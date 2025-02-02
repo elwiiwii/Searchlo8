@@ -50,7 +50,7 @@ namespace Searchlo8
         private int Item_start;
         private int Item_teleport;
         private int Itemnb;
-        private int Items;
+        private List<ItemClass> Items;
         private int Last_check_x;
         private int Last_check_y;
         private List<LevelClass> Level;
@@ -244,10 +244,10 @@ namespace Searchlo8
         }
 
         // entity = the 2 wheels
-        private class EntityClass(int inX, int inY, bool isFinish = false)
+        private class EntityClass(int inx, int iny, bool isFinish = false)
         {
-            public int X = inX;
-            public int Y = inY;
+            public int X = inx;
+            public int Y = iny;
             public double Vx = 0.0d;
             public double Vy = 0.0d;
             public double Rot = 0.0d;
@@ -261,21 +261,21 @@ namespace Searchlo8
             public int linkside = 1;
         }
 
-        private EntityClass EntityNew(int inX, int inY, bool isFinish = false)
+        private EntityClass EntityNew(int inx, int iny, bool isFinish = false)
         {
-            return new EntityClass(inX, inX, isFinish);
+            return new EntityClass(inx, iny, isFinish);
         }
 
-        private class ItemClass(int inX, int inY, int inType)
+        private class ItemClass(double inx, double iny, int inType)
         {
-            public int X = inX;
-            public int Y = inY;
+            public double X = inx;
+            public double Y = iny;
             public int Type = inType;
             public bool Active = true;
             public int Size = 8;
         }
 
-        private ItemClass ItemNew(int inX, int inY, int inType)
+        private ItemClass ItemNew(double inX, double inY, int inType)
         {
             return new ItemClass(inX, inY, inType);
         }
@@ -306,7 +306,7 @@ namespace Searchlo8
             return Math.Max(0, Math.Min(1, a));
         }
 
-        private void BlurPass(List<int> inSdf, List<double> outSdf)
+        private void BlurPass(List<int> insdf, List<double> outsdf)
         {
             for (int i = 1; i <= 14; i++)
             {
@@ -320,11 +320,11 @@ namespace Searchlo8
                         for (int sy = -1; sy <= 1; sy++)
                         {
                             double lwei = Math.Sqrt(sx * sx + sy * sy + 0.01d);
-                            sum += inSdf[idx + sx + sy * 16 - 1] * lwei;
+                            sum += insdf[idx + sx + sy * 16 - 1] * lwei;
                             wei += lwei;
                         }
                     }
-                    outSdf[idx - 1] = sum / wei;
+                    outsdf[idx - 1] = sum / wei;
                 }
             }
         }
@@ -338,7 +338,7 @@ namespace Searchlo8
             int ry = 8 * iy;
 
             int wx = 2 * 8 * (num % 8);
-            double wy = 2 * 8 * Math.Floor(num / 8.0d) + 8 * 12;
+            int wy = 2 * 8 * (int)Math.Floor(num / 8.0d) + 8 * 12;
 
             // init to 0
             // we will ping-pong
@@ -369,7 +369,7 @@ namespace Searchlo8
                     {
                         sdf[idx - 1] = 0.0d;
                     }
-                    // p8.Sset(wx+i + 4, wy+j + 4, sc)
+                    // p8.Sset(wx+i + 4, wy+j + 4, sc);
                 }
             }
 
@@ -430,8 +430,8 @@ namespace Searchlo8
                 for (int j = 0; j <= 15; j++)
                 {
                     int idx = i + j * 16;
-                    p8.Sset(wx + i, wy + j, Math.Max(0, Math.Min(Math.Floor(15.0 - (sdf[idx - 1] - 1) * 4.0), 15)));
-                    // p8.Sset(wx+i, wy+j, Math.Max(0,Math.Min(Math.Floor(sdf[idx]),15)))
+                    p8.Sset(wx + i, wy + j, Math.Max(0, Math.Min((int)Math.Floor(15.0 - (sdf[idx - 1] - 1) * 4.0), 15)));
+                    // p8.Sset(wx+i, wy+j, Math.Max(0,Math.Min((int)Math.Floor(sdf[idx]),15)));
                 }
             }
 
@@ -507,7 +507,7 @@ namespace Searchlo8
         {
             // uncomment the next line
             // to regenerate sdf sprite
-            // gen_all_sdf()
+            // GenAllSdf();
 
             List<int> pal = [5, 13, 15, 11, 9, 6, 7, 7, 14, 10, 7, 7, 7, 6, 15, 7];
 
@@ -528,10 +528,218 @@ namespace Searchlo8
             }
         }
 
+        private void StartLevel(int levelidx)
+        {
+            Currentlevel = levelidx;
+
+            Items = new();
+            Itemnb = 0;
+            Has_check = false;
+            Bikefaceright = Levels[Currentlevel - 1].Startright;
+
+            FindReplaceItems();
+            ResetCamera();
+            ResetPlayer();
+            Score = 0;
+            Retries = 0;
+            Timer = 0;
+            Restartafterfinish = false;
+
+            p8.Sfx(7, 2);
+        }
+
+        private void FindReplaceItemsZone(int startx, int starty, int sizex, int sizey)
+        {
+            for (int i = startx; i <= startx + sizex - 1; i++)
+            {
+                for (int j = starty; j <= starty + sizey - 1; j++)
+                {
+                    int col = p8.Mget(i, j);
+                    int flags = p8.Fget(col);
+                    int itemtype = 0;
+
+                    if ((flags & 4) > 0)
+                    {
+                        itemtype = Item_teleport;
+                        if (col == 56)
+                        {
+                            itemtype = Item_apple;
+                        }
+                    }
+                    if ((flags & 8) > 0)
+                    {
+                        itemtype = Item_teleport;
+                        if (col == 67)
+                        {
+                            itemtype = Item_start;
+                            Last_check_x = 8 * i + 4;
+                            Last_check_y = 8 * j + 4;
+                        }
+                        if (col == 68)
+                        {
+                            itemtype = Item_finish;
+                        }
+                    }
+                    //if we found an item
+				    if (itemtype != 0)
+                    {
+                        Itemnb += 1;
+                        Items[Itemnb - 1] = ItemNew(i * 8 + 3.5, j * 8 + 3.5, itemtype);
+
+                        // remove from the map
+                        p8.Mset(i, j, 0);
+                    }
+                }
+            }
+        }
+
+        // find all items
+        // insert in the array
+        // remove them from the map
+        private void FindReplaceItems()
+        {
+            // here is the list of zones
+            // that make the level
+            for (int i = 0; i <= Levels[Currentlevel - 1].Zonenb; i++)
+            {
+                ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
+                FindReplaceItemsZone(curzone.Startx, curzone.Starty, curzone.Sizex, curzone.Sizey);
+            }
+            // FindReplaceItemsZone(0,0,128,16);
+            // FindReplaceItemsZone(32,16,64,8);
+        }
+
+        // display the level
+        private void DrawMap(int flags)
+        {
+            // here is the list of zones
+            // that make the level
+            for (int i = 0; i <= Levels[Currentlevel - 1].Zonenb; i++)
+            {
+                ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
+                p8.Map(curzone.Startx, curzone.Starty, curzone.Startx * 8, curzone.Starty * 8, curzone.Sizex, curzone.Sizey, flags);
+            }
+            // p8.Map(0,0,0,0,128,16,flags);
+            // p8.Map(32,16,32*8,16*8,64,8,flags);
+        }
+
+        // reset player state
+	    // after a retry
+	    private void ResetPlayer()
+        {
+            Entities[Playeridx - 1].X = Last_check_x;
+            Entities[Playeridx - 1].Y = Last_check_y;
+            Entities[Playeridx - 1].Vx = 0;
+            Entities[Playeridx - 1].Vy = 0;
+            Entities[Playeridx - 1].Vrot = 0;
+
+            Entities[Playeridx + 1 - 1].X = Last_check_x + 8;
+            Entities[Playeridx + 1 - 1].Y = Last_check_y;
+            Entities[Playeridx + 1 - 1].Vx = 0;
+            Entities[Playeridx + 1 - 1].Vy = 0;
+            Entities[Playeridx + 1 - 1].Vrot = 0;
+
+            // Camoffx = 0; Camoffy = -64;
+            // Goalcamx = 0; Goalcamy = -64;
+
+            // Bikefaceright = true;
+            Isdead = false;
+
+	    	if (Isfinish)
+            {
+                Restartafterfinish = true;
+            }
+	    	if (!Isfinish)
+            {
+                Retries += 1;
+            }
+        }
+
+        private void ResetCamera()
+        {
+            Camoffx = Last_check_x - 16;  // -64
+            Camoffy = Last_check_y - 64;  // -96
+            Goalcamx = Camoffx;
+            Goalcamy = Camoffy;
+        }
+
+        // create the 2 wheels
+	    // and init some variables
+	    private void CreateEntities()
+        {
+            Entities[1 - 1] = EntityNew(0, 0);
+            Entities[2 - 1] = EntityNew(0 + 8, 0);
+            Entities[1 - 1].link = Link1;
+            Entities[1 - 1].linkside = 1;
+            Entities[2 - 1].link = Link1;
+            Entities[2 - 1].linkside = -1;
+        }
+
+        // get the value of sdf
+	    // at location lx,ly
+	    // according to a sprite
+	    // chosen at an offset ox,oy
+	    private int GetSdf(int lx, int ly, int ox, int oy)
+        {
+            int sx = (int)Math.Floor((lx + ox) / 8.0d);
+            int sy = (int)Math.Floor((ly + oy) / 8.0d);
+
+            // get the sprite at the offset
+            int col = p8.Mget((lx + ox) / 8.0d, (ly + oy) / 8.0d);
+            int flags = p8.Fget(col);
+            int isc = (flags & 1);
+
+	    	// check if its a colision
+	    	if (isc == 0)
+            {
+                return 0;
+            }
+
+            // check if its in the level zone
+            bool inlevelzone = false;
+	    	for (int i = 0; i <= Levels[Currentlevel-1].Zonenb; i++)
+            {
+                ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
+	    		if ((sx >= curzone.Startx) && (sx < (curzone.Startx+curzone.Sizex)))
+                {
+                    if ((sy >= curzone.Starty) && (sy < (curzone.Starty+curzone.Sizey)))
+                    {
+                        inlevelzone = true;
+                        break;
+                    }
+                }
+            }
+	    	if (!inlevelzone)
+            {
+                return 0;
+            }
+
+            // get the colision profile
+            int sdfval = Sdflink[col - 1];
+	    	// if none is found, use the full square
+	    	if (sdfval == null)
+            {
+                sdfval = 0;
+            }
+
+            // proper coordinates in sdf
+            int wx = 2 * 8 * (sdfval % 8) + lx - sx * 8 + 4;
+            int wy = 2 * 8 * (int)Math.Floor(sdfval / 8.0d) + 8 * 12 + ly - sy * 8 + 4;
+            // get distance
+            int dist = p8.Sget(wx, wy);
+
+            return dist;
+        }
 
 
 
-        
+
+	    
+	    
+	    
+
+
+
 
 
 

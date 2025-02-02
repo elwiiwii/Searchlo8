@@ -275,6 +275,12 @@ namespace Searchlo8
         }
 
 
+        public int Fget(int x, int y = 0)
+        {
+            return 1;
+        }
+
+
         public void Init()
         {
             Array.Copy(colors, resetColors, colors.Length);
@@ -285,7 +291,7 @@ namespace Searchlo8
         }
 
 
-        public void Map(double celx, double cely, double sx, double sy, double celw, double celh) // https://pico-8.fandom.com/wiki/Map
+        public void Map(double celx, double cely, double sx, double sy, double celw, double celh, int? flags = null) // https://pico-8.fandom.com/wiki/Map
         {
             int cxFlr = (int)Math.Floor(celx);
             int cyFlr = (int)Math.Floor(cely);
@@ -790,7 +796,7 @@ namespace Searchlo8
         }
 
 
-        public int Sget(double x, double y, int idk)
+        public int Sget(double x, double y, int? idk = null)
         {
             return 1;
         }
