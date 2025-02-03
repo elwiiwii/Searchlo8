@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection.Emit;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Searchlo8
 {
@@ -10,14 +6,12 @@ namespace Searchlo8
     {
         #region globals
         private static Pico8 p8;
-        private static Cyclo8 g;
-        private static Random random = new();
 
-        private double Base_frameadvback;
-        private double Base_frameadvfront;
-        private double Base_speedback;
-        private double Base_speedfront;
-        private double Base_speedlerp;
+        private readonly double Base_frameadvback;
+        private readonly double Base_frameadvfront;
+        private readonly double Base_speedback;
+        private readonly double Base_speedfront;
+        private readonly double Base_speedlerp;
         private bool Bikefaceright;
         private double Bikeframe;
         private double Bodyrot;
@@ -29,68 +23,61 @@ namespace Searchlo8
         private double Charx2;
         private double Chary;
         private double Chary2;
-        private List<double> Cloudss;
-        private List<double> Cloudsx;
-        private List<double> Cloudsy;
+        private readonly List<double> Cloudss;
+        private readonly List<double> Cloudsx;
+        private readonly List<double> Cloudsy;
         private int Currentlevel;
         private bool Dbg_checkfound;
         private int Dbg_curcheckcount;
         private int Dbg_lastcheckidx;
-        private List<EntityClass> Entity;
-        private List<EntityClass> Entities;
+        private readonly List<EntityClass> Entities;
         private double Flaganim;
         private double Goalcamx;
         private double Goalcamy;
-        private bool Has_check;
         private bool Isdead;
         private bool Isfinish;
         private bool Isstarted;
-        private List<ItemClass> Item;
-        private int Item_apple;
-        private int Item_checkpoint;
-        private int Item_finish;
-        private int Item_start;
-        private int Item_teleport;
+        private readonly int Item_apple;
+        private readonly int Item_checkpoint;
+        private readonly int Item_finish;
+        private readonly int Item_start;
+        private readonly int Item_teleport;
         private int Itemnb;
         private List<ItemClass> Items;
         private double Last_check_x;
         private double Last_check_y;
-        private List<LevelClass> Level;
-        private int Levelnb;
-        private List<LevelClass> Levels;
-        private double Limit_col;
-        private double Limit_wheel;
-        private int Link;
-        private LinkClass Link1;
+        private readonly int Levelnb;
+        private readonly List<LevelClass> Levels;
+        private readonly double Limit_col;
+        private readonly double Limit_wheel;
+        private readonly LinkClass Link1;
         private int[] Pal;
-        private int Playeridx;
+        private readonly int Playeridx;
         private bool Restartafterfinish;
         private int Retries;
         private int Score;
-        private List<int> Sdflink;
-        private int Stepnb;
-        private double Str_air;
-        private double Str_bodyrot;
-        private double Str_gravity;
-        private double Str_link;
-        private double Str_reflect;
-        private double Str_wheel;
-        private double Str_wheel_size;
+        private readonly List<int> Sdflink;
+        private readonly int Stepnb;
+        private readonly double Str_air;
+        private readonly double Str_bodyrot;
+        private readonly double Str_gravity;
+        private readonly double Str_link;
+        private readonly double Str_reflect;
+        private readonly double Str_wheel;
+        private readonly double Str_wheel_size;
         private int Timer;
         private int Timerlasteleport;
         private double Timernextlevel;
-        private double Timernextlevel_dur;
+        private readonly double Timernextlevel_dur;
         private int Totalleveldone;
         private int Totalretries;
         private int Totalscore;
         private int Totaltimer;
-        private List<ZoneClass> Zone;
         #endregion
         
-        private Cyclo8(Pico8 pico8)
+        public Cyclo8(Pico8 pico8)
         {
             p8 = pico8;
-            g = this;
 
             Camoffx = 0;
             Camoffy = -64;
@@ -125,7 +112,6 @@ namespace Searchlo8
             // position of the last checkpoint
             Last_check_x = 0;
             Last_check_y = 0;
-            Has_check = false;
 
             Dbg_curcheckcount = 1;
             Dbg_checkfound = false;
@@ -167,15 +153,11 @@ namespace Searchlo8
             Timernextlevel_dur = 30 * 7;
             Timerlasteleport = 1000;
 
-            Zone = [];
             Cloudsx = [];
             Cloudsy = [];
             Cloudss = [];
-            Level = [];
             Levels = [];
-            Entity = [];
             Entities = [];
-            Item = [];
             Pal = [];
 
             Itemnb = 0;
@@ -185,8 +167,7 @@ namespace Searchlo8
             Item_finish = 4;
             Item_teleport = 5;
 
-            Items = new();
-            Link = new();
+            Items = [];
             Link1 = LinkNew(1, 2);
 
             // array to link sprite to colision
@@ -220,7 +201,7 @@ namespace Searchlo8
             public int Sizey = inSizey;
         }
 
-        private ZoneClass ZoneNew(int inStartX, int inStartY, int inSizeX, int inSizeY)
+        private static ZoneClass ZoneNew(int inStartX, int inStartY, int inSizeX, int inSizeY)
         {
             return new ZoneClass(inStartX, inStartY, inSizeX, inSizeY);
         }
@@ -240,7 +221,7 @@ namespace Searchlo8
             public bool Startright = true;
         }
 		
-        private LevelClass LevelNew(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
+        private static LevelClass LevelNew(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
         {
             return new LevelClass(inName, inZkill, inBacky, inCamminx, inCammaxx, inCamminy, inCammaxy);
         }
@@ -263,7 +244,7 @@ namespace Searchlo8
             public int Linkside = 1;
         }
 
-        private EntityClass EntityNew(double inx, double iny)
+        private static EntityClass EntityNew(double inx, double iny)
         {
             return new EntityClass(inx, iny);
         }
@@ -277,7 +258,7 @@ namespace Searchlo8
             public int Size = 8;
         }
 
-        private ItemClass ItemNew(double inX, double inY, int inType)
+        private static ItemClass ItemNew(double inX, double inY, int inType)
         {
             return new ItemClass(inX, inY, inType);
         }
@@ -293,174 +274,19 @@ namespace Searchlo8
             public double Diry = 0.0;
         }
 
-        private LinkClass LinkNew(int ent1, int ent2)
+        private static LinkClass LinkNew(int ent1, int ent2)
         {
             return new LinkClass(ent1, ent2);
         }
 
-        private double Lerp(double a, double b, double alpha)
+        private static double Lerp(double a, double b, double alpha)
         {
             return a * (1.0 - alpha) + b * alpha;
         }
 
-        private double Saturate(double a)
+        private static double Saturate(double a)
         {
             return Math.Max(0, Math.Min(1, a));
-        }
-
-        private void BlurPass(List<int> insdf, List<double> outsdf)
-        {
-            for (int i = 1; i <= 14; i++)
-            {
-                for (int j = 1; j <= 14; j++)
-                {
-                    int idx = i + j * 16;
-                    double sum = 0;
-                    double wei = 0;
-                    for (int sx = -1; sx <= 1; sx++)
-                    {
-                        for (int sy = -1; sy <= 1; sy++)
-                        {
-                            double lwei = Math.Sqrt(sx * sx + sy * sy + 0.01);
-                            sum += insdf[idx + sx + sy * 16 - 1] * lwei;
-                            wei += lwei;
-                        }
-                    }
-                    outsdf[idx - 1] = sum / wei;
-                }
-            }
-        }
-
-        // this function is not used at runtime
-        // it create a distance field in a 16x16 sprite
-        // based on a 8x8 sprite colision
-        private void GenSdf(int ix, int iy, int num)
-        {
-            int rx = 8 * ix;
-            int ry = 8 * iy;
-
-            int wx = 2 * 8 * (num % 8);
-            int wy = 2 * 8 * (int)Math.Floor(num / 8.0) + 8 * 12;
-
-            // init to 0
-            // we will ping-pong
-            // beetween sdf and sdf2
-            List<double> sdf = new();
-            List<double> sdf2 = new();
-            for (int i = 0; i <= 15; i++)
-            {
-                for (int j = 0; j <= 15; j++)
-                {
-                    sdf[i + j * 16 - 1] = 0.0;
-                }
-            }
-
-            // fill the sdf sprite with the base sprite colision
-            for (int i = 0; i <= 7; i++)
-            {
-                for (int j = 0; j <= 7; j++)
-                {
-                    int sc = p8.Sget(rx + i, ry + j, 8);
-                    int idx = i + 4 + (j + 4) * 16;
-                    // 3 is the transparent color
-                    if (sc != 3)
-                    {
-                        sdf[idx - 1] = 15.0;
-                    }
-                    else
-                    {
-                        sdf[idx - 1] = 0.0;
-                    }
-                    // p8.Sset(wx+i + 4, wy+j + 4, sc);
-                }
-            }
-
-            // first propagation of distance field
-            // along x axis
-            for (int i = 0; i <= 15; i++)
-            {
-                for (int j = 0; j <= 15; j++)
-                {
-                    int idx = i + j * 16;
-                    // we search the nearest colision along x
-                    double mindist = 15.0;
-                    for (int s = 0; s <= 15; s++)
-                    {
-                        //if we find a colision on the same row
-                        if (sdf[s + j * 16 - 1] >= 8.0)
-                        {
-                            // set the distance
-                            int curdist = Math.Abs(s - i);
-                            mindist = Math.Min(mindist, curdist);
-                        }
-                    }
-                    sdf2[idx - 1] = mindist;
-                }
-            }
-
-            // second propagation of distance field
-            // along y axis
-            for (int i = 0; i <= 15; i++)
-            {
-                for (int j = 0; j <= 15; j++)
-                {
-                    int idx = i + j * 16;
-                    // we search the nearest colision along x,y
-                    double mindist = 15.0;
-                    for (int s = 0; s <= 15; s++)
-                    {
-                        // we compute the final distance
-                        // with pythagore
-                        int disty = Math.Abs(s - j);
-                        double distx = sdf2[i + s * 16 - 1];
-                        double curdist = Math.Sqrt(distx * distx + disty * disty + 0.001);
-                        mindist = Math.Min(mindist, curdist);
-                    }
-                    sdf[idx - 1] = mindist;
-                }
-            }
-
-            // blur_pass(sdf,sdf2)
-            // blur_pass(sdf2,sdf)
-
-            // we encode the final sdf
-            // in sprites
-            // we want a maximum range of 4
-            // because the wheel is of radius 4
-            for (int i = 0; i <= 15; i++)
-            {
-                for (int j = 0; j <= 15; j++)
-                {
-                    int idx = i + j * 16;
-                    p8.Sset(wx + i, wy + j, Math.Max(0, Math.Min((int)Math.Floor(15.0 - (sdf[idx - 1] - 1) * 4.0), 15)));
-                    // p8.Sset(wx+i, wy+j, Math.Max(0,Math.Min((int)Math.Floor(sdf[idx]),15)));
-                }
-            }
-
-            // we save everything in the cartridge
-            p8.Cstore();
-        }
-
-        private void GenAllSdf()
-        {
-            // here is the list of all sprites
-            // that will generate a sdf
-            GenSdf(0, 1, 0);
-            GenSdf(1, 0, 1);
-            GenSdf(2, 0, 2);
-            GenSdf(3, 0, 3);
-            GenSdf(6, 0, 4);
-            GenSdf(8, 0, 5);
-            GenSdf(9, 0, 6);
-            GenSdf(10, 0, 7);
-            GenSdf(11, 1, 8);
-            GenSdf(0, 3, 9);
-            GenSdf(1, 3, 10);
-            GenSdf(2, 3, 11);
-            GenSdf(3, 3, 12);
-            GenSdf(4, 3, 13);
-            GenSdf(10, 3, 14);
-            GenSdf(11, 3, 15);
         }
 
         private void CreateLevels()
@@ -505,7 +331,7 @@ namespace Searchlo8
             Levels[l - 1].Zonenb = 2;
         }
 
-        private void _Init()
+        private void Init()
         {
             // uncomment the next line
             // to regenerate sdf sprite
@@ -534,9 +360,8 @@ namespace Searchlo8
         {
             Currentlevel = levelidx;
 
-            Items = new();
+            Items = [];
             Itemnb = 0;
-            Has_check = false;
             Bikefaceright = Levels[Currentlevel - 1].Startright;
 
             FindReplaceItems();
@@ -719,10 +544,7 @@ namespace Searchlo8
             // get the colision profile
             int? sdfval = Sdflink[col - 1];
 	    	// if none is found, use the full square
-	    	if (sdfval == null)
-            {
-                sdfval = 0;
-            }
+	    	sdfval ??= 0;
 
             // proper coordinates in sdf
             double wx = 2 * 8 * ((int)sdfval % 8) + lx - sx * 8 + 4;
@@ -877,13 +699,13 @@ namespace Searchlo8
                 (ent.Vx, ent.Vy) = Reflect(ent.Vx, ent.Vy, norx, nory);
 
                 // ensure we are not inside the colision
-                ent.X = ent.X + norx * (iscol - Limit_col);
-                ent.Y = ent.Y + nory * (iscol - Limit_col);
+                ent.X += norx * (iscol - Limit_col);
+                ent.Y += nory * (iscol - Limit_col);
             }
 
             // apply the motion
-            ent.X = ent.X + ent.Vx / Stepnb;
-            ent.Y = ent.Y + ent.Vy / Stepnb;
+            ent.X += ent.Vx / Stepnb;
+            ent.Y += ent.Vy / Stepnb;
 
 	    	// if wheel is near the ground
 	    	// we apply the wheel force
@@ -988,7 +810,6 @@ namespace Searchlo8
                         it.Active = false;
                         Last_check_x = it.X;
                         Last_check_y = it.Y;
-                        Has_check = true;
 
 	    				if (it.Type == Item_finish)
                         {
@@ -1040,7 +861,6 @@ namespace Searchlo8
                     it.Active = true;
                     Last_check_x = it.X;
                     Last_check_y = it.Y;
-                    Has_check = true;
                     Dbg_checkfound = true;
                 }
                 Dbg_curcheckcount += 1;
@@ -1048,7 +868,7 @@ namespace Searchlo8
         }
 
 		// main update function
-	    private void _Update()
+	    private void Update()
         {
             // start menu
 	    	if (!Isstarted)
@@ -1108,29 +928,13 @@ namespace Searchlo8
                     Bikefaceright = !Bikefaceright;
                     p8.Sfx(8, 3);
                 }
-                double speedlerp = Base_speedlerp;
-                double speedfront = Base_speedfront;
-                double speedback = Base_speedback;
-                double frameadvfront = Base_frameadvfront;
-                double frameadvback = Base_frameadvback;
                 double controlwheel = Playeridx;
                 double otherwheel = Playeridx + 1;
                 double wheelside = 1.0;
 	    		// invert all values if bike face left
 	    		if (!Bikefaceright)
                 {
-                    double tmp = speedback;
-                    speedback = speedfront;
-                    speedfront = tmp;
-
-                    tmp = frameadvfront;
-                    frameadvfront = frameadvback;
-                    frameadvback = tmp;
-
-                    tmp = otherwheel;
-                    otherwheel = controlwheel;
-                    controlwheel = tmp;
-
+                    (controlwheel, otherwheel) = (otherwheel, controlwheel);
                     wheelside = -1.0;
                 }
 	    		// button left
@@ -1149,16 +953,16 @@ namespace Searchlo8
 	    		if (p8.Btn(2))
                 {
                     // only the back wheel is set in motion
-                    Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(controlwheel) - 1].Vrot, -Base_speedfront * wheelside, speedlerp);
-                    // Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(otherwheel) - 1].Vrot, -Base_speedfront * wheelside, speedlerp);
+                    Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(controlwheel) - 1].Vrot, -Base_speedfront * wheelside, Base_speedlerp);
+                    // Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(otherwheel) - 1].Vrot, -Base_speedfront * wheelside, Base_speedlerp);
                     Bikeframe -= Base_frameadvfront;
                 }
 	    		// button down
 	    		if (p8.Btn(3))
                 {
                     // both wheels are slowed
-                    Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(controlwheel) - 1].Vrot, Base_speedback * wheelside, speedlerp);
-                    Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(otherwheel) - 1].Vrot, Base_speedback * wheelside, speedlerp);
+                    Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(controlwheel) - 1].Vrot, Base_speedback * wheelside, Base_speedlerp);
+                    Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(otherwheel) - 1].Vrot, Base_speedback * wheelside, Base_speedlerp);
                     Bikeframe += Base_frameadvback;
                 }
             }
@@ -1324,7 +1128,7 @@ namespace Searchlo8
         }
 
 	    // draw a wheel entity
-	    private void DrawEntity(EntityClass ent)
+	    private static void DrawEntity(EntityClass ent)
         {
             int @base = 80;
             // the wheel sprite
@@ -1374,36 +1178,10 @@ namespace Searchlo8
 	    	// p8.Circ(ent.Lastcolx, ent.Lastcoly, 3, 8);
         }
 
-	    // debug function to draw
-	    // the sdf colision
-	    // around the player
-	    private void DrawCol()
-        {
-            double x = Entities[Playeridx - 1].X;
-            double y = Entities[Playeridx - 1].Y;
-	    	for (int i = (int)Math.Floor(x) - 15; i <= (int)Math.Floor(x) + 15; i++)
-            {
-                for (int j = (int)Math.Floor(y) - 15; j <= (int)Math.Floor(y) + 15; j++)
-                {
-                    bool mi = (i % 2) == 0;
-                    bool mj = (j % 2) == 0;
-	    			if (mi || mj || true)
-                    {
-                        double mycol = IsPointcol(i, j);
-	    				if (mycol > 2.0)
-                        {
-                            p8.Pset(i, j, mycol);
-                        }
-	    				// p8.Pset(i, j, mycol);
-                    }
-                }
-            }
-        }
-	    	
 	    // take 2 wheel and give
 	    // a point between
 	    // with an perpendicular offset
-	    private (double, double, bool) GetBikeRot(EntityClass ent1, EntityClass ent2, double offset)
+	    private static (double, double, bool) GetBikeRot(EntityClass ent1, EntityClass ent2, double offset)
         {
             double dirx = ent2.X - ent1.X;
             double diry = ent2.Y - ent1.Y;
@@ -1414,8 +1192,8 @@ namespace Searchlo8
 
             // normalize the direction
             double length = Math.Sqrt(dirx * dirx + diry * diry + 0.01);
-            dirx = dirx / length;
-            diry = diry / length;
+            dirx /= length;
+            diry /= length;
 
             // get the perpendicular
             double perpx = diry;
@@ -1436,7 +1214,7 @@ namespace Searchlo8
             return (centx, centy, isdown);
         }
 
-        private void CenterText(int posx, int posy, string text, int col)
+        private static void CenterText(int posx, int posy, string text, int col)
         {
             int sposx = posx - text.Length * 2;
             int sposy = posy;
@@ -1524,7 +1302,7 @@ namespace Searchlo8
 	    	// p8.Pal();
         }
 
-	    private string GetTimeStr(int val)
+	    private static string GetTimeStr(int val)
         {
             // transform timer to min:sec:dec
             int t_cent = (int)Math.Floor(val * 10 / 30.0) % 10;
@@ -1540,17 +1318,17 @@ namespace Searchlo8
             return $"{t_min}:{fill_sec}{t_sec}:{t_cent}";
         }
 
-        private double Clampy(double v)
+        private static double Clampy(double v)
         {
             return v; // return max(0,min(128,v))
         }
 
-        private (double, double) Swap(double x1, double x2)
+        private static (double, double) Swap(double x1, double x2)
         {
             return (x2, x1);
         }
 		
-        private void Rectlight(double x, int y, double sx, int sy, int c)
+        private void Rectlight(double x, int y, double sx)
         {
             double mx = Math.Min(x, sx);
             double ex = Math.Max(x, sx);
@@ -1560,7 +1338,7 @@ namespace Searchlo8
             }
         }
 		
-        private void Otri(double x1, double y1, double x2, double y2, double x3, double y3, int c)
+        private void Otri(double x1, double y1, double x2, double y2, double x3, double y3)
         {
             if (y2 < y1)
             {
@@ -1607,7 +1385,7 @@ namespace Searchlo8
             
             for (int y = (int)Math.Floor(cl_y1); y <= cl_miny; y++)
             {
-                Rectlight(sx, y, ex, y, c);
+                Rectlight(sx, y, ex);
                 sx += steps;
                 ex += stepe;
             }
@@ -1625,17 +1403,10 @@ namespace Searchlo8
             
             for (int y = (int)Math.Floor(cl_miny); y <= cl_maxy; y++)
             {
-                Rectlight(sx2, y, ex2, y, c);
+                Rectlight(sx2, y, ex2);
                 sx2 += step2s;
                 ex2 += step2e;
             }
-        }
-
-        private void Wtri(int x1, int y1, int x2, int y2, int x3, int y3, int c)
-        {
-            p8.Line(x1, y1, x2, y2, c);
-            p8.Line(x3, y3, x2, y2, c);
-            p8.Line(x1, y1, x3, y3, c);
         }
 
         private void Lamp(double lampx, double lampy, double lampdirx, double lampdiry, double lampperpx, double lampperpy, int sidefac, int lamplen, int lampwid)
@@ -1644,11 +1415,11 @@ namespace Searchlo8
             double lampp1y = lampy + lampdiry * lamplen * sidefac + lampperpy * lampwid;
             double lampp2x = lampx + lampdirx * lamplen * sidefac - lampperpx * lampwid;
             double lampp2y = lampy + lampdiry * lamplen * sidefac - lampperpy * lampwid;
-            Otri((int)Math.Floor(lampx), (int)Math.Floor(lampy), (int)Math.Floor(lampp1x), (int)Math.Floor(lampp1y), (int)Math.Floor(lampp2x), (int)Math.Floor(lampp2y), 10);
+            Otri((int)Math.Floor(lampx), (int)Math.Floor(lampy), (int)Math.Floor(lampp1x), (int)Math.Floor(lampp1y), (int)Math.Floor(lampp2x), (int)Math.Floor(lampp2y));
         }
 
 		// main draw function
-	    private void _Draw()
+	    private void Draw()
         {
             p8.Cls();
 
@@ -1710,7 +1481,6 @@ namespace Searchlo8
             i = 1;
 	    	while (i <= 30)
             {
-                int b = i - 30;
                 p8.Circfill(paral2x + i * 20 + Cloudsx[i - 1], paral2y + 62 + Cloudsy[i - 1], 10 + Cloudss[i - 1], 4);
                 i += 1;
             }
@@ -1892,7 +1662,7 @@ namespace Searchlo8
             Flaganim += 0.2;
         }
 
-        private string SpriteData
+        private static string SpriteData
         {
             get
             {
@@ -2029,7 +1799,7 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
             }
         }
 
-        private string FlagData
+        private static string FlagData
         {
             get
             {
@@ -2040,7 +1810,7 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
             }
         }
 
-        private string MapData
+        private static string MapData
         {
             get
             {
