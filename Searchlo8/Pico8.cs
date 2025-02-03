@@ -291,6 +291,12 @@ namespace Searchlo8
         }
 
 
+        public void Line(double x1, double y1, double x2, double y2, int col)
+        {
+
+        }
+
+
         public void Map(double celx, double cely, double sx, double sy, double celw, double celh, int? flags = null) // https://pico-8.fandom.com/wiki/Map
         {
             int cxFlr = (int)Math.Floor(celx);
@@ -492,6 +498,12 @@ namespace Searchlo8
                     }
                 }
             }
+        }
+
+
+        public int Pget(double x, double y)
+        {
+            return 1;
         }
 
 
@@ -805,6 +817,12 @@ namespace Searchlo8
         public void Sset(double x, double y, double col)
         {
 
+        }
+
+
+        public int Stat(int i)
+        {
+            return i;
         }
 
 
