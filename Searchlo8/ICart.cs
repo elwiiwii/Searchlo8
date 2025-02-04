@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Searchlo8
+{
+    public interface ICart
+    {
+        public void Init();
+        public void LoadLevel(int level);
+        public void Update();
+        public void Draw();
+        public char[] SpriteData { get; }
+        public string FlagData { get; }
+        public string MapData { get; }
+    }
+}

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Searchlo8
 {
-    public class Cyclo8
+    public class Cyclo8 : ICart
     {
         #region globals
         private static Pico8 p8;
@@ -34,7 +35,7 @@ namespace Searchlo8
         private double Flaganim;
         private double Goalcamx;
         private double Goalcamy;
-        private bool Isdead;
+        public bool Isdead;
         private bool Isfinish;
         private bool Isstarted;
         private readonly int Item_apple;
@@ -65,7 +66,7 @@ namespace Searchlo8
         private readonly double Str_reflect;
         private readonly double Str_wheel;
         private readonly double Str_wheel_size;
-        private int Timer;
+        public int Timer;
         private int Timerlasteleport;
         private double Timernextlevel;
         private readonly double Timernextlevel_dur;
@@ -153,11 +154,11 @@ namespace Searchlo8
             Timernextlevel_dur = 30 * 7;
             Timerlasteleport = 1000;
 
-            Cloudsx = [];
-            Cloudsy = [];
-            Cloudss = [];
-            Levels = [];
-            Entities = [];
+            Cloudsx = new(new double[60]);
+            Cloudsy = new(new double[60]);
+            Cloudss = new(new double[60]);
+            Levels = new(new LevelClass[7]);
+            Entities = new(new EntityClass[2]);
             Pal = [];
 
             Itemnb = 0;
@@ -167,28 +168,30 @@ namespace Searchlo8
             Item_finish = 4;
             Item_teleport = 5;
 
-            Items = [];
+            Items = new(new ItemClass[1000]);
             Link1 = LinkNew(1, 2);
 
             // array to link sprite to colision
-            Sdflink = [];
-            Sdflink[1 - 1] = 1;
-            Sdflink[2 - 1] = 2;
-            Sdflink[3 - 1] = 3;
-            Sdflink[12 - 1] = 3;
-            Sdflink[6 - 1] = 4;
-            Sdflink[13 - 1] = 4;
-            Sdflink[8 - 1] = 5;
-            Sdflink[9 - 1] = 6;
-            Sdflink[10 - 1] = 7;
-            Sdflink[11 + 16 - 1] = 8;
-            Sdflink[0 + 16 * 3 - 1] = 9;
-            Sdflink[1 + 16 * 3 - 1] = 10;
-            Sdflink[2 + 16 * 3 - 1] = 11;
-            Sdflink[3 + 16 * 3 - 1] = 12;
-            Sdflink[4 + 16 * 3 - 1] = 13;
-            Sdflink[10 + 16 * 3 - 1] = 14;
-            Sdflink[11 + 16 * 3 - 1] = 15;
+            Sdflink = new(new int[11 + 16 * 3])
+            {
+                [1 - 1] = 1,
+                [2 - 1] = 2,
+                [3 - 1] = 3,
+                [12 - 1] = 3,
+                [6 - 1] = 4,
+                [13 - 1] = 4,
+                [8 - 1] = 5,
+                [9 - 1] = 6,
+                [10 - 1] = 7,
+                [11 + 16 - 1] = 8,
+                [0 + 16 * 3 - 1] = 9,
+                [1 + 16 * 3 - 1] = 10,
+                [2 + 16 * 3 - 1] = 11,
+                [3 + 16 * 3 - 1] = 12,
+                [4 + 16 * 3 - 1] = 13,
+                [10 + 16 * 3 - 1] = 14,
+                [11 + 16 * 3 - 1] = 15
+            };
         }
         
         // map zone structure.
@@ -210,7 +213,7 @@ namespace Searchlo8
         private class LevelClass(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
         {
             public string Name = inName;
-            public List<ZoneClass> Zones = [];
+            public List<ZoneClass> Zones = new(new ZoneClass[2]);
             public int Zonenb = 0;
             public int Zkill = inZkill;
             public int Backy = inBacky;
@@ -331,7 +334,7 @@ namespace Searchlo8
             Levels[l - 1].Zonenb = 2;
         }
 
-        private void Init()
+        public void Init()
         {
             // uncomment the next line
             // to regenerate sdf sprite
@@ -360,7 +363,7 @@ namespace Searchlo8
         {
             Currentlevel = levelidx;
 
-            Items = [];
+            Items = new(new ItemClass[1000]);
             Itemnb = 0;
             Bikefaceright = Levels[Currentlevel - 1].Startright;
 
@@ -382,10 +385,10 @@ namespace Searchlo8
                 for (int j = starty; j <= starty + sizey - 1; j++)
                 {
                     int col = p8.Mget(i, j);
-                    int flags = p8.Fget(col);
+                    string flags = p8.Fget(col);
                     int itemtype = 0;
 
-                    if ((flags & 4) > 0)
+                    if (p8.Band(flags, "00000100") > 0)
                     {
                         itemtype = Item_teleport;
                         if (col == 56)
@@ -393,7 +396,7 @@ namespace Searchlo8
                             itemtype = Item_apple;
                         }
                     }
-                    if ((flags & 8) > 0)
+                    if (p8.Band(flags, "00001000") > 0)
                     {
                         itemtype = Item_teleport;
                         if (col == 67)
@@ -427,7 +430,7 @@ namespace Searchlo8
         {
             // here is the list of zones
             // that make the level
-            for (int i = 0; i <= Levels[Currentlevel - 1].Zonenb; i++)
+            for (int i = 0; i < Levels[Currentlevel - 1].Zonenb; i++)
             {
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
                 FindReplaceItemsZone(curzone.Startx, curzone.Starty, curzone.Sizex, curzone.Sizey);
@@ -441,7 +444,7 @@ namespace Searchlo8
         {
             // here is the list of zones
             // that make the level
-            for (int i = 0; i <= Levels[Currentlevel - 1].Zonenb; i++)
+            for (int i = 0; i < Levels[Currentlevel - 1].Zonenb; i++)
             {
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
                 p8.Map(curzone.Startx, curzone.Starty, curzone.Startx * 8, curzone.Starty * 8, curzone.Sizex, curzone.Sizey, flags);
@@ -513,8 +516,8 @@ namespace Searchlo8
 
             // get the sprite at the offset
             int col = p8.Mget((lx + ox) / 8.0, (ly + oy) / 8.0);
-            int flags = p8.Fget(col);
-            int isc = (flags & 1);
+            string flags = p8.Fget(col);
+            int isc = p8.Band(flags, "00000001");
 
 	    	// check if its a colision
 	    	if (isc == 0)
@@ -524,7 +527,7 @@ namespace Searchlo8
 
             // check if its in the level zone
             bool inlevelzone = false;
-	    	for (int i = 0; i <= Levels[Currentlevel-1].Zonenb; i++)
+	    	for (int i = 0; i < Levels[Currentlevel-1].Zonenb; i++)
             {
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
 	    		if ((sx >= curzone.Startx) && (sx < (curzone.Startx+curzone.Sizex)))
@@ -547,7 +550,7 @@ namespace Searchlo8
 	    	sdfval ??= 0;
 
             // proper coordinates in sdf
-            double wx = 2 * 8 * ((int)sdfval % 8) + lx - sx * 8 + 4;
+            double wx = 2 * 8 * p8.Mod((int)sdfval, 8) + lx - sx * 8 + 4;
             double wy = 2 * 8 * (int)Math.Floor((int)sdfval / 8.0) + 8 * 12 + ly - sy * 8 + 4;
             // get distance
             int dist = p8.Sget(wx, wy);
@@ -867,8 +870,15 @@ namespace Searchlo8
             }
         }
 
-		// main update function
-	    private void Update()
+        // [CHANGE]
+        public void LoadLevel(int level)
+        {
+            Isstarted = true;
+            StartLevel(level);
+        }
+
+        // main update function
+        public void Update()
         {
             // start menu
 	    	if (!Isstarted)
@@ -876,8 +886,7 @@ namespace Searchlo8
                 // start the game
 	    		if (p8.Btnp(4))
                 {
-                    Isstarted = true;
-                    StartLevel(Currentlevel);
+                    LoadLevel(Currentlevel);
                 }
 	    		// change current level
 	    		if (p8.Btnp(0) || p8.Btnp(3))
@@ -1021,7 +1030,10 @@ namespace Searchlo8
 	    	// check items colision
 	    	foreach (ItemClass i in Items)
             {
-                CheckItem(i);
+                if (i != null)
+                {
+                    CheckItem(i);
+                }
             }
 
             bool needkillplayer = false;
@@ -1133,17 +1145,17 @@ namespace Searchlo8
             int @base = 80;
             // the wheel sprite
             // depend on the wheel rotation
-            int rfr = (int)Math.Floor(-ent.Rot * 4 * 5) % 5;
+            double rfr = p8.Mod((int)Math.Floor(-ent.Rot * 4 * 5), 5);
 	    	if (rfr < 0)
             {
                 rfr += 5;
             }
-            int cspr = @base + rfr;
+            double cspr = @base + rfr;
 
 	    	// if (Math.Abs(ent.Vrot) > 0.14)
 	    	if (false)
             {
-                rfr = (int)Math.Floor(-ent.Rot * 3) % 3;
+                rfr = p8.Mod((int)Math.Floor(-ent.Rot * 3), 3);
                 if (rfr < 0)
                 {
                     rfr += 3;
@@ -1158,7 +1170,7 @@ namespace Searchlo8
 	    	// a frame each time
 	    	if (Math.Abs(ent.Vrot) > 0.14)
             {
-                rfr = (int)Math.Floor(-ent.Rot * 3) % 5;
+                rfr = p8.Mod((int)Math.Floor(-ent.Rot * 3), 5);
 	    		if (rfr < 0)
                 {
                     rfr += 5;
@@ -1214,7 +1226,7 @@ namespace Searchlo8
             return (centx, centy, isdown);
         }
 
-        private static void CenterText(int posx, int posy, string text, int col)
+        private static void CenterText(int posx, int posy, string text, double col)
         {
             int sposx = posx - text.Length * 2;
             int sposy = posy;
@@ -1246,12 +1258,12 @@ namespace Searchlo8
 
 	    		if (it.Type == Item_teleport)
                 {
-                    sprite = 103 + (Flaganim % 3);
+                    sprite = 103 + p8.Mod(Flaganim, 3);
                 }
 
 	    		if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
                 {
-                    sprite = 64 + (Flaganim % 3);
+                    sprite = 64 + p8.Mod(Flaganim, 3);
 
                     // change the flag pole color
                     int flagcolor = 12;
@@ -1285,15 +1297,15 @@ namespace Searchlo8
             p8.Rectfill(finishx, finishy, finishx + 63, finishy + 15, 0);
 	    	for (int i = 0; i <= 31; i++)
             {
-                int tmpx = finishx + (i % 16) * 4;
-                int tmpy = finishy + (1 - i % 2) * 4 + (int)Math.Floor(i / 16.0) * 8;
+                double tmpx = finishx + p8.Mod(i, 16) * 4;
+                double tmpy = finishy + (1 - p8.Mod(i, 2)) * 4 + (int)Math.Floor(i / 16.0) * 8;
                 p8.Rectfill(tmpx, tmpy, tmpx + 3, tmpy + 3, 6);
             }
             CenterText(finishx + 32, finishy + 6, text, col);
 
             // p8.Pal(7, 10);
 
-            int sprite = (64 + ((int)Math.Floor(Flaganim * 0.7) % 3));
+            double sprite = 64 + p8.Mod((int)Math.Floor(Flaganim * 0.7), 3);
             // p8.Spr(sprite, finishx - 6, finishy, 1, 1, true);
             // p8.Spr(sprite, finishx - 2 + 64, finishy, 1, 1, false);
             p8.Sspr((sprite - 64) * 8, 4 * 8, 8, 8, finishx - 20, finishy - 4, 32, 32, true);
@@ -1305,8 +1317,8 @@ namespace Searchlo8
 	    private static string GetTimeStr(int val)
         {
             // transform timer to min:sec:dec
-            int t_cent = (int)Math.Floor(val * 10 / 30.0) % 10;
-            int t_sec = (int)Math.Floor(val / 30.0) % 60;
+            double t_cent = p8.Mod((int)Math.Floor(val * 10 / 30.0), 10);
+            double t_sec = p8.Mod((int)Math.Floor(val / 30.0), 60);
             int t_min = (int)Math.Floor(val / (30.0 * 60.0));
 
             string fill_sec = "";
@@ -1418,8 +1430,8 @@ namespace Searchlo8
             Otri((int)Math.Floor(lampx), (int)Math.Floor(lampy), (int)Math.Floor(lampp1x), (int)Math.Floor(lampp1y), (int)Math.Floor(lampp2x), (int)Math.Floor(lampp2y));
         }
 
-		// main draw function
-	    private void Draw()
+        // main draw function
+        public void Draw()
         {
             p8.Cls();
 
@@ -1448,7 +1460,7 @@ namespace Searchlo8
                 CenterText(96, c, "c = flip bike", 7);
                 CenterText(96, c + 8, "v = retry", 7);
 
-                int flipcol = 6 + (int)Math.Floor(Flaganim * 0.5) % 2;
+                double flipcol = 6 + p8.Mod((int)Math.Floor(Flaganim * 0.5), 2);
 
                 c = 94;
                 CenterText(64, c, "starting level :", 7);
@@ -1493,7 +1505,7 @@ namespace Searchlo8
             // draw the bottom of the trees
             p8.Rectfill(Camoffx, paraly + 64 + 8, Camoffx + 128, Camoffy + 128, 2);
 
-            paralx = paralx % 128 + (int)Math.Floor(paralx / 128) * 256;
+            paralx = p8.Mod(paralx, 128) + (int)Math.Floor(paralx / 128) * 256;
             // draw 2 series of trees
             // warping infinitly
             p8.Map(112, 40, paralx, paraly + 16, 16, 8);
@@ -1514,7 +1526,10 @@ namespace Searchlo8
 
 	    	foreach (ItemClass j in Items)
             {
-                DrawItem(j);
+                if (j != null)
+                {
+                    DrawItem(j);
+                }
             }
 	    	
 	    	// draw_entity(entities[1])
@@ -1525,7 +1540,7 @@ namespace Searchlo8
             }
 
             // draw the player :
-            int cspr = (int)Math.Floor(-Bikeframe) % 4;
+            double cspr = p8.Mod((int)Math.Floor(-Bikeframe), 4);
 	    	if (cspr < 0)
             {
                 cspr += 4;
@@ -1545,7 +1560,7 @@ namespace Searchlo8
                 bodyadv = -1;
             }
 
-            int cspr2 = cspr + 16;
+            double cspr2 = cspr + 16;
 
 	    	if (Chardown)
             {
@@ -1583,7 +1598,7 @@ namespace Searchlo8
             p8.Pset((int)Math.Floor(lampx), (int)Math.Floor(lampy), 7);
 
             // draw the foreground part of the level
-            DrawMap((~0x2));
+            DrawMap(~0x2);
 
             // Otri((int)Math.Floor(lampx), (int)Math.Floor(lampy), (int)Math.Floor(lampp1x), (int)Math.Floor(lampp1y), (int)Math.Floor(lampp2x), (int)Math.Floor(lampp2y), 10);
 
@@ -1598,7 +1613,7 @@ namespace Searchlo8
             {
                 if (Timerlasteleport < 30)
                 {
-                    if ((Timerlasteleport % 4) < 2)
+                    if (p8.Mod(Timerlasteleport, 4) < 2)
                     {
                         CenterText(64, 64, "teleport", 12);
                     }
@@ -1662,11 +1677,7 @@ namespace Searchlo8
             Flaganim += 0.2;
         }
 
-        private static string SpriteData
-        {
-            get
-            {
-                return @"
+        public char[] SpriteData => @"
 333333337733333333333333333333331110d100001d011133333333333333333333337773333333333333377777777733333333333333331000000000110001
 33333333667733333333333333333333d61010d11d01016d33333333333333333333776667333333333333766666666633333333333333331100000111111011
 33333333d66677333333333333333333dd11016dd61011dd33333333333333333377666dd67333333333376ddddddddd33333333333333333111111111111111
@@ -1795,26 +1806,14 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
 147aaaaaaaaaa741147aaaa764210000000000000000000000000000000000000000000000000000000012467aaaa741147aaa74100000000000000147aaa741
 02466666666664200246666421000000000000000000000000000000000000000000000000000000000000124666642002466642000000000000000024666420
 00122222222221000012222100000000000000000000000000000000000000000000000000000000000000001222210000122210000000000000000001222100
-".Replace("\n", "");
-            }
-        }
+".Replace("\n", "").Replace("\r", "").ToCharArray();
 
-        private static string FlagData
-        {
-            get
-            {
-                return @"
+        public string FlagData => @"
 0001010101010100010101010101020201010101000000010101010100000202020202020000000101010101010102020101010101010101040101010202020208080808080200000000000000000000000000000000000000000000000000000000000000000004040400000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-".Replace("\n", "");
-            }
-        }
+".Replace("\n", "").Replace("\r", "");
 
-        private static string MapData
-        {
-            get
-            {
-                return @"
+        public string MapData => @"
 030000000000380d1d060c0000003800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000380000001510140000000000000000000000003800000000000000252a292736132827282a292813121110282917
 10140000000a0b1a16271901081b1b09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d0202030000251224000000000000000000000d082b2c140000430000252811123a2021220e0f202122233b13112717
 12240006081a3a23252827282a3512190103000000000000000000000000000000000000000000000000000000000038000000000000000000000000000000000000430000000000000000000000001532383b283e3f25352400000000000000060230320e3b2900060203380025123a0e003800002e2f38004038003b121329
@@ -1847,12 +1846,8 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
 100000210f23401f0e0f220f1f1e1f3d00380000003800001521203b192b2d04003b1311123a3b190b1a3a141f1e000000151013292924000000400000000012123d44000000000d081a190102020300152c2d1b1b1b1b2b2c14000067000000003d00152819090000002021220e220f220000004500000d30323b2813282717
 05010202020c3e2e3d3c383d3c2e2f0d1d001c0c3e0d08090044000d042a1027000020210f000021222300001e3c0040000a0411270501020202020202020804130c3e0d0202081a29282a122927292425272a2917172829282400000000000000000025282919010c000000003c403d00000000000d303200000027122a1717
 29122a2829192b2d01020202082b2d1a240025190b1a28190102081a2912282a000000003c000000000000003d00000d3032202122212220232021222021212328190b1a291029271717172a17171724252a2817171717272a240000000000000000002527122827190102020202020202020202081a24000000002829171717
-".Replace("\n", "");
-            }
-        }
-
+".Replace("\n", "").Replace("\r", "");
 
     }
-
 
 }

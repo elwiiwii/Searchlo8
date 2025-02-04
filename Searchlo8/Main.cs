@@ -11,8 +11,6 @@ namespace Searchlo8
         public static void Main(String[] args)
         {
             Pico8 p8 = new();
-            Cyclo8 c8 = new(p8);
-            c8.
         }
     }
 }
