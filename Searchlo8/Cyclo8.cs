@@ -27,7 +27,7 @@ namespace Searchlo8
         private readonly List<double> Cloudss;
         private readonly List<double> Cloudsx;
         private readonly List<double> Cloudsy;
-        private int Currentlevel;
+        public int Currentlevel;
         private bool Dbg_checkfound;
         private int Dbg_curcheckcount;
         private int Dbg_lastcheckidx;
@@ -37,7 +37,7 @@ namespace Searchlo8
         private double Goalcamy;
         public bool Isdead;
         private bool Isfinish;
-        private bool Isstarted;
+        public bool Isstarted;
         private readonly int Item_apple;
         private readonly int Item_checkpoint;
         private readonly int Item_finish;
@@ -385,10 +385,10 @@ namespace Searchlo8
                 for (int j = starty; j <= starty + sizey - 1; j++)
                 {
                     int col = p8.Mget(i, j);
-                    string flags = p8.Fget(col);
+                    int flags = p8.Fget(col);
                     int itemtype = 0;
-
-                    if (p8.Band(flags, "00000100") > 0)
+                    
+                    if (p8.Band(flags, 4) > 0)
                     {
                         itemtype = Item_teleport;
                         if (col == 56)
@@ -396,7 +396,7 @@ namespace Searchlo8
                             itemtype = Item_apple;
                         }
                     }
-                    if (p8.Band(flags, "00001000") > 0)
+                    if (p8.Band(flags, 8) > 0)
                     {
                         itemtype = Item_teleport;
                         if (col == 67)
@@ -515,9 +515,9 @@ namespace Searchlo8
             int sy = (int)Math.Floor((ly + oy) / 8.0);
 
             // get the sprite at the offset
-            int col = p8.Mget((lx + ox) / 8.0, (ly + oy) / 8.0);
-            string flags = p8.Fget(col);
-            int isc = p8.Band(flags, "00000001");
+            int col = p8.Mget((lx + ox) / 8.0, ((ly + oy) / 8.0) - 1);
+            int flags = p8.Fget(col);
+            int isc = p8.Band(flags, 1);
 
 	    	// check if its a colision
 	    	if (isc == 0)
@@ -590,8 +590,8 @@ namespace Searchlo8
             double final = (1.0 - lly) * lerp1 + lly * lerp2;
 
             // the normal is a gradient
-            double norx = (v0 - v1 + v3 - v2) * 0.5;
-            double nory = (v0 - v3 + v1 - v2) * 0.5;
+            double norx = (v0 - v1 + (v3 - v2)) * 0.5; // added brackets idk if correct
+            double nory = (v0 - v3 + (v1 - v2)) * 0.5; // added brackets idk if correct
 
             // we ensure normal is normalized
             double len = Math.Sqrt(norx * norx + nory * nory + 0.001);
@@ -686,7 +686,7 @@ namespace Searchlo8
             double x2 = ent.X + ent.Vx / Stepnb;
             double y2 = ent.Y + ent.Vy / Stepnb;
 
-            (double iscol, double norx, double nory) = IsColiding(x2, y2);
+            (double iscol, double norx, double nory) = IsColiding(x2, y2); // should all be 0
 
 	    	// if coliding
 	    	if (iscol > Limit_col)
@@ -775,7 +775,7 @@ namespace Searchlo8
             // before squaring
             double madx = (it.X - Charx) / it.Size;
             double mady = (it.Y - Chary) / it.Size;
-            double sqrlen = (madx * madx + mady * mady);
+            double sqrlen = madx * madx + mady * mady;
 
 	    	// if colision with an item
 	    	if ((!Isdead) && (sqrlen < 1))
@@ -873,8 +873,9 @@ namespace Searchlo8
         // [CHANGE]
         public void LoadLevel(int level)
         {
+            Currentlevel = level;
             Isstarted = true;
-            StartLevel(level);
+            StartLevel(Currentlevel);
         }
 
         // main update function
@@ -1010,7 +1011,7 @@ namespace Searchlo8
             // make upper body a bit closer
             // to the lower body
             Charx += (Charx2 - Charx) * 0.5;
-
+            
 	    	// check the upper body colision
 	    	(double coldist, double colnx, double colny) = IsColiding(Charx, Chary);
 	    	if (coldist > 1.8)

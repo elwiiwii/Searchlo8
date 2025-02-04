@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -52,17 +53,17 @@ namespace Searchlo8
         }
 
 
-        public int Band(string first, string second)
+        public int Band(int first, int second)
         {
-            char[] afirst = first.ToCharArray();
-            char[] asecond = second.ToCharArray();
-            Array.Reverse(afirst);
-            Array.Reverse(asecond);
+            char[] cfirst = Convert.ToString(first, 2).ToCharArray();
+            char[] csecond = Convert.ToString(second, 2).ToCharArray();
+            Array.Reverse(cfirst);
+            Array.Reverse(csecond);
 
             int val = 0;
-            for (int i = 0; i <= 7; i++)
+            for (int i = 0; i < Math.Min(cfirst.Length, csecond.Length); i++)
             {
-                if (afirst[i] == '1' && asecond[i] == '1')
+                if (cfirst[i] == '1' && csecond[i] == '1')
                 {
                     val += (int)Math.Pow(2, i);
                 }
@@ -107,9 +108,9 @@ namespace Searchlo8
         }
 
 
-        public string Fget(int n) // https://pico-8.fandom.com/wiki/Fget
+        public int Fget(int n) // https://pico-8.fandom.com/wiki/Fget
         {
-            return _cart.FlagData.Substring(n, 8);
+            return Convert.ToInt32(_cart.FlagData.Substring(n * 2, 2));
         }
 
 
