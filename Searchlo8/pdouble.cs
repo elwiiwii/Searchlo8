@@ -16,7 +16,7 @@ namespace Searchlo8
     public struct Pdouble(double value)
     {
         private const int DecimalPlaces = 4;
-        private readonly double _value = Math.Round(value, DecimalPlaces, MidpointRounding.AwayFromZero);
+        private readonly double _value = Math.Round(value, DecimalPlaces, MidpointRounding.ToEven);
 
         //
         // Public Constants
@@ -61,16 +61,17 @@ namespace Searchlo8
         public static explicit operator double(Pdouble p) => p._value;
 
         public static Pdouble operator +(Pdouble left, Pdouble right) => new(left._value + right._value);
+        public static Pdouble operator -(Pdouble left) => new(-left._value);
         public static Pdouble operator -(Pdouble left, Pdouble right) => new(left._value - right._value);
         public static Pdouble operator *(Pdouble left, Pdouble right) => new(left._value * right._value);
         public static Pdouble operator /(Pdouble left, Pdouble right) => new(left._value / right._value);
 
         public static bool operator ==(Pdouble left, Pdouble right) => left._value.Equals(right._value);
         public static bool operator !=(Pdouble left, Pdouble right) => !left._value.Equals(right._value);
-        public static bool operator <(Pdouble left, Pdouble right) => left < right;
-        public static bool operator >(Pdouble left, Pdouble right) => left > right;
-        public static bool operator <=(Pdouble left, Pdouble right) => left <= right;
-        public static bool operator >=(Pdouble left, Pdouble right) => left >= right;
+        public static bool operator <(Pdouble left, Pdouble right) => left._value < right._value;
+        public static bool operator >(Pdouble left, Pdouble right) => left._value > right._value;
+        public static bool operator <=(Pdouble left, Pdouble right) => left._value <= right._value;
+        public static bool operator >=(Pdouble left, Pdouble right) => left._value >= right._value;
 
         public override readonly string ToString() => _value.ToString($"F{DecimalPlaces}");
         public override readonly bool Equals(object? obj) => obj is Pdouble other && Equals(other);
