@@ -31,7 +31,7 @@ namespace Searchlo8
         private bool Dbg_checkfound;
         private int Dbg_curcheckcount;
         private int Dbg_lastcheckidx;
-        private readonly List<EntityClass> Entities;
+        public readonly List<EntityClass> Entities;
         private double Flaganim;
         private double Goalcamx;
         private double Goalcamy;
@@ -230,7 +230,7 @@ namespace Searchlo8
         }
 
         // entity = the 2 wheels
-        private class EntityClass(double inx, double iny)
+        public class EntityClass(double inx, double iny)
         {
             public double X = inx;
             public double Y = iny;
@@ -267,7 +267,7 @@ namespace Searchlo8
         }
 
         // a physic link between wheels
-        private class LinkClass(int ent1, int ent2)
+        public class LinkClass(int ent1, int ent2)
         {
             public int Ent1 = ent1;
             public int Ent2 = ent2;

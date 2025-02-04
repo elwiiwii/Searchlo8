@@ -31,7 +31,7 @@ namespace Searchlo8
             while (!_cart.Isdead)
             {
                 Step();
-                Console.WriteLine(_cart.Timer.ToString());
+                Console.WriteLine(_cart.Entities[0].Rot.ToString());
             }
             Console.WriteLine("DEAD");
         }
