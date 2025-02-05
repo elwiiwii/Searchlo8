@@ -6,6 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using FixMath;
 
 namespace Searchlo8
 {
@@ -84,25 +85,25 @@ namespace Searchlo8
         }
 
 
-        public void Camera(double x = 0, double y = 0) // https://pico-8.fandom.com/wiki/Camera
+        public void Camera(F32 x, F32 y) // https://pico-8.fandom.com/wiki/Camera
         {
             return;
         }
 
 
-        public void Circ(double x, double y, double r, int c) // https://pico-8.fandom.com/wiki/Circ
+        public void Circ(F32 x, F32 y, F32 r, int c) // https://pico-8.fandom.com/wiki/Circ
         {
             return;
         }
 
 
-        public void Circfill(double x, double y, double r, int c) // https://pico-8.fandom.com/wiki/Circfill
+        public void Circfill(F32 x, F32 y, F32 r, int c) // https://pico-8.fandom.com/wiki/Circfill
         {
             return;
         }
 
 
-        public void Cls(double color = 0) // https://pico-8.fandom.com/wiki/Cls
+        public void Cls() // https://pico-8.fandom.com/wiki/Cls
         {
             return;
         }
@@ -114,22 +115,22 @@ namespace Searchlo8
         }
 
 
-        public void Line(double x1, double y1, double x2, double y2, int col)
+        public void Line(F32 x1, F32 y1, F32 x2, F32 y2, int col)
         {
             return;
         }
 
 
-        public void Map(double celx, double cely, double sx, double sy, double celw, double celh, int? flags = null) // https://pico-8.fandom.com/wiki/Map
+        public void Map(int celx, int cely, F32 sx, F32 sy, int celw, int celh, int? flags = null) // https://pico-8.fandom.com/wiki/Map
         {
             return;
         }
 
 
-        public int Mget(double celx, double cely) // https://pico-8.fandom.com/wiki/Mget
+        public int Mget(F32 celx, F32 cely) // https://pico-8.fandom.com/wiki/Mget
         {
-            int xFlr = Math.Abs((int)Math.Floor(celx));
-            int yFlr = Math.Abs((int)Math.Floor(cely));
+            int xFlr = Math.Abs(F32.FloorToInt(celx));
+            int yFlr = Math.Abs(F32.FloorToInt(cely));
 
             string s = $"0x{_cart.MapData.Substring(xFlr * 2 + (yFlr * 256), 2)}";
             return Convert.ToInt32(s, 16);
@@ -158,90 +159,96 @@ namespace Searchlo8
         }*/
 
 
-        public double Mod(double x, double m)
+        public F32 Mod(F32 x, F32 m)
         {
-            double r = x % m;
+            F32 r = x % m;
             return r < 0 ? r + m : r;
         }
 
 
-        public void Mset(double celx, double cely, double snum = 0) // https://pico-8.fandom.com/wiki/Mset
+        public void Mset(F32 celx, F32 cely, int snum) // https://pico-8.fandom.com/wiki/Mset
         {
             return;
         }
 
 
-        public void Music(double n, double fadems = 0, double channelmask = 0) // https://pico-8.fandom.com/wiki/Music
+        public void Music(F32 n, F32 fadems, F32 channelmask) // https://pico-8.fandom.com/wiki/Music
         {
             return;
         }
 
 
-        public void Palt(double col, bool t) // https://pico-8.fandom.com/wiki/Palt
+        public void Palt(int col, bool t) // https://pico-8.fandom.com/wiki/Palt
         {
             return;
         }
 
 
-        public void Print(string str, double x, double y, double c) // https://pico-8.fandom.com/wiki/Print
+        public void Print(string str, int x, int y, F32 c) // https://pico-8.fandom.com/wiki/Print
         {
             return;
         }
 
 
-        public int Pget(double x, double y)
+        public int Pget(int x, int y)
         {
             return 1;
         }
 
 
-        public void Pset(double x, double y, double c) // https://pico-8.fandom.com/wiki/Pset
+        public void Pset(int x, int y, int c) // https://pico-8.fandom.com/wiki/Pset
         {
             return;
         }
 
 
-        public void Rectfill(double x1, double y1, double x2, double y2, double c) // https://pico-8.fandom.com/wiki/Rectfill
+        public void Rectfill(F32 x1, F32 y1, F32 x2, F32 y2, F32 c) // https://pico-8.fandom.com/wiki/Rectfill
         {
             return;
         }
 
 
-        public double Rnd(double lower = 1.0, double upper = 0.0) // https://pico-8.fandom.com/wiki/Rnd
+        public F32 Rnd(double lower, double upper) // https://pico-8.fandom.com/wiki/Rnd
         {
             Random random = new();
             if (lower < upper)
             {
                 double n = random.NextDouble() * (upper - lower) + lower;
-                return n;
+                return F32.FromDouble(n);
             }
             double n2 = random.NextDouble() * (lower - upper) + upper;
-            return n2;
+            return F32.FromDouble(n2);
         }
 
 
-        public void Sfx(double n, double channel = -1.0, double offset = 0.0, double length = 31.0) // https://pico-8.fandom.com/wiki/Sfx
+        public void Sfx(int n, int channel) // https://pico-8.fandom.com/wiki/Sfx
         {
             return;
         }
 
 
-        public void Spr(double spriteNumber, double x, double y, double w = 1.0, double h = 1.0, bool flip_x = false, bool flip_y = false) // https://pico-8.fandom.com/wiki/Spr
+        public void Spr(F32 spriteNumber, F32 x, F32 y, int w, int h) // https://pico-8.fandom.com/wiki/Spr
         {
             return;
         }
 
 
-        public void Sspr(double sx, double sy, double sw, double sh, double dx, double dy, double dw = -1, double dh = -1, bool flip_x = false, bool flip_y = false) // https://pico-8.fandom.com/wiki/Sspr
+        public void Spr(F32 spriteNumber, F32 x, F32 y, int w, int h, bool flip_x) // https://pico-8.fandom.com/wiki/Spr
         {
             return;
         }
 
 
-        public int Sget(double x, double y, int? idk = null)
+        public void Sspr(F32 sx, int sy, int sw, int sh, int dx, int dy, int dw, int dh, bool flip_x) // https://pico-8.fandom.com/wiki/Sspr
         {
-            int xFlr = (int)Math.Floor(x);
-            int yFlr = (int)Math.Floor(y);
+            return;
+        }
+
+
+        public int Sget(F32 x, F32 y, int? idk = null)
+        {
+            int xFlr = F32.FloorToInt(x);
+            int yFlr = F32.FloorToInt(y);
 
             if (xFlr < 0 || yFlr < 0)
             {
