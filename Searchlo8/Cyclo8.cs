@@ -595,7 +595,7 @@ namespace Searchlo8
             F32 nory = (v0 - v3 + (v1 - v2)) * F32.FromDouble(0.5); // added brackets idk if correct
 
             // we ensure normal is normalized
-            F32 len = F32.SqrtFast(norx * norx + nory * nory + F32.FromDouble(0.001));
+            F32 len = F32.Sqrt(norx * norx + nory * nory + F32.FromDouble(0.001));
             norx /= len;
             nory /= len;
 
@@ -640,7 +640,7 @@ namespace Searchlo8
             F32 dirx = Entities[link.Ent2 - 1].X - Entities[link.Ent1 - 1].X;
             F32 diry = Entities[link.Ent2 - 1].Y - Entities[link.Ent1 - 1].Y;
 
-            link.Length = F32.SqrtFast(dirx * dirx + diry * diry + F32.FromDouble(0.01));
+            link.Length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
             link.Dirx = dirx / link.Length;
             link.Diry = diry / link.Length;
         }
@@ -687,6 +687,11 @@ namespace Searchlo8
             F32 x2 = ent.X + ent.Vx / Stepnb;
             F32 y2 = ent.Y + ent.Vy / Stepnb;
 
+            if (ent.Y > F32.FromDouble(16.913)) //F32.FromDouble(16.9132))
+            {
+
+            }
+
             (F32 iscol, F32 norx, F32 nory) = IsColiding(x2, y2); // should all be 0
 
 	    	// if coliding
@@ -710,6 +715,7 @@ namespace Searchlo8
             // apply the motion
             ent.X += ent.Vx / Stepnb;
             ent.Y += ent.Vy / Stepnb;
+            Console.WriteLine(ent.Y);
 
 	    	// if wheel is near the ground
 	    	// we apply the wheel force
@@ -1205,7 +1211,7 @@ namespace Searchlo8
             F32 centy = ent1.Y + diry * F32.FromDouble(0.5);
 
             // normalize the direction
-            F32 length = F32.SqrtFast(dirx * dirx + diry * diry + F32.FromDouble(0.01));
+            F32 length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
             dirx /= length;
             diry /= length;
 

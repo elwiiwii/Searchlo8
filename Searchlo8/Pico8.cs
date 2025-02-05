@@ -28,13 +28,13 @@ namespace Searchlo8
         {
             _cart = cart;
             _cart.Init();
-            _cart.LoadLevel(4);
+            _cart.LoadLevel(3);
             while (!_cart.Isdead)
             {
                 Step();
-                Console.WriteLine(_cart.Entities[0].Rot.ToString());
+                //Console.WriteLine($"{_cart.Timer.ToString()} {_cart.Entities[0].Rot.ToString()}");
             }
-            Console.WriteLine("DEAD");
+            //Console.WriteLine("DEAD");
         }
 
         private void Step()

@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace Searchlo8
 {
-    class Program
+    static class Program
     {
-        public static void Main(String[] args)
+        static void Main(String[] args)
         {
+            //using (Game)
             Pico8 p8 = new();
         }
     }
