@@ -81,6 +81,7 @@ namespace Searchlo8
         {
             batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
 
+            p8.Pal();
             p8.Palt();
             p8.Draw();
 

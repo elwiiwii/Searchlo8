@@ -12,7 +12,7 @@ namespace Searchlo8
         public void LoadLevel(int level);
         public void Update();
         public void Draw();
-        public char[] SpriteData { get; }
+        public string SpriteData { get; }
         public string FlagData { get; }
         public string MapData { get; }
     }

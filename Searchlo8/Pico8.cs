@@ -38,12 +38,12 @@ namespace Searchlo8
             //LoadGame(_cart);
         }
 
-        private int[] DataToArray(string s)
+        private int[] DataToArray(string s, int n)
         {
-            int[] val = [s.Length / 2];
-            for (int i = 0; i < s.Length; i++)
+            int[] val = new int[s.Length / n];
+            for (int i = 0; i < s.Length / n; i++)
             {
-                val[i] = Convert.ToInt32($"0x{s.Substring(i * 2, 2)}", 16);
+                val[i] = Convert.ToInt32($"0x{s.Substring(i * n, n)}", 16);
             }
 
             return val;
@@ -53,10 +53,13 @@ namespace Searchlo8
         {
             _cart = cart;
             _memory = new() {
-                { "sprites", DataToArray(_cart.SpriteData) },
-                { "flags", DataToArray(_cart.FlagData) },
-                { "map", DataToArray(_cart.MapData) }
+                { "sprites", DataToArray(_cart.SpriteData, 1) },
+                { "flags", DataToArray(_cart.FlagData, 2) },
+                { "map", DataToArray(_cart.MapData, 2) }
             };
+            Array.Copy(colors, resetColors, colors.Length);
+            Array.Copy(colors, sprColors, colors.Length);
+            Array.Copy(colors, resetSprColors, colors.Length);
             _cart.Init();
             _cart.LoadLevel(lvl);
             //while (!_cart.Isdead)
@@ -153,7 +156,7 @@ namespace Searchlo8
         //    this.resetColors = colors;
         //}
 
-        private Texture2D CreateTextureFromSpriteData(char[] spriteData, int spriteX, int spriteY, int spriteWidth, int spriteHeight)
+        private Texture2D CreateTextureFromSpriteData(int[] spriteData, int spriteX, int spriteY, int spriteWidth, int spriteHeight)
         {
             //spriteData = new string(spriteData.Where(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')).ToArray());
 
@@ -165,11 +168,13 @@ namespace Searchlo8
 
             for (int i = spriteX + (spriteY * 128), j = 0; j < (spriteWidth * spriteHeight); i++, j++)
             {
-                char c = spriteData[i];
-                int colorIndex = Convert.ToInt32(c.ToString(), 16); // Convert hex to int
+                int colorIndex = spriteData[i];
                 Color color = sprColors[colorIndex]; // Convert the PICO-8 color index to a Color
-                colorData[j] = color;
-
+                if (colorIndex != 3)
+                {
+                    colorData[j] = color;
+                }
+                
                 if (i % spriteWidth == spriteWidth - 1) { i += 128 - spriteWidth; }
                 //j++;
             }
@@ -297,7 +302,7 @@ namespace Searchlo8
 
         public int Fget(int n) // https://pico-8.fandom.com/wiki/Fget
         {
-            return Convert.ToInt32(_cart.FlagData.Substring(n * 2, 2));
+            return _memory["flags"][n];
         }
 
 
@@ -341,7 +346,7 @@ namespace Searchlo8
 
         public void Mset(int celx, int cely, int snum) // https://pico-8.fandom.com/wiki/Mset
         {
-            _cart.MapData.Remove(celx * 2 + (cely * 256), 2).Insert(celx * 2 + (cely * 256), snum.ToString("X"));
+            _memory["map"][celx + cely * 128] = snum;
         }
 
 
@@ -565,7 +570,7 @@ namespace Searchlo8
 
             if (!spriteTextures.TryGetValue(spriteNumberFlr + colorCache, out var texture))
             {
-                texture = CreateTextureFromSpriteData(_cart.SpriteData, spriteX, spriteY, spriteWidth * w, spriteHeight * h);
+                texture = CreateTextureFromSpriteData(_memory["sprites"], spriteX, spriteY, spriteWidth * w, spriteHeight * h);
                 spriteTextures[spriteNumberFlr + colorCache] = texture;
             }
 
@@ -636,7 +641,7 @@ namespace Searchlo8
 
             if (!spriteTextures.TryGetValue(spriteNumberFlr + colorCache, out var texture))
             {
-                texture = CreateTextureFromSpriteData(_cart.SpriteData, sxFlr, sy, sw, sh);
+                texture = CreateTextureFromSpriteData(_memory["sprites"], sxFlr, sy, sw, sh);
                 spriteTextures[spriteNumberFlr + colorCache] = texture;
             }
 
