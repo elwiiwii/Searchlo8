@@ -187,7 +187,8 @@ namespace Searchlo8
 
         public bool Btn(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btn
         {
-            return false;
+            KeyboardState state = Keyboard.GetState();
+            return i == 2 && state.IsKeyDown(Keys.W);
         }
 
 
@@ -312,7 +313,7 @@ namespace Searchlo8
         }
 
 
-        public void Map(int celx, int cely, F32 sx, F32 sy, int celw, int celh, int? flags = null) // https://pico-8.fandom.com/wiki/Map
+        public void Map(int celx, int cely, F32 sx, F32 sy, int celw, int celh, int flags = 0) // https://pico-8.fandom.com/wiki/Map
         {
             int sxFlr = F32.FloorToInt(sx);
             int syFlr = F32.FloorToInt(sy);
@@ -321,7 +322,10 @@ namespace Searchlo8
             {
                 for (int j = 0; j <= celh; j++)
                 {
-                    Spr(F32.FromInt(Mget(F32.FromInt(i + celx), F32.FromInt(j + cely))), sx + i * 8, sy + j * 8);
+                    if (flags == 0 || flags == Fget(Mget(F32.FromInt(celx + i), F32.FromInt(cely + j))))
+                    {
+                        Spr(F32.FromInt(Mget(F32.FromInt(i + celx), F32.FromInt(j + cely))), sx + i * 8, sy + j * 8);
+                    }
                 }
             }
         }

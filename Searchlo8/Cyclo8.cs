@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using FixMath;
 
 namespace Searchlo8
@@ -169,7 +170,7 @@ namespace Searchlo8
             Item_finish = 4;
             Item_teleport = 5;
 
-            Items = new(new ItemClass[1000]);
+            Items = new(new ItemClass[1]);
             Link1 = LinkNew(1, 2);
 
             // array to link sprite to colision
@@ -364,7 +365,7 @@ namespace Searchlo8
         {
             Currentlevel = levelidx;
 
-            Items = new(new ItemClass[1000]);
+            Items = new(new ItemClass[30]);
             Itemnb = 0;
             Bikefaceright = Levels[Currentlevel - 1].Startright;
 
@@ -399,7 +400,7 @@ namespace Searchlo8
                     }
                     if ((flags & 8) > 0)
                     {
-                        itemtype = Item_teleport;
+                        itemtype = Item_checkpoint;
                         if (col == 67)
                         {
                             itemtype = Item_start;
@@ -516,12 +517,13 @@ namespace Searchlo8
             int sy = F32.FloorToInt((ly + oy) / F32.FromDouble(8.0));
 
             // get the sprite at the offset
-            int col = p8.Mget((lx + ox) / F32.FromDouble(8.0), ((ly + oy) / F32.FromDouble(8.0)) - 1);
+            int col = p8.Mget((lx + ox) / F32.FromDouble(8.0), ((ly + oy) / F32.FromDouble(8.0)));
             int flags = p8.Fget(col);
             int isc = flags & 1;
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"col {col}" + Environment.NewLine);
 
-	    	// check if its a colision
-	    	if (isc == 0)
+            // check if its a colision
+            if (isc == 0)
             {
                 return F32.FromInt(0);
             }
@@ -546,13 +548,13 @@ namespace Searchlo8
             }
 
             // get the colision profile
-            int? sdfval = Sdflink[col - 1];
+            int sdfval = Sdflink[col - 1];
 	    	// if none is found, use the full square
-	    	sdfval ??= 0;
+	    	//sdfval ??= 0;
 
             // proper coordinates in sdf
-            F32 wx = 2 * 8 * p8.Mod(F32.FromInt((int)sdfval), F32.FromInt(8)) + lx - sx * 8 + 4;
-            F32 wy = 2 * 8 * F32.FloorToInt((int)sdfval / F32.FromDouble(8.0)) + 8 * 12 + ly - sy * 8 + 4;
+            F32 wx = 2 * 8 * p8.Mod(F32.FromInt(sdfval), F32.FromInt(8)) + lx - sx * 8 + 4;
+            F32 wy = 2 * 8 * F32.FloorToInt(sdfval / F32.FromDouble(8.0)) + 8 * 12 + ly - sy * 8 + 4;
             // get distance
             int dist = p8.Sget(wx, wy);
 
@@ -573,7 +575,7 @@ namespace Searchlo8
 
         // get the colision distance
 	    // and surface normal
-	    private (F32, F32, F32) IsColiding(F32 lx, F32 ly)
+	    private (F32 final, F32 norx, F32 nory) IsColiding(F32 lx, F32 ly)
         {
             // we take the 4 points
             // at the center of the wheel
@@ -591,11 +593,11 @@ namespace Searchlo8
             F32 final = (F32.FromDouble(1.0) - lly) * lerp1 + lly * lerp2;
 
             // the normal is a gradient
-            F32 norx = (v0 - v1 + (v3 - v2)) * F32.FromDouble(0.5); // added brackets idk if correct
-            F32 nory = (v0 - v3 + (v1 - v2)) * F32.FromDouble(0.5); // added brackets idk if correct
+            F32 norx = (v0 - v1 + v3 - v2) * F32.FromDouble(0.5);
+            F32 nory = (v0 - v3 + v1 - v2) * F32.FromDouble(0.5);
 
             // we ensure normal is normalized
-            F32 len = F32.Sqrt(norx * norx + nory * nory + F32.FromDouble(0.001));
+            F32 len = F32.SqrtPrecise(norx * norx + nory * nory + F32.FromDouble(0.001));
             norx /= len;
             nory /= len;
 
@@ -640,7 +642,7 @@ namespace Searchlo8
             F32 dirx = Entities[link.Ent2 - 1].X - Entities[link.Ent1 - 1].X;
             F32 diry = Entities[link.Ent2 - 1].Y - Entities[link.Ent1 - 1].Y;
 
-            link.Length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
+            link.Length = F32.SqrtPrecise(dirx * dirx + diry * diry + F32.FromDouble(0.01));
             link.Dirx = dirx / link.Length;
             link.Diry = diry / link.Length;
         }
@@ -697,7 +699,7 @@ namespace Searchlo8
 	    	// if coliding
 	    	if (iscol > Limit_col)
             {
-                Console.WriteLine("collision");
+                //Console.WriteLine("collision");
                 // debug data
                 // ent.Lastcolx = ent.X
                 // ent.Lastcoly = ent.Y
@@ -708,16 +710,30 @@ namespace Searchlo8
                 // the surface normal
                 (ent.Vx, ent.Vy) = Reflect(ent.Vx, ent.Vy, norx, nory);
 
+                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol}" + Environment.NewLine);
+                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Limit_col {Limit_col}" + Environment.NewLine);
+                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx}" + Environment.NewLine);
+                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy}" + Environment.NewLine);
+                //Console.WriteLine($"iscol {iscol}");
+                //Console.WriteLine($"Limit_col {Limit_col}");
+                //Console.WriteLine($"ent.Vx {ent.Vx}");
+                //Console.WriteLine($"ent.Vy {ent.Vy}");
+
                 // ensure we are not inside the colision
                 ent.X += norx * (iscol - Limit_col);
                 ent.Y += nory * (iscol - Limit_col);
             }
 
+            if (ent.Vx < -1)
+            {
+
+            }
+
             // apply the motion
             ent.X += ent.Vx / Stepnb;
             ent.Y += ent.Vy / Stepnb;
-            Console.WriteLine(ent.Y);
-
+            //Console.WriteLine(ent.Y);
+            
 	    	// if wheel is near the ground
 	    	// we apply the wheel force
 	    	if (iscol > Limit_wheel)
@@ -992,8 +1008,12 @@ namespace Searchlo8
             {
                 UpStartEntity(i);
             }
-	    	for (int i = 0; i <= Stepnb - 1; i++)
+            //Console.WriteLine($"Timer {Timer}");
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {Timer}" + Environment.NewLine);
+            for (int i = 0; i <= Stepnb - 1; i++)
             {
+                //Console.WriteLine($"physics loop {i}");
+                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {i}" + Environment.NewLine);
                 // update links
                 UpLink(Link1);
 	    		// update wheels
@@ -1212,7 +1232,7 @@ namespace Searchlo8
             F32 centy = ent1.Y + diry * F32.FromDouble(0.5);
 
             // normalize the direction
-            F32 length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
+            F32 length = F32.SqrtPrecise(dirx * dirx + diry * diry + F32.FromDouble(0.01));
             dirx /= length;
             diry /= length;
 
@@ -1855,7 +1875,7 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
 100000210f23401f0e0f220f1f1e1f3d00380000003800001521203b192b2d04003b1311123a3b190b1a3a141f1e000000151013292924000000400000000012123d44000000000d081a190102020300152c2d1b1b1b1b2b2c14000067000000003d00152819090000002021220e220f220000004500000d30323b2813282717
 05010202020c3e2e3d3c383d3c2e2f0d1d001c0c3e0d08090044000d042a1027000020210f000021222300001e3c0040000a0411270501020202020202020804130c3e0d0202081a29282a122927292425272a2917172829282400000000000000000025282919010c000000003c403d00000000000d303200000027122a1717
 29122a2829192b2d01020202082b2d1a240025190b1a28190102081a2912282a000000003c000000000000003d00000d3032202122212220232021222021212328190b1a291029271717172a17171724252a2817171717272a240000000000000000002527122827190102020202020202020202081a24000000002829171717
-0000000000000000000000000000000000000000000000000000000000060300000000000000000000380000000d30320000000000000000000000000000000000000000000000060300000006030000000000000038000000000000000000000000000000000000000000000000000000000000000000000021222222221200
+0000000000000000000000000000000000000000000000000000000000060300000000000000000000380000000d30320000000000000000000000000000000000000000000000060300000006030000000000000038000000000000000000000000000000000000000000000000000000000000000000000000000000000006
 00000000000000000000000000000000000000000000000000000006080427140000000000000000000d081b1b1a24000000000000000000000000000000000000000000060306043614001510111438000000000602020300000000000000000000000000000000000000000000000000000000000000000000000000001528
 0000000000000000000000003800000000004000000000000000153b123a2000000000000000001c081a29282710240000000000000000000000000000003e3f00004315101228290503002528050102020300152222200f14000000000000000000000000000000000000000000000038000000000000000000000000000029
 03000000000000000000000000000000000d02020c000000000000251324380000004000001c082b29293513102824000300000000000000380000001c082b2d01020202042817292a10142528292a27222114000000001f00000a0b0900000000000000000000003e0000000000060202020203000000000000000000440012
@@ -1880,9 +1900,9 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
 62daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2641a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a14
 2064666666664602206466666666460220646666666646022064666666664602206466666666460220646666666646022064666666664602206466666666460200212222222212000021222222221200002122222222120000212222222212000021222222221200002122222222120000212222222212000021222222221200
 0021220110221200000000002122120000212222222212000021222222221200002122222222120000212212000000000021222222221200002122222222120020646624426646020000002164664602206466666666460220646666666646022064666666664602206466461200000020646666666646022064666666664602
-41a7aa4774aa7a1400002164a7aa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aa7a4612000041a7aaaaaaaa7a1441a7aaaaaaaa7a1462dade7aa7edad26002164a7daeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeead7a46120062daeeeeeeeead2600daeeeeeeeead26
-62eaefaddafeae262064a7daeeffae2662eaffffffffae2662eaffffffffae2662eaffffffffae2662eaffeead7a460262eaffffffffae2662eaffffffffae2662eaffdeedffae2641a7daeeffffae2662eaffffffffae2662eaffffffeead2662daeeffffffae2662eaffffeead7a1462eaffffffeead2600daeeffffffae26
-62eaffeffeffae2662daeeffffffae2662eaffffffffae2662eaffffeead7a1441a7daeeffffae2662eaffffffeead2662eaffffeead7a1441a7daeeffffae2662eaffffffffae2662eaffffffffae2662eaffffffffae2662eaffeead7a46022064a7daeeffae2662eaffffffffae2662eaffefad7a46020064a7dafeffae26
+41a7aa4774aa7a1400002164a7aa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aaaaaaaa7a1441a7aa7a4612000041a7aaaaaaaa7a1441a7aaaaaaaa7a1462dade7aa7edad26002164a7daeead2662daeeeeeeeead2662daeeeeeeeead2662daeeeeeeeead2662daeead7a46120062daeeeeeeeead2662daeeeeeeeead26
+62eaefaddafeae262064a7daeeffae2662eaffffffffae2662eaffffffffae2662eaffffffffae2662eaffeead7a460262eaffffffffae2662eaffffffffae2662eaffdeedffae2641a7daeeffffae2662eaffffffffae2662eaffffffeead2662daeeffffffae2662eaffffeead7a1462eaffffffeead2662daeeffffffae26
+62eaffeffeffae2662daeeffffffae2662eaffffffffae2662eaffffeead7a1441a7daeeffffae2662eaffffffeead2662eaffffeead7a1441a7daeeffffae2662eaffffffffae2662eaffffffffae2662eaffffffffae2662eaffeead7a46022064a7daeeffae2662eaffffffffae2662eaffefad7a46022064a7dafeffae26
 62eaffffffffae2662eaffffffffae2662daeeeeeeeead2662daeead7a461200002164a7daeead2662eaffffffffae2662eaffde7a461200002164a7edffae2662eaffffffffae2662eaffffffeead2641a7aaaaaaaa7a1441a7aa7a4612000000002164a7aa7a1462daeeffffffae2662eaffae4712000000002174eaffae26
 62eaffffffffae2662eaffffeead7a1420646666666646022064664612000000000000216466460241a7daeeffffae2662eaefad2600000000000062dafeae2662eaffffffffae2662eaffeead7a46020021222222221200002122120000000000000000212212002064a7daeeffae2662eaef7a1400000000000041a7feae26
 62daeeeeeeeead2662daeead7a461200000000000000000000000000000000000000000000000000002164a7daeead2662dade6a0200000000000020a6edad2641a7aaaaaaaa7a1441a7aa7a4612000000000000000000000000000000000000000000000000000000002164a7aa7a1441a7aa47010000000000001074aa7a14
