@@ -286,7 +286,7 @@ namespace Searchlo8
 
         private static F32 Lerp(F32 a, F32 b, F32 alpha)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Lerp()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Lerp()" + Environment.NewLine);
             return a * (F32.FromDouble(1.0) - alpha) + b * alpha;
         }
 
@@ -514,18 +514,18 @@ namespace Searchlo8
         // chosen at an offset ox,oy
         private F32 GetSdf(F32 lx, F32 ly, int ox, int oy)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
             int sx = F32.FloorToInt((lx + ox) / F32.FromDouble(8.0));
             int sy = F32.FloorToInt((ly + oy) / F32.FromDouble(8.0));
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | lx {lx} | ox {ox}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | ly {ly} | oy {oy}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | lx {lx} | ox {ox}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | ly {ly} | oy {oy}" + Environment.NewLine);
 
             // get the sprite at the offset
             int col = p8.Mget((lx + ox) / F32.FromDouble(8.0), ((ly + oy) / F32.FromDouble(8.0)));
             int flags = p8.Fget(col);
             int isc = flags & 1;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"col {col} | lx {lx} | ox {ox} | ly {ly} | oy {oy}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flags {flags} | isc {isc}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"col {col} | lx {lx} | ox {ox} | ly {ly} | oy {oy}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flags {flags} | isc {isc}" + Environment.NewLine);
 
             // check if its a colision
             if (isc == 0)
@@ -537,16 +537,16 @@ namespace Searchlo8
             bool inlevelzone = false;
 	    	for (int i = 0; i < Levels[Currentlevel-1].Zonenb; i++)
             {
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"for loop {i}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"for loop {i}" + Environment.NewLine);
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | curzone.Startx {curzone.Startx} | curzone.Sizex {curzone.Sizex}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | curzone.Starty {curzone.Starty} | curzone.Sizey {curzone.Sizey}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | curzone.Startx {curzone.Startx} | curzone.Sizex {curzone.Sizex}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | curzone.Starty {curzone.Starty} | curzone.Sizey {curzone.Sizey}" + Environment.NewLine);
                 if ((sx >= curzone.Startx) && (sx < (curzone.Startx+curzone.Sizex)))
                 {
                     if ((sy >= curzone.Starty) && (sy < (curzone.Starty+curzone.Sizey)))
                     {
                         inlevelzone = true;
-                        File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"inlevelzone {inlevelzone}" + Environment.NewLine);
+                        //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"inlevelzone {inlevelzone}" + Environment.NewLine);
                         break;
                     }
                 }
@@ -559,18 +559,18 @@ namespace Searchlo8
 
             // get the colision profile
             int sdfval = Sdflink[col - 1];
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sdfval {sdfval} | col {col}" + Environment.NewLine);
             // if none is found, use the full square
             //sdfval ??= 0;
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sdfval {sdfval} | col {col}" + Environment.NewLine);
 
             // proper coordinates in sdf
             F32 wx = 2 * 8 * p8.Mod(F32.FromInt(sdfval), F32.FromInt(8)) + lx - sx * 8 + 4;
             F32 wy = 2 * 8 * F32.FloorToInt(sdfval / F32.FromDouble(8.0)) + 8 * 12 + ly - sy * 8 + 4;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wx {wx} | sdfval {sdfval} | lx {lx} | sx {sx}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wy {wy} | sdfval {sdfval} | ly {ly} | sy {sy}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wx {wx} | sdfval {sdfval} | lx {lx} | sx {sx}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wy {wy} | sdfval {sdfval} | ly {ly} | sy {sy}" + Environment.NewLine);
             // get distance
             int dist = p8.Sget(wx, wy);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dist {dist} | wx {wx} | wy {wy}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dist {dist} | wx {wx} | wy {wy}" + Environment.NewLine);
 
             return F32.FromInt(dist);
         }
@@ -579,15 +579,15 @@ namespace Searchlo8
 	    // of the 4 closest cells
 	    private F32 IsPointcol(F32 lx, F32 ly)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsPointCol()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsPointCol()" + Environment.NewLine);
             F32 v0 = GetSdf(lx, ly, -3, -3);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {v0} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {v0} | lx {lx} | ly {ly}" + Environment.NewLine);
             F32 v1 = GetSdf(lx, ly, 4, -3);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {v1} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {v1} | lx {lx} | ly {ly}" + Environment.NewLine);
             F32 v2 = GetSdf(lx, ly, 4, 4);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {v2} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {v2} | lx {lx} | ly {ly}" + Environment.NewLine);
             F32 v3 = GetSdf(lx, ly, -3, 4);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {v3} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {v3} | lx {lx} | ly {ly}" + Environment.NewLine);
 
             return F32.Max(F32.Max(v0, v1), F32.Max(v2, v3));
         }
@@ -596,17 +596,17 @@ namespace Searchlo8
         // and surface normal
         private (F32 final, F32 norx, F32 nory) IsColiding(F32 lx, F32 ly)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsColiding()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsColiding()" + Environment.NewLine);
             // we take the 4 points
             // at the center of the wheel
             F32 v0 = IsPointcol(lx - F32.FromDouble(0.5), ly - F32.FromDouble(0.5));
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {v0} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {v0} | lx {lx} | ly {ly}" + Environment.NewLine);
             F32 v1 = IsPointcol(lx + F32.FromDouble(0.5), ly - F32.FromDouble(0.5));
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {v1} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {v1} | lx {lx} | ly {ly}" + Environment.NewLine);
             F32 v2 = IsPointcol(lx + F32.FromDouble(0.5), ly + F32.FromDouble(0.5));
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {v2} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {v2} | lx {lx} | ly {ly}" + Environment.NewLine);
             F32 v3 = IsPointcol(lx - F32.FromDouble(0.5), ly + F32.FromDouble(0.5));
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {v3} | lx {lx} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {v3} | lx {lx} | ly {ly}" + Environment.NewLine);
 
             // we iterpolate the distance
             // with bilinear
@@ -615,24 +615,24 @@ namespace Searchlo8
             F32 lerp1 = (F32.FromDouble(1.0) - llx) * v0 + llx * v1;
             F32 lerp2 = (F32.FromDouble(1.0) - llx) * v3 + llx * v2;
             F32 final = (F32.FromDouble(1.0) - lly) * lerp1 + lly * lerp2;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"llx {llx} | lx {lx}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lly {lly} | ly {ly}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp1 {lerp1} | llx {llx} | v0 {v0} | v1 {v1}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp2 {lerp2} | llx {llx} | v3 {v3} | v2 {v2}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"final {final} | lly {lly} | lerp1 {lerp1} | lerp2 {lerp2}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"llx {llx} | lx {lx}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lly {lly} | ly {ly}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp1 {lerp1} | llx {llx} | v0 {v0} | v1 {v1}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp2 {lerp2} | llx {llx} | v3 {v3} | v2 {v2}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"final {final} | lly {lly} | lerp1 {lerp1} | lerp2 {lerp2}" + Environment.NewLine);
 
             // the normal is a gradient
             F32 norx = (v0 - v1 + v3 - v2) * F32.FromDouble(0.5);
             F32 nory = (v0 - v3 + v1 - v2) * F32.FromDouble(0.5);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {norx} | v0 {v0} | v1 {v1} | v3 {v3} | v2 {v2}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"nory {nory} | v0 {v0} | v3 {v3} | v1 {v1} | v2 {v2}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {norx} | v0 {v0} | v1 {v1} | v3 {v3} | v2 {v2}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"nory {nory} | v0 {v0} | v3 {v3} | v1 {v1} | v2 {v2}" + Environment.NewLine);
 
             // we ensure normal is normalized
             F32 len = F32.Sqrt(norx * norx + nory * nory + F32.FromDouble(0.001));
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"len {len} | norx {norx} | nory {nory}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"len {len} | norx {norx} | nory {nory}" + Environment.NewLine);
             norx /= len;
             nory /= len;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {norx} | nory {nory}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {norx} | nory {nory}" + Environment.NewLine);
 
             // F32 final = IsPointcol(lx,ly);
 
@@ -644,22 +644,22 @@ namespace Searchlo8
 	    // a damping is applyed of the reflection
 	    private (F32, F32) Reflect(F32 vx, F32 vy, F32 nx, F32 ny)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Reflect()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Reflect()" + Environment.NewLine);
             F32 dot = vx * nx + vy * ny;
             F32 bx = dot * nx;
             F32 by = dot * ny;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot} | vx {vx} | nx {nx} | vy {vy} | ny {ny}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"bx {bx} | dot {dot} | nx {nx}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"by {by} | dot {dot} | nx {ny}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot} | vx {vx} | nx {nx} | vy {vy} | ny {ny}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"bx {bx} | dot {dot} | nx {nx}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"by {by} | dot {dot} | nx {ny}" + Environment.NewLine);
 
             F32 rx = vx - Str_reflect * bx;
             F32 ry = vy - Str_reflect * by;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"rx {rx} | vx {vx} | Str_reflect {Str_reflect} | bx {bx}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ry {ry} | vy {vy} | Str_reflect {Str_reflect} | by {by}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"rx {rx} | vx {vx} | Str_reflect {Str_reflect} | bx {bx}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ry {ry} | vy {vy} | Str_reflect {Str_reflect} | by {by}" + Environment.NewLine);
 
             // we play some colision sounds
             // when both vector are opposite
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot}" + Environment.NewLine);
             if (dot < F32.FromDouble(- 0.8))
             {
                 p8.Sfx(0, 3);
@@ -679,16 +679,16 @@ namespace Searchlo8
 	    // between 2 wheels
 	    private void UpLink(LinkClass link)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpLink()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpLink()" + Environment.NewLine);
             F32 dirx = Entities[link.Ent2 - 1].X - Entities[link.Ent1 - 1].X;
             F32 diry = Entities[link.Ent2 - 1].Y - Entities[link.Ent1 - 1].Y;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dirx {dirx} | Entities[link.Ent2 - 1].x {Entities[link.Ent2 - 1].X} | Entities[link.Ent1 - 1].x {Entities[link.Ent1 - 1].X}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"diry {diry} | Entities[link.Ent2 - 1].y {Entities[link.Ent2 - 1].Y} | Entities[link.Ent1 - 1].y {Entities[link.Ent1 - 1].Y}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dirx {dirx} | Entities[link.Ent2 - 1].x {Entities[link.Ent2 - 1].X} | Entities[link.Ent1 - 1].x {Entities[link.Ent1 - 1].X}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"diry {diry} | Entities[link.Ent2 - 1].y {Entities[link.Ent2 - 1].Y} | Entities[link.Ent1 - 1].y {Entities[link.Ent1 - 1].Y}" + Environment.NewLine);
             
             link.Length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
             link.Dirx = dirx / link.Length;
             link.Diry = diry / link.Length;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"link.Length {link.Length} | link.Dirx {link.Dirx} | link.Diry {link.Diry}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"link.Length {link.Length} | link.Dirx {link.Dirx} | link.Diry {link.Diry}" + Environment.NewLine);
         }
 
         // pre physic update of a wheel
@@ -702,19 +702,19 @@ namespace Searchlo8
         // do one step of physic on a wheel
 	    private void UpStepEntity(EntityClass ent)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpStepEntity()" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpStepEntity()" + Environment.NewLine);
             // apply link force
             if (ent.Link != null)
             {
                 // force according to base length
                 F32 flink = (ent.Link.Length - ent.Link.Baselen) * Str_link;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flink {flink} | ent.Link.Length {ent.Link.Length} | ent.Link.Baselen {ent.Link.Baselen} | Str_link {Str_link}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flink {flink} | ent.Link.Length {ent.Link.Length} | ent.Link.Baselen {ent.Link.Baselen} | Str_link {Str_link}" + Environment.NewLine);
                 
                 // add the force
                 ent.Vx += ent.Link.Dirx * ent.Linkside * flink;
                 ent.Vy += ent.Link.Diry * ent.Linkside * flink;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Link.Dirx {ent.Link.Dirx} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | ent.Link.Diry {ent.Link.Diry} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Link.Dirx {ent.Link.Dirx} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | ent.Link.Diry {ent.Link.Diry} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
                 
                 // apply the rotation
                 // due to the body
@@ -726,13 +726,13 @@ namespace Searchlo8
                     // to the link axis
                     F32 perpx = ent.Link.Diry;
                     F32 perpy = -ent.Link.Dirx;
-                    File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {perpx} | ent.Link.Diry {ent.Link.Diry}" + Environment.NewLine);
-                    File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {perpy} | -ent.Link.Dirx {-ent.Link.Dirx}" + Environment.NewLine);
+                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {perpx} | ent.Link.Diry {ent.Link.Diry}" + Environment.NewLine);
+                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {perpy} | -ent.Link.Dirx {-ent.Link.Dirx}" + Environment.NewLine);
 
                     ent.Vx += perpx * Bodyrot / Stepnb * ent.Linkside;
                     ent.Vy += perpy * Bodyrot / Stepnb * ent.Linkside;
-                    File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | perpx {perpx} | Bodyrot {Bodyrot} | Stepnb {Stepnb} | ent.Linkside {ent.Linkside}" + Environment.NewLine);
-                    File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | perpy {perpy} | Bodyrot {Bodyrot} | Stepnb {Stepnb} | ent.Linkside {ent.Linkside}" + Environment.NewLine);
+                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | perpx {perpx} | Bodyrot {Bodyrot} | Stepnb {Stepnb} | ent.Linkside {ent.Linkside}" + Environment.NewLine);
+                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | perpy {perpy} | Bodyrot {Bodyrot} | Stepnb {Stepnb} | ent.Linkside {ent.Linkside}" + Environment.NewLine);
                 }
             }
 
@@ -740,8 +740,8 @@ namespace Searchlo8
             // is coliding
             F32 x2 = ent.X + ent.Vx / Stepnb;
             F32 y2 = ent.Y + ent.Vy / Stepnb;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {x2} | ent.X {ent.X} | ent.Vx {ent.Vx} | Stepnb {Stepnb}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"y2 {y2} | ent.Y {ent.Y} | ent.Vy {ent.Vy} | Stepnb {Stepnb}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {x2} | ent.X {ent.X} | ent.Vx {ent.Vx} | Stepnb {Stepnb}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"y2 {y2} | ent.Y {ent.Y} | ent.Vy {ent.Vy} | Stepnb {Stepnb}" + Environment.NewLine);
 
             if (ent.Y > F32.FromDouble(16.1)) //F32.FromDouble(16.9132))
             {
@@ -749,9 +749,9 @@ namespace Searchlo8
             }
 
             (F32 iscol, F32 norx, F32 nory) = IsColiding(x2, y2); // should all be 0
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {x2} | y2 {y2} | iscol {iscol} | norx {norx} | nory {nory}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {x2} | y2 {y2} | iscol {iscol} | norx {norx} | nory {nory}" + Environment.NewLine);
 
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
             // if coliding
             if (iscol > Limit_col)
             {
@@ -765,9 +765,9 @@ namespace Searchlo8
                 // reflect the velocity by
                 // the surface normal
 
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Vy {ent.Vy}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Vy {ent.Vy}" + Environment.NewLine);
                 (ent.Vx, ent.Vy) = Reflect(ent.Vx, ent.Vy, norx, nory);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Vy {ent.Vy} | norx {norx} | nory {nory}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Vy {ent.Vy} | norx {norx} | nory {nory}" + Environment.NewLine);
                 //Console.WriteLine($"iscol {iscol}");
                 //Console.WriteLine($"Limit_col {Limit_col}");
                 //Console.WriteLine($"ent.Vx {ent.Vx}");
@@ -776,8 +776,8 @@ namespace Searchlo8
                 // ensure we are not inside the colision
                 ent.X += norx * (iscol - Limit_col);
                 ent.Y += nory * (iscol - Limit_col);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {ent.X} | norx {norx} | iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {ent.Y} | nory {nory} | iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {ent.X} | norx {norx} | iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {ent.Y} | nory {nory} | iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
             }
 
             if (ent.Vx < -1)
@@ -788,13 +788,13 @@ namespace Searchlo8
             // apply the motion
             ent.X += ent.Vx / Stepnb;
             ent.Y += ent.Vy / Stepnb;
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {ent.X} | ent.Vx {ent.Vx} | Stepnb {Stepnb}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {ent.Y} | ent.Vy {ent.Vy} | Stepnb {Stepnb}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {ent.X} | ent.Vx {ent.Vx} | Stepnb {Stepnb}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {ent.Y} | ent.Vy {ent.Vy} | Stepnb {Stepnb}" + Environment.NewLine);
             //Console.WriteLine(ent.Y);
 
             // if wheel is near the ground
             // we apply the wheel force
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol} | Limit_wheel {Limit_wheel}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol} | Limit_wheel {Limit_wheel}" + Environment.NewLine);
             if (iscol > Limit_wheel)
             {
                 // force direction
@@ -802,49 +802,49 @@ namespace Searchlo8
                 // surface normal
                 F32 perpx = nory;
                 F32 perpy = -norx;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {perpx} | nory {nory}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {perpy} | -norx {-norx}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {perpx} | nory {nory}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {perpy} | -norx {-norx}" + Environment.NewLine);
 
                 F32 angfac = F32.FromDouble(3.1415) * 8 * Str_wheel_size;
                 // transform wheel speed to force
                 F32 angrot = ent.Vrot * angfac;
                 F32 wantx = angrot * perpx;
                 F32 wanty = angrot * perpy;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angfac {angfac} | Str_wheel_size {Str_wheel_size}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angrot {angrot} | ent.Vrot {ent.Vrot} | angfac {angfac}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wantx {wantx} | angrot {angrot} | perpx {perpx}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wanty {wanty} | angrot {angrot} | perpy {perpy}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angfac {angfac} | Str_wheel_size {Str_wheel_size}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angrot {angrot} | ent.Vrot {ent.Vrot} | angfac {angfac}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wantx {wantx} | angrot {angrot} | perpx {perpx}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wanty {wanty} | angrot {angrot} | perpy {perpy}" + Environment.NewLine);
 
                 F32 distfactor = F32.FromDouble(1.0);  // Saturate((iscol - Limit_wheel)*1.0)
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"distfactor {distfactor}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"distfactor {distfactor}" + Environment.NewLine);
 
                 // interpolate between
                 // wheel motion
                 // and entity motion
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | wantx {wantx} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | wantx {wanty} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | wantx {wantx} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | wanty {wanty} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
                 F32 lerpx = Lerp(ent.Vx, wantx, Str_wheel * distfactor);
                 F32 lerpy = Lerp(ent.Vy, wanty, Str_wheel * distfactor);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpx {lerpx} | ent.Vx {ent.Vx} | wantx {wantx} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpy {lerpy} | ent.Vy {ent.Vy} | wantx {wanty} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpx {lerpx} | ent.Vx {ent.Vx} | wantx {wantx} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpy {lerpy} | ent.Vy {ent.Vy} | wanty {wanty} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
 
                 ent.Vx = lerpx;
                 ent.Vy = lerpy;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | lerpx {lerpx}" + Environment.NewLine);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | lerpy {lerpy}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | lerpx {lerpx}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | lerpy {lerpy}" + Environment.NewLine);
 
                 // get the wheel speed along the surface
                 F32 dotperp = (ent.Vx * perpx + ent.Vy * perpy);
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dotperp {dotperp} | ent.Vx {ent.Vx} | perpx {perpx} | ent.Vy {ent.Vy} | perpy {perpy}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dotperp {dotperp} | ent.Vx {ent.Vx} | perpx {perpx} | ent.Vy {ent.Vy} | perpy {perpy}" + Environment.NewLine);
 
                 // the new wheel rotation is
                 // the speed along the surface
                 ent.Vrot = dotperp / angfac;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vrot {ent.Vrot} | dotperp {dotperp} | angfac {angfac}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vrot {ent.Vrot} | dotperp {dotperp} | angfac {angfac}" + Environment.NewLine);
 
                 // the wheel touch the ground
                 ent.Isflying = false;
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Isflying {ent.Isflying}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Isflying {ent.Isflying}" + Environment.NewLine);
             }
         }
 
@@ -1084,11 +1084,11 @@ namespace Searchlo8
                 UpStartEntity(i);
             }
             //Console.WriteLine($"Timer {Timer}");
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {Timer}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {Timer}" + Environment.NewLine);
             for (int i = 0; i <= Stepnb - 1; i++)
             {
                 //Console.WriteLine($"physics loop {i}");
-                File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {i}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {i}" + Environment.NewLine);
                 // update links
                 UpLink(Link1);
 	    		// update wheels

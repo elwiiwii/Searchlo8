@@ -512,14 +512,14 @@ namespace Searchlo8
             int xFlr = F32.FloorToInt(x);
             int yFlr = F32.FloorToInt(y);
 
-            if (xFlr < 0 || yFlr < 0)
+            if (xFlr < 0 || yFlr < 0 || xFlr > 127 || yFlr > 127)
             {
                 return 0;
             }
 
-            char c = _cart.SpriteData[xFlr + (yFlr * 128)];
-
-            return Convert.ToInt32(c);
+            string c = $"0x{_cart.SpriteData[xFlr + (yFlr * 128)]}";
+            
+            return Convert.ToInt32(c, 16);
         }
 
 
