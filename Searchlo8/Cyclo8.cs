@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using FixMath;
+﻿using FixMath;
 
 namespace Searchlo8
 {
@@ -33,7 +30,7 @@ namespace Searchlo8
         private bool Dbg_checkfound;
         private int Dbg_curcheckcount;
         private int Dbg_lastcheckidx;
-        private readonly List<EntityClass> Entities;
+        public List<EntityClass> Entities;
         private F32 Flaganim;
         private F32 Goalcamx;
         private F32 Goalcamy;
@@ -46,14 +43,14 @@ namespace Searchlo8
         private readonly int Item_start;
         private readonly int Item_teleport;
         private int Itemnb;
-        private List<ItemClass> Items;
+        public List<ItemClass> Items;
         private F32 Last_check_x;
         private F32 Last_check_y;
         private readonly int Levelnb;
         private readonly List<LevelClass> Levels;
         private readonly F32 Limit_col;
         private readonly F32 Limit_wheel;
-        private readonly LinkClass Link1;
+        public LinkClass Link1;
         private int[] Pal;
         private readonly int Playeridx;
         private bool Restartafterfinish;
@@ -195,7 +192,7 @@ namespace Searchlo8
                 [11 + 16 * 3 - 1] = 15
             };
         }
-        
+
         // map zone structure.
         // level is made of several zones
         private class ZoneClass(int inStartx, int inStarty, int inSizex, int inSizey)
@@ -225,7 +222,7 @@ namespace Searchlo8
             public int Cammaxy = inCammaxy;
             public bool Startright = true;
         }
-		
+
         private static LevelClass LevelNew(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
         {
             return new LevelClass(inName, inZkill, inBacky, inCamminx, inCammaxx, inCamminy, inCammaxy);
@@ -254,7 +251,7 @@ namespace Searchlo8
             return new EntityClass(inx, iny);
         }
 
-        private class ItemClass(F32 inx, F32 iny, int inType)
+        public class ItemClass(F32 inx, F32 iny, int inType)
         {
             public F32 X = inx;
             public F32 Y = iny;
@@ -460,6 +457,7 @@ namespace Searchlo8
 	    // after a retry
 	    private void ResetPlayer()
         {
+            Isdead = true;
             Entities[Playeridx - 1].X = Last_check_x;
             Entities[Playeridx - 1].Y = Last_check_y;
             Entities[Playeridx - 1].Vx = F32.FromInt(0);

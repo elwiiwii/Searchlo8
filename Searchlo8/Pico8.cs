@@ -1,4 +1,5 @@
-﻿using FixMath;
+﻿using System.Xml.Linq;
+using FixMath;
 
 namespace Searchlo8
 {
@@ -6,7 +7,8 @@ namespace Searchlo8
     {
         #region globals
         private int _btnState;
-        public Cyclo8 _cart;
+        private Cyclo8 _cart;
+        private Cyclo8 _game;
         private Dictionary<string, int[]> _memory;
         #endregion
 
@@ -16,6 +18,12 @@ namespace Searchlo8
             _memory = [];
             _cart = new(this);
             LoadGame(_cart);
+        }
+
+        public Cyclo8 game
+        {
+            get => _game;
+            set => _game = value;
         }
 
         private static int[] DataToArray(string s, int n)
@@ -32,27 +40,27 @@ namespace Searchlo8
         public void LoadGame(Cyclo8 cart)
         {
             _cart = cart;
+            _game = _cart;
             _memory = new() {
-                { "sprites", DataToArray(_cart.SpriteData, 1) },
-                { "flags", DataToArray(_cart.FlagData, 2) },
-                { "map", DataToArray(_cart.MapData, 2) }
+                { "sprites", DataToArray(_game.SpriteData, 1) },
+                { "flags", DataToArray(_game.FlagData, 2) },
+                { "map", DataToArray(_game.MapData, 2) }
             };
-            _cart.Init();
-            _cart.LoadLevel(4);
+            _game.Init();
         }
 
-        private void Step()
+        public void Step()
         {
-            _cart.Update();
-            //_cart.Draw();
+            _game.Update();
+            //_game.Draw();
         }
 
-        private void SetInputs(int l = 0, int r = 0, int u = 0, int d = 0, int z = 0, int x = 0)
+        public void SetInputs(int l = 0, int r = 0, int u = 0, int d = 0, int z = 0, int x = 0)
         {
             SetBtnState(l * 1 + r * 2 + u * 4 + d * 8 + z * 16 + x * 32);
         }
 
-        private void SetBtnState(int state)
+        public void SetBtnState(int state)
         {
             _btnState = state;
         }

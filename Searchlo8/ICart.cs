@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Searchlo8
+﻿namespace Searchlo8
 {
     public interface ICart
     {
