@@ -7,11 +7,13 @@ namespace Searchlo8
     {
         private int[][] Solutions;
         private Pico8 p8;
+        int count;
 
         public Searchlo8()
         {
             Solutions = [] ;
             p8 = new();
+            count = 0;
         }
 
         private Cyclo8 InitState()
@@ -60,6 +62,18 @@ namespace Searchlo8
             return actions;
         }
 
+        private int Hcost(Cyclo8 state)
+        {
+            if (IsRip(state))
+            {
+                return int.MaxValue;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         private bool IsRip(Cyclo8 state)
         {
             return state.Isdead;
@@ -82,6 +96,8 @@ namespace Searchlo8
             p8.game.Link1 = state.Link1.DeepClone();
             p8.SetBtnState(action);
             p8.Step();
+            count += 1;
+            //Console.WriteLine($"{count}");
             return p8.game;
         }
 
@@ -96,7 +112,7 @@ namespace Searchlo8
             else
             {
                 bool optimal_depth = false;
-                if (depth > 0)
+                if (depth > 0 && Hcost(state) <= depth)
                 {
                     foreach (int action in GetActions())
                     {
