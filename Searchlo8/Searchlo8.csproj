@@ -8,20 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Include="bin\Debug\net9.0\FAudio.dll" />
-      <None Include="bin\Debug\net9.0\FNA3D.dll" />
-      <None Include="bin\Debug\net9.0\libtheorafile.dll" />
-      <None Include="bin\Debug\net9.0\SDL3.dll" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\..\..\FNA\FNA.Core.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Content\Graphics\" />
-      <Folder Include="Content\Music\" />
-      <Folder Include="Content\Sfx\" />
+      <Folder Include="bin\Debug\net9.0\" />
     </ItemGroup>
 
 </Project>
