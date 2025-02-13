@@ -9,13 +9,17 @@ namespace Searchlo8
         private int _btnState;
         private Cyclo8 _cart;
         private Cyclo8 _game;
-        private Dictionary<string, int[]> _memory;
+        private int[] _sprites;
+        private int[] _flags;
+        private int[] _map;
         #endregion
 
         public Pico8()
         {
             _btnState = 0;
-            _memory = [];
+            _sprites = [];
+            _flags = [];
+            _map = [];
             _cart = new(this);
             LoadGame(_cart);
         }
@@ -41,11 +45,9 @@ namespace Searchlo8
         {
             _cart = cart;
             _game = _cart;
-            _memory = new() {
-                { "sprites", DataToArray(_game.SpriteData, 1) },
-                { "flags", DataToArray(_game.FlagData, 2) },
-                { "map", DataToArray(_game.MapData, 2) }
-            };
+            _sprites = DataToArray(_game.SpriteData, 1);
+            _flags = DataToArray(_game.FlagData, 2);
+            _map = DataToArray(_game.MapData, 2);
             _game.Init();
         }
 
@@ -68,13 +70,13 @@ namespace Searchlo8
 
         public bool Btn(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btn
         {
-            return false;
+            return (_btnState & (int)Math.Pow(2, i)) != 0;
         }
 
 
         public bool Btnp(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btnp
         {
-            return false;
+            return (_btnState & (int)Math.Pow(2, i)) != 0;
         }
 
 
@@ -104,7 +106,7 @@ namespace Searchlo8
 
         public int Fget(int n) // https://pico-8.fandom.com/wiki/Fget
         {
-            return _memory["flags"][n];
+            return _flags[n];
         }
 
 
@@ -125,8 +127,7 @@ namespace Searchlo8
             int xFlr = Math.Abs(F32.FloorToInt(celx));
             int yFlr = Math.Abs(F32.FloorToInt(cely));
 
-            string s = $"0x{_cart.MapData.Substring(xFlr * 2 + (yFlr * 256), 2)}";
-            return Convert.ToInt32(s, 16);
+            return _map[xFlr + yFlr * 128];
         }
 
 
@@ -139,7 +140,7 @@ namespace Searchlo8
 
         public void Mset(int celx, int cely, int snum) // https://pico-8.fandom.com/wiki/Mset
         {
-            _memory["map"][celx + cely * 128] = snum;
+            _map[celx + cely * 128] = snum;
         }
 
 
@@ -208,9 +209,7 @@ namespace Searchlo8
                 return 0;
             }
 
-            string c = $"0x{_cart.SpriteData[xFlr + (yFlr * 128)]}";
-            
-            return Convert.ToInt32(c, 16);
+            return _sprites[xFlr + yFlr * 128];
         }
 
 
