@@ -85,8 +85,9 @@ namespace Searchlo8
         private double ExitHeuristic((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
         {
             //var endflag = state.Item3.Find(item => item.Type == 4);
+            //var player = state.Item1[0];
 
-            //return F32.FloorToInt(endflag.X) / 21;
+            //return Math.Abs(F32.FloorToInt((endflag.X + endflag.Y) - (player.X + player.Y))) / 150;
             return 0;
         }
 
@@ -105,8 +106,8 @@ namespace Searchlo8
             p8.game.Entities = state.Item1.DeepClone();
             p8.game.Link1 = state.Item2.DeepClone();
             p8.game.Items = state.Item3.DeepClone();
-            p8.game.Isdead = state.Item4.DeepClone();
-            p8.game.Isfinish = state.Item5.DeepClone();
+            p8.game.Isdead = state.Isdead.DeepClone();
+            p8.game.Isfinish = state.Isfinish.DeepClone();
             p8.SetBtnState(action);
             p8.Step();
             return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
@@ -142,36 +143,36 @@ namespace Searchlo8
 
         private bool DepthCheck(int depth)
         {
-            List<List<int>> keys = [];
-            foreach (List<int> key in _cache.Keys)
+            List<KeyValuePair<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)>> kvpairs = [];
+            foreach (var kvp in _cache)
             {
-                if (key.Count == depth)
+                if (kvp.Key.Count == depth)
                 {
-                    keys.Add(key);
+                    kvpairs.Add(kvp);
                 }
             }
-            Dictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> states = [];
-            foreach (List<int> key in keys)
+            ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> states = [];
+            Parallel.ForEach(kvpairs, kvp =>
             {
                 foreach (int action in GetActions())
                 {
-                    List<int> new_key = new(key);
-                    new_key.Add(action);
-                    states.Add(new_key, _cache[key]);
+                    List<int> new_kvp = new(kvp.Key) { action };
+                    states.TryAdd(new_kvp, kvp.Value);
                 }
-            }
+            });
             _cache = [];
-            Parallel.ForEach(states.Keys, index =>
+            Parallel.ForEach(states, state =>
             {
-                (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) curstate = Transition(states[index], index[^1]);
+                var (newKey, newValue) = state;
+                (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) curstate = Transition(newValue, newKey[^1]);
                 if (Hcost(curstate) <= depth)
                 {
-                    _cache.TryAdd(index, curstate);
+                    _cache.TryAdd(newKey, curstate);
                 }
                 if (curstate.Isfinish)
                 {
-                    Solutions.Append(index);
-                    Console.WriteLine($"  inputs: {index}\n  frames: {index.Count - 1}");
+                    Solutions.Append(newKey);
+                    Console.WriteLine($"  inputs: {newKey}\n  frames: {newKey.Count - 1}");
                 }
             });
             return true;

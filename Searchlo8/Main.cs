@@ -35,14 +35,14 @@ namespace Searchlo8
                 0b101001 - 41 - l + d + x
                 0b101010 - 42 - r + d + x
             */
-            int[] actions = [0b000101, 0b000010];
+            int[] actions = [0b000101, 0b000110];
             return actions;
         }
 
         static void Main(String[] args)
         {
             Search3 s = new();
-            List<List<int>> solutions = s.Search(130, true);
+            List<List<int>> solutions = s.Search(150, true);
 
             Console.WriteLine($"inputs: {s.InputsToEnglish(solutions[0])}");
         }
