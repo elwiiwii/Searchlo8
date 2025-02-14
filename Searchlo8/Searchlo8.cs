@@ -1,70 +1,70 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Force.DeepCloner;
 
 namespace Searchlo8
 {
     public class Searchlo8
     {
-        private int[][] Solutions;
+        private List<List<int>> Solutions;
         private Pico8 p8;
-        private int count;
-        private Dictionary<int[], (List<Cyclo8.EntityClass>, Cyclo8.LinkClass)> _cache;
+        private ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish)> _cache;
 
         public Searchlo8()
         {
             Solutions = [] ;
             p8 = new();
-            count = 0;
             _cache = [];
         }
 
-        private Cyclo8 InitState()
+        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) InitState()
         {
             p8.game.LoadLevel(3);
-            return p8.game;
+            return (p8.game.Entities, p8.game.Link1, p8.game.Isdead, p8.game.Isfinish);
         }
 
         public virtual int[] AllowableActions()
         {
             /*  button states
-                0x000000 - 0 - no input
-                0x000001 - 1 - l
-                0x000010 - 2 - r
-                0x000100 - 4 - u
-                0x001000 - 8 - d
-                0x010000 - 16 - z
-                0x100000 - 32 - x
-                0x000101 - 5 - l + u
-                0x000110 - 6 - r + u
-                0x001001 - 9 - l + d
-                0x001010 - 10 - r + d
-                0x010001 - 17 - l + z
-                0x010010 - 18 - r + z
-                0x010100 - 20 - u + z
-                0x011000 - 24 - d + z
-                0x100001 - 33 - l + x
-                0x100010 - 34 - r + x
-                0x100100 - 36 - u + x
-                0x101000 - 40 - d + x
-                0x010101 - 21 - l + u + z
-                0x010110 - 22 - r + u + z
-                0x011001 - 25 - l + d + z
-                0x011010 - 26 - r + d + z
-                0x100101 - 37 - l + u + x
-                0x100110 - 38 - r + u + x
-                0x101001 - 41 - l + d + x
-                0x101010 - 42 - r + d + x
+                0b000000 - 0 - no input
+                0b000001 - 1 - l
+                0b000010 - 2 - r
+                0b000100 - 4 - u
+                0b001000 - 8 - d
+                0b010000 - 16 - z
+                0b100000 - 32 - x
+                0b000101 - 5 - l + u
+                0b000110 - 6 - r + u
+                0b001001 - 9 - l + d
+                0b001010 - 10 - r + d
+                0b010001 - 17 - l + z
+                0b010010 - 18 - r + z
+                0b010100 - 20 - u + z
+                0b011000 - 24 - d + z
+                0b100001 - 33 - l + x
+                0b100010 - 34 - r + x
+                0b100100 - 36 - u + x
+                0b101000 - 40 - d + x
+                0b010101 - 21 - l + u + z
+                0b010110 - 22 - r + u + z
+                0b011001 - 25 - l + d + z
+                0b011010 - 26 - r + d + z
+                0b100101 - 37 - l + u + x
+                0b100110 - 38 - r + u + x
+                0b101001 - 41 - l + d + x
+                0b101010 - 42 - r + d + x
             */
-            int[] actions = [0x000000, 0x000001,0x000010,0x000100,0x001000,0x010000,0x100000,
-                            0x000101,0x000110,0x001001,0x001010,
-                            0x010001,0x010010,0x010100,0x011000,
-                            0x100001,0x100010,0x100100,0x101000,
-                            0x010101,0x010110,0x011001,0x011010,
-                            0x100101,0x100110,0x101001,0x101010];
+            int[] actions = [0b000000, 0b000001,0b000010,0b000100,0b001000,0b010000,0b100000,
+                            0b000101,0b000110,0b001001,0b001010,
+                            0b010001,0b010010,0b010100,0b011000,
+                            0b100001,0b100010,0b100100,0b101000,
+                            0b010101,0b010110,0b011001,0b011010,
+                            0b100101,0b100110,0b101001,0b101010];
             return actions;
         }
 
-        private int Hcost(Cyclo8 state)
+        private int Hcost((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state)
         {
             if (IsRip(state))
             {
@@ -76,12 +76,12 @@ namespace Searchlo8
             }
         }
 
-        private bool IsRip(Cyclo8 state)
+        private bool IsRip((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state)
         {
             return state.Isdead;
         }
 
-        private bool IsGoal(Cyclo8 state)
+        private bool IsGoal((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state)
         {
             return state.Isfinish;
         }
@@ -91,24 +91,23 @@ namespace Searchlo8
             return AllowableActions();
         }
 
-        private Cyclo8 Transition(Cyclo8 state, int action)
+        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) Transition((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state, int action)
         {
-            p8.game.Entities = state.Entities.DeepClone();
-            p8.game.Items = state.Items.DeepClone();
-            p8.game.Link1 = state.Link1.DeepClone();
+            p8.game.Entities = state.Item1.DeepClone();
+            p8.game.Link1 = state.Item2.DeepClone();
+            p8.game.Isdead = state.Item3.DeepClone();
+            p8.game.Isfinish = state.Item4.DeepClone();
             p8.SetBtnState(action);
             p8.Step();
-            count += 1;
-            //Console.WriteLine($"{count}");
-            return p8.game;
+            return (p8.game.Entities, p8.game.Link1, p8.game.Isdead, p8.game.Isfinish);
         }
 
-        private bool Iddfs(Cyclo8 state, int depth, int[] inputs)
+        private bool Iddfs((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state, int depth, List<int> inputs)
         {
             if (depth == 0 && IsGoal(state))
             {
-                Solutions.Append(inputs);
-                Console.WriteLine($"  inputs: {inputs}\n  frames: {inputs.Length - 1}");
+                Solutions.Add(inputs);
+                Console.WriteLine($"  inputs: {inputs}\n  frames: {inputs.Count - 1}");
                 return true;
             }
             else
@@ -118,8 +117,8 @@ namespace Searchlo8
                 {
                     foreach (int action in GetActions())
                     {
-                        Cyclo8 new_state = Transition(state, action);
-                        inputs.Append(action);
+                        (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) new_state = Transition(state, action);
+                        inputs.Add(action);
                         bool done = Iddfs(new_state, depth - 1, inputs);
                         if (done)
                         {
@@ -131,30 +130,55 @@ namespace Searchlo8
             }
         }
 
-        private bool Glorp(int depth)
+        private bool DepthCheck(int depth)
         {
-            var keys = _cache.Keys.Where(key => key.Length > depth);
-            List<(List<Cyclo8.EntityClass>, Cyclo8.LinkClass)> states = [];
-            foreach (var key in keys)
+            List<List<int>> keys = [];
+            foreach (List<int> key in _cache.Keys)
             {
-                states.Add(_cache[key]);
+                if (key.Count == depth)
+                {
+                    keys.Add(key);
+                }
             }
-            Parallel.For(0, states.Count * GetActions().Length, index =>
+            Dictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish)> states = [];
+            foreach (List<int> key in keys)
             {
-                //foreach ()
+                foreach (int action in GetActions())
+                {
+                    List<int> new_key = new(key);
+                    new_key.Add(action);
+                    states.Add(new_key, _cache[key]);
+                }
+            }
+            _cache = [];
+            Parallel.ForEach(states.Keys, index =>
+            {
+                (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) curstate = Transition(states[index], index[^1]);
+                if (!curstate.Isdead)
+                {
+                    _cache.TryAdd(index, curstate);
+                }
+                if (curstate.Isfinish)
+                {
+                    Solutions.Append(index);
+                    Console.WriteLine($"  inputs: {index}\n  frames: {index.Count - 1}");
+                }
             });
+            return true;
         }
 
-        public int[][] Search(int max_depth, bool complete = false)
+        public List<List<int>> Search(int max_depth, bool complete = false)
         {
             Solutions = [];
             DateTime timer = DateTime.Now;
-            Cyclo8 state = InitState();
+            (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state = InitState();
+            _cache.TryAdd([0], state);
             Console.WriteLine("searching...");
             for (int i = 1; i <= max_depth; i++)
             {
                 Console.WriteLine($"depth {i}...");
-                bool done = Iddfs(state, i, []) && !complete;
+                //bool done = Iddfs(state, i, []) && !complete;
+                bool done = DepthCheck(i) && !complete;
                 Console.WriteLine($" elapsed time: {DateTime.Now - timer} [s]");
                 if (done)
                 {
@@ -164,7 +188,7 @@ namespace Searchlo8
             return Solutions;
         }
 
-        public string InputsToEnglish(int[] inputs)
+        public string InputsToEnglish(List<int> inputs)
         {
             Dictionary<int, string> action_dict = new()
             {
