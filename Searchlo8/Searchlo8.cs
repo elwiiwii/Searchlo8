@@ -7,13 +7,15 @@ namespace Searchlo8
     {
         private int[][] Solutions;
         private Pico8 p8;
-        int count;
+        private int count;
+        private Dictionary<int[], (List<Cyclo8.EntityClass>, Cyclo8.LinkClass)> _cache;
 
         public Searchlo8()
         {
             Solutions = [] ;
             p8 = new();
             count = 0;
+            _cache = [];
         }
 
         private Cyclo8 InitState()
@@ -127,6 +129,20 @@ namespace Searchlo8
                 }
                 return optimal_depth;
             }
+        }
+
+        private bool Glorp(int depth)
+        {
+            var keys = _cache.Keys.Where(key => key.Length > depth);
+            List<(List<Cyclo8.EntityClass>, Cyclo8.LinkClass)> states = [];
+            foreach (var key in keys)
+            {
+                states.Add(_cache[key]);
+            }
+            Parallel.For(0, states.Count * GetActions().Length, index =>
+            {
+                //foreach ()
+            });
         }
 
         public int[][] Search(int max_depth, bool complete = false)
