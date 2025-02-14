@@ -43,7 +43,7 @@ namespace Searchlo8
         private readonly int Item_start;
         private readonly int Item_teleport;
         private int Itemnb;
-        private List<ItemClass> Items;
+        public List<ItemClass> Items;
         private F32 Last_check_x;
         private F32 Last_check_y;
         private readonly int Levelnb;

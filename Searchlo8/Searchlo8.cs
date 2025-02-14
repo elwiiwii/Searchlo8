@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Force.DeepCloner;
+using FixMath;
 
 namespace Searchlo8
 {
@@ -9,7 +10,7 @@ namespace Searchlo8
     {
         private List<List<int>> Solutions;
         private Pico8 p8;
-        private ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish)> _cache;
+        private ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> _cache;
 
         public Searchlo8()
         {
@@ -18,10 +19,10 @@ namespace Searchlo8
             _cache = [];
         }
 
-        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) InitState()
+        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) InitState()
         {
             p8.game.LoadLevel(3);
-            return (p8.game.Entities, p8.game.Link1, p8.game.Isdead, p8.game.Isfinish);
+            return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         }
 
         public virtual int[] AllowableActions()
@@ -64,7 +65,7 @@ namespace Searchlo8
             return actions;
         }
 
-        private int Hcost((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state)
+        private double Hcost((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
         {
             if (IsRip(state))
             {
@@ -72,16 +73,24 @@ namespace Searchlo8
             }
             else
             {
-                return 0;
+                return ExitHeuristic(state);
             }
         }
 
-        private bool IsRip((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state)
+        private bool IsRip((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
         {
             return state.Isdead;
         }
 
-        private bool IsGoal((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state)
+        private double ExitHeuristic((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
+        {
+            //var endflag = state.Item3.Find(item => item.Type == 4);
+
+            //return F32.FloorToInt(endflag.X) / 21;
+            return 0;
+        }
+
+        private bool IsGoal((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
         {
             return state.Isfinish;
         }
@@ -91,18 +100,19 @@ namespace Searchlo8
             return AllowableActions();
         }
 
-        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) Transition((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state, int action)
+        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) Transition((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int action)
         {
             p8.game.Entities = state.Item1.DeepClone();
             p8.game.Link1 = state.Item2.DeepClone();
-            p8.game.Isdead = state.Item3.DeepClone();
-            p8.game.Isfinish = state.Item4.DeepClone();
+            p8.game.Items = state.Item3.DeepClone();
+            p8.game.Isdead = state.Item4.DeepClone();
+            p8.game.Isfinish = state.Item5.DeepClone();
             p8.SetBtnState(action);
             p8.Step();
-            return (p8.game.Entities, p8.game.Link1, p8.game.Isdead, p8.game.Isfinish);
+            return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         }
 
-        private bool Iddfs((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state, int depth, List<int> inputs)
+        private bool Iddfs((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int depth, List<int> inputs)
         {
             if (depth == 0 && IsGoal(state))
             {
@@ -117,7 +127,7 @@ namespace Searchlo8
                 {
                     foreach (int action in GetActions())
                     {
-                        (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) new_state = Transition(state, action);
+                        (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) new_state = Transition(state, action);
                         inputs.Add(action);
                         bool done = Iddfs(new_state, depth - 1, inputs);
                         if (done)
@@ -140,7 +150,7 @@ namespace Searchlo8
                     keys.Add(key);
                 }
             }
-            Dictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish)> states = [];
+            Dictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> states = [];
             foreach (List<int> key in keys)
             {
                 foreach (int action in GetActions())
@@ -153,8 +163,8 @@ namespace Searchlo8
             _cache = [];
             Parallel.ForEach(states.Keys, index =>
             {
-                (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) curstate = Transition(states[index], index[^1]);
-                if (!curstate.Isdead)
+                (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) curstate = Transition(states[index], index[^1]);
+                if (Hcost(curstate) <= depth)
                 {
                     _cache.TryAdd(index, curstate);
                 }
@@ -171,7 +181,7 @@ namespace Searchlo8
         {
             Solutions = [];
             DateTime timer = DateTime.Now;
-            (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, bool Isdead, bool Isfinish) state = InitState();
+            (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state = InitState();
             _cache.TryAdd([0], state);
             Console.WriteLine("searching...");
             for (int i = 1; i <= max_depth; i++)
