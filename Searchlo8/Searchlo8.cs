@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Force.DeepCloner;
 using FixMath;
+using System.Drawing;
 
 namespace Searchlo8
 {
@@ -239,6 +240,85 @@ namespace Searchlo8
                 s.Concat($", {action_dict[i]}");
             }
             return s;
+        }
+
+        private Color[] colors =
+        [
+            ColorTranslator.FromHtml("#000000"), // 00 black
+            ColorTranslator.FromHtml("#1D2B53"), // 01 dark-blue
+            ColorTranslator.FromHtml("#7E2553"), // 02 dark-purple
+            ColorTranslator.FromHtml("#008751"), // 03 dark-green
+            ColorTranslator.FromHtml("#AB5236"), // 04 brown
+            ColorTranslator.FromHtml("#5F574F"), // 05 dark-grey
+            ColorTranslator.FromHtml("#C2C3C7"), // 06 light-grey
+            ColorTranslator.FromHtml("#FFF1E8"), // 07 white
+            ColorTranslator.FromHtml("#FF004D"), // 08 red
+            ColorTranslator.FromHtml("#FFA300"), // 09 orange
+            ColorTranslator.FromHtml("#FFEC27"), // 10 yellow
+            ColorTranslator.FromHtml("#00E436"), // 11 green
+            ColorTranslator.FromHtml("#29ADFF"), // 12 blue
+            ColorTranslator.FromHtml("#83769C"), // 13 lavender
+            ColorTranslator.FromHtml("#FF77A8"), // 14 pink
+            ColorTranslator.FromHtml("#FFCCAA"), // 15 light-peach
+            
+            /*
+            ColorTranslator.FromHtml("#291814"), // 16 brownish-black
+            ColorTranslator.FromHtml("#111D35"), // 17 darker-blue
+            ColorTranslator.FromHtml("#422136"), // 18 darker-purple
+            ColorTranslator.FromHtml("#125359"), // 19 blue-green
+            ColorTranslator.FromHtml("#742F29"), // 20 dark-brown
+            ColorTranslator.FromHtml("#49333B"), // 21 darker-grey
+            ColorTranslator.FromHtml("#A28879"), // 22 medium-grey
+            ColorTranslator.FromHtml("#F3EF7D"), // 23 light-yellow
+            ColorTranslator.FromHtml("#BE1250"), // 24 dark-red
+            ColorTranslator.FromHtml("#FF6C24"), // 25 dark-orange
+            ColorTranslator.FromHtml("#A8E72E"), // 26 lime-green
+            ColorTranslator.FromHtml("#00B543"), // 27 medium-green
+            ColorTranslator.FromHtml("#065AB5"), // 28 true-blue
+            ColorTranslator.FromHtml("#754665"), // 29 mauve
+            ColorTranslator.FromHtml("#FF6E59"), // 30 dark-peach
+            ColorTranslator.FromHtml("#FF9D81"), // 31 peach
+            */
+        ];
+
+
+
+        public void CreateLevelImage(int lvl)
+        {
+            int minx = int.MaxValue;
+            int maxx = 0;
+            int miny = int.MaxValue;
+            int maxy = 0;
+            foreach (var zone in p8.game.Levels[lvl - 1].Zones)
+            {
+                if (zone != null)
+                {
+                    if (zone.Startx < minx) { minx = zone.Startx; }
+                    if (zone.Startx + zone.Sizex > maxx) { maxx = zone.Startx + zone.Sizex; }
+                    if (zone.Starty < miny) { miny = zone.Starty; }
+                    if (zone.Starty + zone.Sizey > maxy) { maxy = zone.Starty + zone.Sizey; }
+                }
+            }
+
+            Bitmap new_image = new((maxx - minx) * 8, (maxy - miny) * 8);
+            for (int i = 0; i < maxx - minx; i++)
+            {
+                for (int j = 0; j < maxy - miny; j++)
+                {
+                    int snum = p8.Mget(F32.FromInt(minx + i), F32.FromInt(miny + j));
+                    for (int k = 0; k < 8; k++)
+                    {
+                        for (int l = 0; l < 8; l++)
+                        {
+                            int sx = (snum * 8) % 128;
+                            int sy = snum / 16;
+                            var col = p8.Sget(F32.FromInt(sx) + k, F32.FromInt(sy * 8) + l);
+                            new_image.SetPixel(i * 8 + k, j * 8 + l, colors[col]);
+                        }
+                    }
+                }
+            }
+            new_image.Save($"lvl{lvl}.png");
         }
 
     }

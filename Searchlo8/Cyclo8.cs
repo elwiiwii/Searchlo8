@@ -47,7 +47,7 @@ namespace Searchlo8
         private F32 Last_check_x;
         private F32 Last_check_y;
         private readonly int Levelnb;
-        private readonly List<LevelClass> Levels;
+        public readonly List<LevelClass> Levels;
         private readonly F32 Limit_col;
         private readonly F32 Limit_wheel;
         public LinkClass Link1;
@@ -195,7 +195,7 @@ namespace Searchlo8
 
         // map zone structure.
         // level is made of several zones
-        private class ZoneClass(int inStartx, int inStarty, int inSizex, int inSizey)
+        public class ZoneClass(int inStartx, int inStarty, int inSizex, int inSizey)
         {
             public int Startx = inStartx;
             public int Starty = inStarty;
@@ -209,7 +209,7 @@ namespace Searchlo8
         }
 
         // level structure
-        private class LevelClass(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
+        public class LevelClass(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
         {
             public string Name = inName;
             public List<ZoneClass> Zones = new(new ZoneClass[2]);
