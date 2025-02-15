@@ -42,10 +42,9 @@ namespace Searchlo8
         static void Main(String[] args)
         {
             Search3 s = new();
-            s.CreateLevelImage(1);
-            //List<List<int>> solutions = s.Search(200, true);
-            //
-            //Console.WriteLine($"inputs: {s.InputsToEnglish(solutions[0])}");
+            List<List<int>> solutions = s.Search(200, true);
+            
+            Console.WriteLine($"inputs: {s.InputsToEnglish(solutions[0])}");
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using Force.DeepCloner;
 using FixMath;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace Searchlo8
 {
@@ -15,11 +17,36 @@ namespace Searchlo8
         private List<List<int>> Solutions;
         private Cyclo8.ItemClass startflag;
 
+        private byte[] _pathImageData;
+        private int _pathImageStride;
+        private PixelFormat _pathImagePixelFormat;
+        private int _pathImageWidth;
+        private int _pathImageHeight;
+
         public Searchlo8()
         {
             _cache = [];
             p8 = new();
+            InitPathImage();
             Solutions = [] ;
+        }
+
+        private void InitPathImage()
+        {
+            using (var pathImage = new Bitmap("Paths/lvl3route1.bmp"))
+            {
+                _pathImageWidth = pathImage.Width;
+                _pathImageHeight = pathImage.Height;
+                var rect = new Rectangle(0, 0, pathImage.Width, pathImage.Height);
+                var bitmapData = pathImage.LockBits(rect, ImageLockMode.ReadOnly, pathImage.PixelFormat);
+
+                _pathImageStride = bitmapData.Stride;
+                _pathImagePixelFormat = pathImage.PixelFormat;
+                _pathImageData = new byte[bitmapData.Stride * pathImage.Height];
+
+                Marshal.Copy(bitmapData.Scan0, _pathImageData, 0, _pathImageData.Length);
+                pathImage.UnlockBits(bitmapData);
+            }
         }
 
         private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) InitState()
@@ -78,7 +105,7 @@ namespace Searchlo8
             }
             else
             {
-                return ExitHeuristic(state, depth, maxdepth);
+                return PathFromImage(state.Item1, 3, Color.FromArgb(0, 0, 255, 0));
             }
         }
 
@@ -153,11 +180,17 @@ namespace Searchlo8
                 }
             });
             Console.WriteLine(_cache.Count);
-            if (depth > 65 && _cache.Count > 500000)
+            if (_cache.Count > 2000000)
             {
-                var sorted = _cache.OrderByDescending(kvp => kvp.Value.Item1[0].Y).ToList();
+                var sorted = _cache
+                .OrderBy(kvp =>
+                {
+                    var point = kvp.Value.Item1[0];
+                    return F32.Abs(point.X - endflag.X) + F32.Abs(point.Y - endflag.Y);
+                })
+                .ToList();
                 var entries = _cache.Count;
-                var keep = 500000; //(int)Math.Ceiling(entries * 0.5);
+                var keep = 2000000; //(int)Math.Ceiling(entries * 0.5);
 
                 _cache = [];
                 foreach (var entry in sorted.Take(keep))
@@ -165,18 +198,7 @@ namespace Searchlo8
                     _cache.TryAdd(entry.Key, entry.Value);
                 }
             }
-            else if (depth > 10 && _cache.Count > 500000)
-            {
-                var sorted = _cache.OrderByDescending(kvp => kvp.Value.Item1[0].X).ToList();
-                var entries = _cache.Count;
-                var keep = 500000; // (int)Math.Ceiling(entries * 0.5);
-
-                _cache = [];
-                foreach (var entry in sorted.Take(keep))
-                {
-                    _cache.TryAdd(entry.Key, entry.Value);
-                }
-            }
+            
             return true;
         }
 
@@ -281,7 +303,33 @@ namespace Searchlo8
             */
         ];
 
+        private bool PathFromImage(List<Cyclo8.EntityClass> state, int lvl, Color color)
+        {
+            int iX = F32.FloorToInt(F32.Min(state[0].X, state[1].X) + (F32.Max(state[0].X, state[1].X) - F32.Min(state[0].X, state[1].X)) / 2);
+            int iY = F32.FloorToInt(F32.Min(state[0].Y, state[1].Y) + (F32.Max(state[0].Y, state[1].Y) - F32.Min(state[0].Y, state[1].Y)) / 2);
+            var iLevel = p8.game.Levels[lvl - 1];
+            int startx = iLevel.Zones[0].Startx;
+            int starty = iLevel.Zones[0].Starty;
+            iX -= startx * 8;
+            iY -= starty * 8;
 
+            if (iX < 0 || iX >= _pathImageWidth || iY < 0 || iY >= _pathImageHeight)
+            {
+                return false;
+            }
+
+            // Get color from the byte array (assuming 32bppArgb format)
+            int index = iY * _pathImageStride + iX * 4; // 4 bytes per pixel (BGRA)
+            byte b = _pathImageData[index];
+            byte g = _pathImageData[index + 1];
+            byte r = _pathImageData[index + 2];
+            byte a = _pathImageData[index + 3];
+
+            Color pixelColor = Color.FromArgb(a, r, g, b);
+            Color targetColor = color;
+
+            return pixelColor == targetColor;
+        }
 
         public void CreateLevelImage(int lvl)
         {
