@@ -8,20 +8,24 @@ namespace Searchlo8
 {
     public class Searchlo8
     {
-        private List<List<int>> Solutions;
-        private Pico8 p8;
         private ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> _cache;
+        private Cyclo8.ItemClass endflag;
+        private Pico8 p8;
+        private List<List<int>> Solutions;
+        private Cyclo8.ItemClass startflag;
 
         public Searchlo8()
         {
-            Solutions = [] ;
-            p8 = new();
             _cache = [];
+            p8 = new();
+            Solutions = [] ;
         }
 
         private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) InitState()
         {
             p8.game.LoadLevel(3);
+            startflag = p8.game.Items.Find(item => item.Type == 3);
+            endflag = p8.game.Items.Find(item => item.Type == 4);
             return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         }
 
@@ -65,15 +69,15 @@ namespace Searchlo8
             return actions;
         }
 
-        private double Hcost((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
+        private bool Hcost((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int depth, int maxdepth)
         {
             if (IsRip(state))
             {
-                return int.MaxValue;
+                return false;
             }
             else
             {
-                return ExitHeuristic(state);
+                return ExitHeuristic(state, depth, maxdepth);
             }
         }
 
@@ -82,13 +86,13 @@ namespace Searchlo8
             return state.Isdead;
         }
 
-        private double ExitHeuristic((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
+        private bool ExitHeuristic((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int depth, int maxdepth)
         {
-            //var endflag = state.Item3.Find(item => item.Type == 4);
-            //var player = state.Item1[0];
-
-            //return Math.Abs(F32.FloorToInt((endflag.X + endflag.Y) - (player.X + player.Y))) / 150;
-            return 0;
+            var lvlrange = endflag.Y - startflag.Y;
+            
+            var playerpercentage = (state.Item1[0].Y - startflag.Y) / lvlrange * 100;
+            var depthpercentage = Math.Max(depth - 65, 0) / maxdepth * 100;
+            return playerpercentage + 10 >= depthpercentage;
         }
 
         private bool IsGoal((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
@@ -113,35 +117,7 @@ namespace Searchlo8
             return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         }
 
-        private bool Iddfs((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int depth, List<int> inputs)
-        {
-            if (depth == 0 && IsGoal(state))
-            {
-                Solutions.Add(inputs);
-                Console.WriteLine($"  inputs: {inputs}\n  frames: {inputs.Count - 1}");
-                return true;
-            }
-            else
-            {
-                bool optimal_depth = false;
-                if (depth > 0 && Hcost(state) <= depth)
-                {
-                    foreach (int action in GetActions())
-                    {
-                        (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) new_state = Transition(state, action);
-                        inputs.Add(action);
-                        bool done = Iddfs(new_state, depth - 1, inputs);
-                        if (done)
-                        {
-                            optimal_depth = true;
-                        }
-                    }
-                }
-                return optimal_depth;
-            }
-        }
-
-        private bool DepthCheck(int depth)
+        private bool DepthCheck(int depth, int maxdepth)
         {
             List<KeyValuePair<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)>> kvpairs = [];
             foreach (var kvp in _cache)
@@ -165,16 +141,41 @@ namespace Searchlo8
             {
                 var (newKey, newValue) = state;
                 (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) curstate = Transition(newValue, newKey[^1]);
-                if (Hcost(curstate) <= depth)
+                if (Hcost(curstate, depth, maxdepth))
                 {
                     _cache.TryAdd(newKey, curstate);
                 }
-                if (curstate.Isfinish)
+                if (IsGoal(curstate))
                 {
-                    Solutions.Append(newKey);
+                    Solutions.Add(newKey);
                     Console.WriteLine($"  inputs: {newKey}\n  frames: {newKey.Count - 1}");
                 }
             });
+            Console.WriteLine(_cache.Count);
+            if (depth > 65 && _cache.Count > 500000)
+            {
+                var sorted = _cache.OrderByDescending(kvp => kvp.Value.Item1[0].Y).ToList();
+                var entries = _cache.Count;
+                var keep = 500000; //(int)Math.Ceiling(entries * 0.5);
+
+                _cache = [];
+                foreach (var entry in sorted.Take(keep))
+                {
+                    _cache.TryAdd(entry.Key, entry.Value);
+                }
+            }
+            else if (depth > 10 && _cache.Count > 500000)
+            {
+                var sorted = _cache.OrderByDescending(kvp => kvp.Value.Item1[0].X).ToList();
+                var entries = _cache.Count;
+                var keep = 500000; // (int)Math.Ceiling(entries * 0.5);
+
+                _cache = [];
+                foreach (var entry in sorted.Take(keep))
+                {
+                    _cache.TryAdd(entry.Key, entry.Value);
+                }
+            }
             return true;
         }
 
@@ -189,7 +190,7 @@ namespace Searchlo8
             {
                 Console.WriteLine($"depth {i}...");
                 //bool done = Iddfs(state, i, []) && !complete;
-                bool done = DepthCheck(i) && !complete;
+                bool done = DepthCheck(i, max_depth) && !complete;
                 Console.WriteLine($" elapsed time: {DateTime.Now - timer} [s]");
                 if (done)
                 {
