@@ -33,7 +33,7 @@ namespace Searchlo8
 
         private void InitPathImage()
         {
-            using (var pathImage = new Bitmap("Paths/lvl3route1.bmp"))
+            using (var pathImage = new Bitmap("Paths/lvl3route2.bmp"))
             {
                 _pathImageWidth = pathImage.Width;
                 _pathImageHeight = pathImage.Height;
@@ -105,7 +105,7 @@ namespace Searchlo8
             }
             else
             {
-                return PathFromImage(state.Item1, 3, Color.FromArgb(0, 0, 255, 0));
+                return PathFromImage(state.Item1, 3, Color.FromArgb(0, 0, 255, 0), 2);
             }
         }
 
@@ -180,7 +180,7 @@ namespace Searchlo8
                 }
             });
             Console.WriteLine(_cache.Count);
-            if (_cache.Count > 2000000)
+            if (_cache.Count > 1000000)
             {
                 var sorted = _cache
                 .OrderBy(kvp =>
@@ -189,8 +189,11 @@ namespace Searchlo8
                     return F32.Abs(point.X - endflag.X) + F32.Abs(point.Y - endflag.Y);
                 })
                 .ToList();
+                Console.WriteLine(sorted[0].Value.Item1[0].X);
+                Console.WriteLine(sorted[0].Value.Item1[0].Y);
+                Console.WriteLine(sorted[0].Value.Item1[0].Isflying);
                 var entries = _cache.Count;
-                var keep = 2000000; //(int)Math.Ceiling(entries * 0.5);
+                var keep = 1000000; //(int)Math.Ceiling(entries * 0.5);
 
                 _cache = [];
                 foreach (var entry in sorted.Take(keep))
@@ -303,7 +306,7 @@ namespace Searchlo8
             */
         ];
 
-        private bool PathFromImage(List<Cyclo8.EntityClass> state, int lvl, Color color)
+        private bool PathFromImage(List<Cyclo8.EntityClass> state, int lvl, Color color, int extralayers = 0)
         {
             int iX = F32.FloorToInt(F32.Min(state[0].X, state[1].X) + (F32.Max(state[0].X, state[1].X) - F32.Min(state[0].X, state[1].X)) / 2);
             int iY = F32.FloorToInt(F32.Min(state[0].Y, state[1].Y) + (F32.Max(state[0].Y, state[1].Y) - F32.Min(state[0].Y, state[1].Y)) / 2);
@@ -312,6 +315,7 @@ namespace Searchlo8
             int starty = iLevel.Zones[0].Starty;
             iX -= startx * 8;
             iY -= starty * 8;
+            iY += extralayers * 8;
 
             if (iX < 0 || iX >= _pathImageWidth || iY < 0 || iY >= _pathImageHeight)
             {
@@ -331,7 +335,7 @@ namespace Searchlo8
             return pixelColor == targetColor;
         }
 
-        public void CreateLevelImage(int lvl)
+        public void CreateLevelImage(int lvl, int extralayers = 0)
         {
             int minx = int.MaxValue;
             int maxx = 0;
@@ -348,12 +352,16 @@ namespace Searchlo8
                 }
             }
 
-            Bitmap new_image = new((maxx - minx) * 8, (maxy - miny) * 8);
+            Bitmap new_image = new((maxx - minx) * 8, (maxy - miny + extralayers) * 8);
             for (int i = 0; i < maxx - minx; i++)
             {
-                for (int j = 0; j < maxy - miny; j++)
+                for (int j = 0; j < maxy - miny + extralayers; j++)
                 {
-                    int snum = p8.Mget(F32.FromInt(minx + i), F32.FromInt(miny + j));
+                    int snum = 0;
+                    if (j > 1)
+                    {
+                        snum = p8.Mget(F32.FromInt(minx + i), F32.FromInt(miny + j - extralayers));
+                    }
                     for (int k = 0; k < 8; k++)
                     {
                         for (int l = 0; l < 8; l++)
@@ -366,7 +374,7 @@ namespace Searchlo8
                     }
                 }
             }
-            new_image.Save($"lvl{lvl}.png");
+            new_image.Save($"lvl{lvl}.bmp");
         }
 
     }

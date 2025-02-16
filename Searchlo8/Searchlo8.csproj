@@ -9,10 +9,14 @@
 
     <ItemGroup>
       <None Remove="Paths\lvl3route1.bmp" />
+      <None Remove="Paths\lvl3route2.bmp" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="Paths\lvl3route1.bmp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Paths\lvl3route2.bmp">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
