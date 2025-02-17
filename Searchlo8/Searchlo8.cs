@@ -33,7 +33,7 @@ namespace Searchlo8
 
         private void InitPathImage()
         {
-            using (var pathImage = new Bitmap("Paths/lvl3route2.bmp"))
+            using (var pathImage = new Bitmap("Paths/lvl3route3.bmp"))
             {
                 _pathImageWidth = pathImage.Width;
                 _pathImageHeight = pathImage.Height;
@@ -358,7 +358,7 @@ namespace Searchlo8
                 for (int j = 0; j < maxy - miny + extralayers; j++)
                 {
                     int snum = 0;
-                    if (j > 1)
+                    if (j > extralayers - 1)
                     {
                         snum = p8.Mget(F32.FromInt(minx + i), F32.FromInt(miny + j - extralayers));
                     }
@@ -375,6 +375,27 @@ namespace Searchlo8
                 }
             }
             new_image.Save($"lvl{lvl}.bmp");
+        }
+
+        private Dictionary<(int, int), ((double, double), (double, double))> Checkpoints = new()
+        {
+            { (15, 70), ((145, 25), (154, 48)) },
+            { (80, 110), ((122, 88), (139, 110)) },
+            { (120, 160), ((207, 133), (207, 133)) },
+        };
+
+        private void ArchiveOrCull(int depth)
+        {
+            int curcheck = 0;
+            var checks = Checkpoints.ToList();
+            if (depth < checks[curcheck].Key.Item1)
+            {
+
+            }
+            else if (depth > checks[curcheck].Key.Item1 && depth < checks[curcheck].Key.Item2)
+            {
+
+            }
         }
 
     }
