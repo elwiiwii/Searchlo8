@@ -377,25 +377,41 @@ namespace Searchlo8
             new_image.Save($"lvl{lvl}.bmp");
         }
 
-        private Dictionary<(int, int), ((double, double), (double, double))> Checkpoints = new()
+        private Dictionary<(int, int), ((int, int), (int, int))> Checkpoints = new()
         {
-            { (15, 70), ((145, 25), (154, 48)) },
+            { (15, 78), ((145, 25), (154, 48)) },
             { (80, 110), ((122, 88), (139, 110)) },
             { (120, 160), ((207, 133), (207, 133)) },
         };
 
-        private void ArchiveOrCull(int depth)
+        private bool ArchiveOrCull(int depth, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
         {
             int curcheck = 0;
             var checks = Checkpoints.ToList();
+            (int, int) checkpointcenter = (Math.Abs(checks[curcheck].Value.Item1.Item1 - checks[curcheck].Value.Item1.Item2), Math.Abs(checks[curcheck].Value.Item2.Item1 - checks[curcheck].Value.Item2.Item2));
             if (depth < checks[curcheck].Key.Item1)
             {
-
+                return true;
             }
-            else if (depth > checks[curcheck].Key.Item1 && depth < checks[curcheck].Key.Item2)
+            else if (depth >= checks[curcheck].Key.Item1 && depth <= checks[curcheck].Key.Item2)
             {
-
+                bool wall_contact = false;
+                foreach (var entity in state.Item1)
+                {
+                    if (!entity.Isflying)
+                    {
+                        wall_contact = true;
+                    }
+                }
+                if (wall_contact)
+                {
+                    if (F32.Abs(state.Item1[0].Y - state.Item1[1].Y) < 10)
+                    {
+                        return true;
+                    }
+                }
             }
+            return false;
         }
 
     }

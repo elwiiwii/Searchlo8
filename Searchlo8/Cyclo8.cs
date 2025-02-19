@@ -44,8 +44,8 @@ namespace Searchlo8
         private readonly int Item_teleport;
         private int Itemnb;
         public List<ItemClass> Items;
-        private F32 Last_check_x;
-        private F32 Last_check_y;
+        public F32 Last_check_x;
+        public F32 Last_check_y;
         private readonly int Levelnb;
         public readonly List<LevelClass> Levels;
         private readonly F32 Limit_col;
