@@ -32,6 +32,7 @@ namespace Searchlo8
                     entity.Linkside} | ";
             }
 
+
             return str;
         }
     }
