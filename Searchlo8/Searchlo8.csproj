@@ -11,6 +11,7 @@
       <None Remove="Paths\lvl3route1.bmp" />
       <None Remove="Paths\lvl3route2.bmp" />
       <None Remove="Paths\lvl3route3.bmp" />
+      <None Remove="Paths\lvl3route4.bmp" />
     </ItemGroup>
 
     <ItemGroup>
@@ -21,6 +22,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="Paths\lvl3route3.bmp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Paths\lvl3route4.bmp">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

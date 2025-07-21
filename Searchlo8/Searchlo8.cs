@@ -6,12 +6,13 @@ using FixMath;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace Searchlo8
 {
     public class Searchlo8
     {
-        private ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> _cache;
+        private ConcurrentDictionary<List<int>, GameState> _cache;
         private Cyclo8.ItemClass endflag;
         private Pico8 p8;
         private List<List<int>> Solutions;
@@ -33,7 +34,7 @@ namespace Searchlo8
 
         private void InitPathImage()
         {
-            using (var pathImage = new Bitmap("Paths/lvl3route3.bmp"))
+            using (var pathImage = new Bitmap("Paths/lvl3route4.bmp"))
             {
                 _pathImageWidth = pathImage.Width;
                 _pathImageHeight = pathImage.Height;
@@ -49,12 +50,12 @@ namespace Searchlo8
             }
         }
 
-        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) InitState()
+        private GameState InitState()
         {
             p8.game.LoadLevel(3);
             startflag = p8.game.Items.Find(item => item.Type == 3);
             endflag = p8.game.Items.Find(item => item.Type == 4);
-            return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+            return new GameState(p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         }
 
         public virtual int[] AllowableActions()
@@ -97,7 +98,7 @@ namespace Searchlo8
             return actions;
         }
 
-        private bool Hcost((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int depth, int maxdepth)
+        private bool Hcost(GameState state, int depth, int maxdepth)
         {
             if (IsRip(state))
             {
@@ -105,27 +106,27 @@ namespace Searchlo8
             }
             else
             {
-                return PathFromImage(state.Item1, 3, Color.FromArgb(0, 0, 255, 0), 2);
+                return PathFromImage(state.Entities, 3, Color.FromArgb(0, 0, 255, 0), 2);
             }
         }
 
-        private bool IsRip((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
+        private bool IsRip(GameState state)
         {
-            return state.Isdead;
+            return state.IsDead;
         }
 
-        private bool ExitHeuristic((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int depth, int maxdepth)
+        private bool ExitHeuristic(GameState state, int depth, int maxdepth)
         {
             var lvlrange = endflag.Y - startflag.Y;
             
-            var playerpercentage = (state.Item1[0].Y - startflag.Y) / lvlrange * 100;
+            var playerpercentage = (state.Entities[0].Y - startflag.Y) / lvlrange * 100;
             var depthpercentage = Math.Max(depth - 65, 0) / maxdepth * 100;
             return playerpercentage + 10 >= depthpercentage;
         }
 
-        private bool IsGoal((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
+        private bool IsGoal(GameState state)
         {
-            return state.Isfinish;
+            return state.IsFinish;
         }
 
         private int[] GetActions()
@@ -133,21 +134,21 @@ namespace Searchlo8
             return AllowableActions();
         }
 
-        private (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) Transition((List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state, int action)
+        private GameState Transition(GameState state, int action)
         {
-            p8.game.Entities = state.Item1.DeepClone();
-            p8.game.Link1 = state.Item2.DeepClone();
-            p8.game.Items = state.Item3.DeepClone();
-            p8.game.Isdead = state.Isdead.DeepClone();
-            p8.game.Isfinish = state.Isfinish.DeepClone();
+            p8.game.Entities = state.Entities.DeepClone();
+            p8.game.Link1 = state.Link.DeepClone();
+            p8.game.Items = state.Items.DeepClone();
+            p8.game.Isdead = state.IsDead.DeepClone();
+            p8.game.Isfinish = state.IsFinish.DeepClone();
             p8.SetBtnState(action);
             p8.Step();
-            return (p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+            return new GameState(p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         }
 
         private bool DepthCheck(int depth, int maxdepth)
         {
-            List<KeyValuePair<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)>> kvpairs = [];
+            List<KeyValuePair<List<int>, GameState>> kvpairs = [];
             foreach (var kvp in _cache)
             {
                 if (kvp.Key.Count == depth)
@@ -155,7 +156,7 @@ namespace Searchlo8
                     kvpairs.Add(kvp);
                 }
             }
-            ConcurrentDictionary<List<int>, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish)> states = [];
+            ConcurrentDictionary<List<int>, GameState> states = [];
             Parallel.ForEach(kvpairs, kvp =>
             {
                 foreach (int action in GetActions())
@@ -168,7 +169,7 @@ namespace Searchlo8
             Parallel.ForEach(states, state =>
             {
                 var (newKey, newValue) = state;
-                (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) curstate = Transition(newValue, newKey[^1]);
+                GameState curstate = Transition(newValue, newKey[^1]);
                 if (Hcost(curstate, depth, maxdepth))
                 {
                     _cache.TryAdd(newKey, curstate);
@@ -185,13 +186,13 @@ namespace Searchlo8
                 var sorted = _cache
                 .OrderBy(kvp =>
                 {
-                    var point = kvp.Value.Item1[0];
+                    var point = kvp.Value.Entities[0];
                     return F32.Abs(point.X - endflag.X) + F32.Abs(point.Y - endflag.Y);
                 })
                 .ToList();
-                Console.WriteLine(sorted[0].Value.Item1[0].X);
-                Console.WriteLine(sorted[0].Value.Item1[0].Y);
-                Console.WriteLine(sorted[0].Value.Item1[0].Isflying);
+                Console.WriteLine(sorted[0].Value.Entities[0].X);
+                Console.WriteLine(sorted[0].Value.Entities[0].Y);
+                Console.WriteLine(sorted[0].Value.Entities[0].Isflying);
                 var entries = _cache.Count;
                 var keep = 1000000; //(int)Math.Ceiling(entries * 0.5);
 
@@ -209,7 +210,7 @@ namespace Searchlo8
         {
             Solutions = [];
             DateTime timer = DateTime.Now;
-            (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state = InitState();
+            GameState state = InitState();
             _cache.TryAdd([0], state);
             Console.WriteLine("searching...");
             for (int i = 1; i <= max_depth; i++)
@@ -259,12 +260,12 @@ namespace Searchlo8
                 { 42, "right + down + x" }
             };
 
-            string s = "";
-            foreach (int i in inputs)
+            if (inputs is null)
             {
-                s.Concat($", {action_dict[i]}");
+                return string.Empty;
             }
-            return s;
+
+            return string.Join(", ", inputs.Select(i => action_dict.GetValueOrDefault(i, "unknown")));
         }
 
         private Color[] colors =
@@ -384,7 +385,7 @@ namespace Searchlo8
             { (120, 160), ((207, 133), (207, 133)) },
         };
 
-        private bool ArchiveOrCull(int depth, (List<Cyclo8.EntityClass>, Cyclo8.LinkClass, List<Cyclo8.ItemClass>, bool Isdead, bool Isfinish) state)
+        private bool ArchiveOrCull(int depth, GameState state)
         {
             int curcheck = 0;
             var checks = Checkpoints.ToList();
@@ -396,7 +397,7 @@ namespace Searchlo8
             else if (depth >= checks[curcheck].Key.Item1 && depth <= checks[curcheck].Key.Item2)
             {
                 bool wall_contact = false;
-                foreach (var entity in state.Item1)
+                foreach (var entity in state.Entities)
                 {
                     if (!entity.Isflying)
                     {
@@ -405,7 +406,7 @@ namespace Searchlo8
                 }
                 if (wall_contact)
                 {
-                    if (F32.Abs(state.Item1[0].Y - state.Item1[1].Y) < 10)
+                    if (F32.Abs(state.Entities[0].Y - state.Entities[1].Y) < 10)
                     {
                         return true;
                     }
