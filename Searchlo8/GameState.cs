@@ -19,25 +19,27 @@ public struct LinkState(int length, int dirx, int diry)
     public int Diry = diry;
 }
 
-public struct ItemState(int x, int y, bool active)
-{
-    public int X = x;
-    public int Y = y;
-    public bool Active = active;
-}
-
-public struct GameState
+unsafe struct GameState
 {
     public EntityState Wheel0, Wheel1;
     public LinkState Link;
-    public ItemState[] Items;
+    public fixed int ItemsX[30];
+    public fixed int ItemsY[30];
+    public fixed int ItemsType[30];
+    public fixed bool ItemsActive[30];
     public bool IsDead, IsFinish;
     public GameState(Cyclo8.EntityClass wheel0, Cyclo8.EntityClass wheel1, Cyclo8.LinkClass link, List<Cyclo8.ItemClass> items, bool isDead, bool isFinish)
     {
         Wheel0 = new(wheel0.X.Raw, wheel0.Y.Raw, wheel0.Vx.Raw, wheel0.Vy.Raw, wheel0.Rot.Raw, wheel0.Vrot.Raw, wheel0.Isflying, wheel0.Linkside);
         Wheel1 = new(wheel1.X.Raw, wheel1.Y.Raw, wheel1.Vx.Raw, wheel1.Vy.Raw, wheel1.Rot.Raw, wheel1.Vrot.Raw, wheel1.Isflying, wheel1.Linkside);
         Link = new(link.Length.Raw, link.Dirx.Raw, link.Diry.Raw);
-        Items = items;
+        for (int i = 0; i < 30; i++)
+        {
+            ItemsX[i] = items[i] is not null ? items[i].X.Raw : -1;
+            ItemsY[i] = items[i] is not null ? items[i].Y.Raw : -1;
+            ItemsType[i] = items[i] is not null ? items[i].Type : -1;
+            ItemsActive[i] = items[i] is not null && items[i].Active;
+        }
         IsDead = isDead;
         IsFinish = isFinish;
     }

@@ -23,7 +23,7 @@ public class Searchlo8
 
     public Searchlo8()
     {
-        _cache = [];
+        _cache = new();
         p8 = new();
         InitPathImage();
         Solutions = [] ;
@@ -52,7 +52,8 @@ public class Searchlo8
         p8.game.LoadLevel(3);
         startflag = p8.game.Items.Find(item => item.Type == 3);
         endflag = p8.game.Items.Find(item => item.Type == 4);
-        return new GameState(p8.game.Entities[0], p8.game.Entities[1], p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+        var state = new GameState(p8.game.Entities[0], p8.game.Entities[1], p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+        return state;
     }
 
     public virtual int[] AllowableActions()
@@ -103,7 +104,8 @@ public class Searchlo8
         }
         else
         {
-            return PathFromImage(state.Entities, 3, Color.FromArgb(0, 0, 255, 0), 2);
+            //return PathFromImage(state.Wheel0, state.Wheel1, 3, Color.FromArgb(0, 0, 255, 0), 2);
+            return true;
         }
     }
 
@@ -116,7 +118,7 @@ public class Searchlo8
     {
         var lvlrange = endflag.Y - startflag.Y;
         
-        var playerpercentage = (state.Entities[0].Y - startflag.Y) / lvlrange * 100;
+        var playerpercentage = (F32.FromRaw(state.Wheel0.Y) - startflag.Y) / lvlrange * 100;
         var depthpercentage = Math.Max(depth - 65, 0) / maxdepth * 100;
         return playerpercentage + 10 >= depthpercentage;
     }
@@ -131,16 +133,24 @@ public class Searchlo8
         return AllowableActions();
     }
 
-    private GameState Transition(GameState state, int action)
+    unsafe private GameState Transition(GameState state, int action)
     {
-        p8.game.Entities = state.Entities.DeepClone();
-        p8.game.Link1 = state.Link.DeepClone();
-        p8.game.Items = state.Items.DeepClone();
-        p8.game.Isdead = state.IsDead.DeepClone();
-        p8.game.Isfinish = state.IsFinish.DeepClone();
+        var s = state.DeepClone();
+        p8.game.Link1 = new(1, 2) { Length = F32.FromRaw(s.Link.Length), Dirx = F32.FromRaw(s.Link.Dirx), Diry = F32.FromRaw(s.Link.Diry) };
+        p8.game.Entities = [
+            new(F32.FromRaw(s.Wheel0.X), F32.FromRaw(s.Wheel0.Y)) { Vx = F32.FromRaw(s.Wheel0.Vx), Vy = F32.FromRaw(s.Wheel0.Vy), Rot = F32.FromRaw(s.Wheel0.Rot), Vrot = F32.FromRaw(s.Wheel0.Vrot), Isflying = s.Wheel0.IsFlying, Link = p8.game.Link1, Linkside = s.Wheel0.Linkside },
+            new(F32.FromRaw(s.Wheel1.X), F32.FromRaw(s.Wheel1.Y)) { Vx = F32.FromRaw(s.Wheel1.Vx), Vy = F32.FromRaw(s.Wheel1.Vy), Rot = F32.FromRaw(s.Wheel1.Rot), Vrot = F32.FromRaw(s.Wheel1.Vrot), Isflying = s.Wheel1.IsFlying, Link = p8.game.Link1, Linkside = s.Wheel1.Linkside }];
+        p8.game.Items = [];
+        for (int i = 0; i < 30; i++)
+        {
+            p8.game.Items.Add(new(F32.FromRaw(s.ItemsX[i]), F32.FromRaw(s.ItemsY[i]), s.ItemsType[i]) { Active = s.ItemsActive[i] });
+        }
+        p8.game.Isdead = s.IsDead;
+        p8.game.Isfinish = s.IsFinish;
         p8.SetBtnState(action);
         p8.Step();
-        return new GameState(p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+        var newState = new GameState(p8.game.Entities[0], p8.game.Entities[1], p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+        return newState;
     }
 
     private bool DepthCheck(int depth, int maxdepth)
@@ -162,7 +172,7 @@ public class Searchlo8
                 states.TryAdd(new_kvp, kvp.Value);
             }
         });
-        _cache = [];
+        _cache = new();
         Parallel.ForEach(states, state =>
         {
             var (newKey, newValue) = state;
@@ -183,17 +193,17 @@ public class Searchlo8
             var sorted = _cache
             .OrderBy(kvp =>
             {
-                var point = kvp.Value.Entities[0];
+                var point = kvp.Value.Wheel0;
                 return F32.Abs(point.X - endflag.X) + F32.Abs(point.Y - endflag.Y);
             })
             .ToList();
-            Console.WriteLine(sorted[0].Value.Entities[0].X);
-            Console.WriteLine(sorted[0].Value.Entities[0].Y);
-            Console.WriteLine(sorted[0].Value.Entities[0].Isflying);
+            Console.WriteLine(F32.FromRaw(sorted[0].Value.Wheel0.X));
+            Console.WriteLine(F32.FromRaw(sorted[0].Value.Wheel0.Y));
+            Console.WriteLine(sorted[0].Value.Wheel0.IsFlying);
             var entries = _cache.Count;
             var keep = 1000000; //(int)Math.Ceiling(entries * 0.5);
 
-            _cache = [];
+            _cache = new();
             foreach (var entry in sorted.Take(keep))
             {
                 _cache.TryAdd(entry.Key, entry.Value);
@@ -304,10 +314,12 @@ public class Searchlo8
         */
     ];
 
-    private bool PathFromImage(List<Cyclo8.EntityClass> state, int lvl, Color color, int extralayers = 0)
+    private bool PathFromImage(EntityState wheel0, EntityState wheel1, int lvl, Color color, int extralayers = 0)
     {
-        int iX = F32.FloorToInt(F32.Min(state[0].X, state[1].X) + (F32.Max(state[0].X, state[1].X) - F32.Min(state[0].X, state[1].X)) / 2);
-        int iY = F32.FloorToInt(F32.Min(state[0].Y, state[1].Y) + (F32.Max(state[0].Y, state[1].Y) - F32.Min(state[0].Y, state[1].Y)) / 2);
+        (F32 X, F32 Y) w0 = (F32.FromRaw(wheel0.X), F32.FromRaw(wheel0.Y));
+        (F32 X, F32 Y) w1 = (F32.FromRaw(wheel1.X), F32.FromRaw(wheel1.Y));
+        int iX = F32.FloorToInt(F32.Min(w0.X, w1.X) + (F32.Max(w0.X, w1.X) - F32.Min(w0.X, w1.X)) / 2);
+        int iY = F32.FloorToInt(F32.Min(w0.Y, w1.Y) + (F32.Max(w0.Y, w1.Y) - F32.Min(w0.Y, w1.Y)) / 2);
         var iLevel = p8.game.Levels[lvl - 1];
         int startx = iLevel.Zones[0].Startx;
         int starty = iLevel.Zones[0].Starty;
@@ -394,16 +406,15 @@ public class Searchlo8
         else if (depth >= checks[curcheck].Key.Item1 && depth <= checks[curcheck].Key.Item2)
         {
             bool wall_contact = false;
-            foreach (var entity in state.Entities)
+
+            if (!(state.Wheel0.IsFlying && state.Wheel1.IsFlying))
             {
-                if (!entity.Isflying)
-                {
-                    wall_contact = true;
-                }
+                wall_contact = true;
             }
+            
             if (wall_contact)
             {
-                if (F32.Abs(state.Entities[0].Y - state.Entities[1].Y) < 10)
+                if (F32.Abs(F32.FromRaw(state.Wheel0.Y) - F32.FromRaw(state.Wheel1.Y)) < 10)
                 {
                     return true;
                 }

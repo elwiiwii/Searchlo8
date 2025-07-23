@@ -74,11 +74,11 @@ public class Cyclo8
     private int Totalscore;
     private int Totaltimer;
     #endregion
-    
+
     public Cyclo8(Pico8 pico8)
     {
         p8 = pico8;
-        
+
         Camoffx = F32.FromInt(0);
         Camoffy = F32.FromInt(-64);
         Goalcamx = F32.FromInt(0);
@@ -387,7 +387,7 @@ public class Cyclo8
                 int col = p8.Mget(F32.FromInt(i), F32.FromInt(j));
                 int flags = p8.Fget(col);
                 int itemtype = 0;
-                
+
                 if ((flags & 4) > 0)
                 {
                     itemtype = Item_teleport;
@@ -411,7 +411,7 @@ public class Cyclo8
                     }
                 }
                 //if we found an item
-				    if (itemtype != 0)
+                if (itemtype != 0)
                 {
                     Itemnb += 1;
                     Items[Itemnb - 1] = ItemNew(i * 8 + F32.FromDouble(3.5), j * 8 + F32.FromDouble(3.5), itemtype);
@@ -454,8 +454,8 @@ public class Cyclo8
     }
 
     // reset player state
-	    // after a retry
-	    private void ResetPlayer()
+    // after a retry
+    private void ResetPlayer()
     {
         Isdead = true;
         Entities[Playeridx - 1].X = Last_check_x;
@@ -476,11 +476,11 @@ public class Cyclo8
         // Bikefaceright = true;
         Isdead = false;
 
-	    	if (Isfinish)
+        if (Isfinish)
         {
             Restartafterfinish = true;
         }
-	    	if (!Isfinish)
+        if (!Isfinish)
         {
             Retries += 1;
         }
@@ -495,8 +495,8 @@ public class Cyclo8
     }
 
     // create the 2 wheels
-	    // and init some variables
-	    private void CreateEntities()
+    // and init some variables
+    private void CreateEntities()
     {
         Entities[1 - 1] = EntityNew(F32.FromInt(0), F32.FromInt(0));
         Entities[2 - 1] = EntityNew(F32.FromInt(0 + 8), F32.FromInt(0));
@@ -533,15 +533,15 @@ public class Cyclo8
 
         // check if its in the level zone
         bool inlevelzone = false;
-	    	for (int i = 0; i < Levels[Currentlevel-1].Zonenb; i++)
+        for (int i = 0; i < Levels[Currentlevel - 1].Zonenb; i++)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"for loop {i}" + Environment.NewLine);
             ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | curzone.Startx {curzone.Startx} | curzone.Sizex {curzone.Sizex}" + Environment.NewLine);
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | curzone.Starty {curzone.Starty} | curzone.Sizey {curzone.Sizey}" + Environment.NewLine);
-            if ((sx >= curzone.Startx) && (sx < (curzone.Startx+curzone.Sizex)))
+            if ((sx >= curzone.Startx) && (sx < (curzone.Startx + curzone.Sizex)))
             {
-                if ((sy >= curzone.Starty) && (sy < (curzone.Starty+curzone.Sizey)))
+                if ((sy >= curzone.Starty) && (sy < (curzone.Starty + curzone.Sizey)))
                 {
                     inlevelzone = true;
                     //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"inlevelzone {inlevelzone}" + Environment.NewLine);
@@ -574,8 +574,8 @@ public class Cyclo8
     }
 
     // get the combined sdf
-	    // of the 4 closest cells
-	    private F32 IsPointcol(F32 lx, F32 ly)
+    // of the 4 closest cells
+    private F32 IsPointcol(F32 lx, F32 ly)
     {
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsPointCol()" + Environment.NewLine);
         F32 v0 = GetSdf(lx, ly, -3, -3);
@@ -638,9 +638,9 @@ public class Cyclo8
     }
 
     // this take a velocity vector
-	    // and reflect it by a normal
-	    // a damping is applyed of the reflection
-	    private (F32, F32) Reflect(F32 vx, F32 vy, F32 nx, F32 ny)
+    // and reflect it by a normal
+    // a damping is applyed of the reflection
+    private (F32, F32) Reflect(F32 vx, F32 vy, F32 nx, F32 ny)
     {
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Reflect()" + Environment.NewLine);
         F32 dot = vx * nx + vy * ny;
@@ -658,11 +658,11 @@ public class Cyclo8
         // we play some colision sounds
         // when both vector are opposite
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot}" + Environment.NewLine);
-        if (dot < F32.FromDouble(- 0.8))
+        if (dot < F32.FromDouble(-0.8))
         {
             p8.Sfx(0, 3);
         }
-	    	else
+        else
         {
             if (dot < F32.FromDouble(-0.2))
             {
@@ -674,15 +674,15 @@ public class Cyclo8
     }
 
     // this update the state of a link
-	    // between 2 wheels
-	    private void UpLink(LinkClass link)
+    // between 2 wheels
+    private void UpLink(LinkClass link)
     {
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpLink()" + Environment.NewLine);
         F32 dirx = Entities[link.Ent2 - 1].X - Entities[link.Ent1 - 1].X;
         F32 diry = Entities[link.Ent2 - 1].Y - Entities[link.Ent1 - 1].Y;
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dirx {dirx} | Entities[link.Ent2 - 1].x {Entities[link.Ent2 - 1].X} | Entities[link.Ent1 - 1].x {Entities[link.Ent1 - 1].X}" + Environment.NewLine);
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"diry {diry} | Entities[link.Ent2 - 1].y {Entities[link.Ent2 - 1].Y} | Entities[link.Ent1 - 1].y {Entities[link.Ent1 - 1].Y}" + Environment.NewLine);
-        
+
         link.Length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
         link.Dirx = dirx / link.Length;
         link.Diry = diry / link.Length;
@@ -690,7 +690,7 @@ public class Cyclo8
     }
 
     // pre physic update of a wheel
-	    private void UpStartEntity(EntityClass ent)
+    private void UpStartEntity(EntityClass ent)
     {
         // apply gravity
         ent.Vy += Str_gravity;
@@ -698,7 +698,7 @@ public class Cyclo8
     }
 
     // do one step of physic on a wheel
-	    private void UpStepEntity(EntityClass ent)
+    private void UpStepEntity(EntityClass ent)
     {
         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpStepEntity()" + Environment.NewLine);
         // apply link force
@@ -707,13 +707,13 @@ public class Cyclo8
             // force according to base length
             F32 flink = (ent.Link.Length - ent.Link.Baselen) * Str_link;
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flink {flink} | ent.Link.Length {ent.Link.Length} | ent.Link.Baselen {ent.Link.Baselen} | Str_link {Str_link}" + Environment.NewLine);
-            
+
             // add the force
             ent.Vx += ent.Link.Dirx * ent.Linkside * flink;
             ent.Vy += ent.Link.Diry * ent.Linkside * flink;
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Link.Dirx {ent.Link.Dirx} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | ent.Link.Diry {ent.Link.Diry} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
-            
+
             // apply the rotation
             // due to the body
             // if not on the ground ?
@@ -847,10 +847,10 @@ public class Cyclo8
     }
 
     // post physic update of a wheel
-	    private void UpEndEntity(EntityClass ent)
+    private void UpEndEntity(EntityClass ent)
     {
         // apply air friction
-	    	if (!ent.Isflying)
+        if (!ent.Isflying)
         {
             ent.Vx *= Str_air;
             ent.Vy *= Str_air;
@@ -858,13 +858,13 @@ public class Cyclo8
 
         // make the wheel turn
         ent.Rot += ent.Vrot;
-	    	// we could apply a wheel friction
-	    	// ent.Vrot *= 0.94
+        // we could apply a wheel friction
+        // ent.Vrot *= 0.94
     }
 
     // check if an item
-	    // is near the player
-	    private void CheckItem(ItemClass it)
+    // is near the player
+    private void CheckItem(ItemClass it)
     {
         // need to be carefull
         // with squaring because of overflow
@@ -874,27 +874,27 @@ public class Cyclo8
         F32 mady = (it.Y - Chary) / it.Size;
         F32 sqrlen = madx * madx + mady * mady;
 
-	    	// if colision with an item
-	    	if ((!Isdead) && (sqrlen < 1))
+        // if colision with an item
+        if ((!Isdead) && (sqrlen < 1))
         {
             // apples
-	    		if ((it.Type == Item_apple) && it.Active)
+            if ((it.Type == Item_apple) && it.Active)
             {
                 if (!Restartafterfinish)
                 {
                     it.Active = false;
                     Score += 1;
-	    				if (Isfinish)
+                    if (Isfinish)
                     {
                         Totalscore += 1;  // special case
                     }
                     p8.Sfx(3, 3);
                 }
             }
-	    		// teleports
-	    		if ((it.Type == Item_teleport) && it.Active)
+            // teleports
+            if ((it.Type == Item_teleport) && it.Active)
             {
-                if ((!Isfinish) &&(!Isdead))
+                if ((!Isfinish) && (!Isdead))
                 {
                     p8.Sfx(7, 2);
                     Retries -= 1;  // free retry
@@ -902,8 +902,8 @@ public class Cyclo8
                     ResetPlayer();
                 }
             }
-	    		// checkpoints
-	    		if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
+            // checkpoints
+            if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
             {
                 if (it.Active)
                 {
@@ -911,7 +911,7 @@ public class Cyclo8
                     Last_check_x = it.X;
                     Last_check_y = it.Y;
 
-	    				if (it.Type == Item_finish)
+                    if (it.Type == Item_finish)
                     {
                         Isfinish = true;
                         // cumul total values
@@ -921,7 +921,7 @@ public class Cyclo8
                         Totalleveldone += 1;
                         p8.Sfx(5, 2);
                     }
-	    				else
+                    else
                     {
                         p8.Sfx(7, 2);
                     }
@@ -931,22 +931,22 @@ public class Cyclo8
     }
 
     // debug function
-	    // find the next checkpoint in the list of item
-	    private void FindNextCheckpoint()
+    // find the next checkpoint in the list of item
+    private void FindNextCheckpoint()
     {
         Dbg_curcheckcount = 1;
         Dbg_checkfound = false;
-	    	foreach (ItemClass i in Items)
+        foreach (ItemClass i in Items)
         {
             LoopNextCheckpoint(i);
         }
-	    	if (Dbg_checkfound)
+        if (Dbg_checkfound)
         {
             Dbg_lastcheckidx += 1;
             Retries -= 1;
             ResetPlayer();
         }
-	    	else
+        else
         {
             Dbg_lastcheckidx = 0;
         }
@@ -954,7 +954,7 @@ public class Cyclo8
 
     private void LoopNextCheckpoint(ItemClass it)
     {
-		    if (it.Type == Item_checkpoint)
+        if (it.Type == Item_checkpoint)
         {
             if (Dbg_curcheckcount == Dbg_lastcheckidx + 1)
             {
@@ -979,24 +979,24 @@ public class Cyclo8
     public void Update()
     {
         // start menu
-	    	if (!Isstarted)
+        if (!Isstarted)
         {
             // start the game
-	    		if (p8.Btnp(4))
+            if (p8.Btnp(4))
             {
                 LoadLevel(Currentlevel);
             }
-	    		// change current level
-	    		if (p8.Btnp(0) || p8.Btnp(3))
+            // change current level
+            if (p8.Btnp(0) || p8.Btnp(3))
             {
                 Currentlevel -= 1;
-	    			if (Currentlevel <= 0)
+                if (Currentlevel <= 0)
                 {
                     Currentlevel = Levelnb;
                 }
                 p8.Sfx(0, 3);
             }
-	    		if (p8.Btnp(1) || p8.Btnp(2))
+            if (p8.Btnp(1) || p8.Btnp(2))
             {
                 Currentlevel += 1;
                 if (Currentlevel > Levelnb)
@@ -1010,8 +1010,8 @@ public class Cyclo8
             return;
         }
 
-	    	// handle going to the next level
-	    	if (Isfinish)
+        // handle going to the next level
+        if (Isfinish)
         {
             if (Timernextlevel > Timernextlevel_dur)
             {
@@ -1026,11 +1026,11 @@ public class Cyclo8
         }
         Bodyrot = F32.FromDouble(0.0);
 
-	    	// player control
-	    	if ((!Isdead) && (!Isfinish))
+        // player control
+        if ((!Isdead) && (!Isfinish))
         {
             // flip button (c)
-	    		if (p8.Btnp(4))
+            if (p8.Btnp(4))
             {
                 Bikefaceright = !Bikefaceright;
                 p8.Sfx(8, 3);
@@ -1038,34 +1038,34 @@ public class Cyclo8
             F32 controlwheel = F32.FromInt(Playeridx);
             F32 otherwheel = F32.FromInt(Playeridx + 1);
             F32 wheelside = F32.FromDouble(1.0);
-	    		// invert all values if bike face left
-	    		if (!Bikefaceright)
+            // invert all values if bike face left
+            if (!Bikefaceright)
             {
                 (controlwheel, otherwheel) = (otherwheel, controlwheel);
                 wheelside = F32.FromDouble(-1.0);
             }
-	    		// button left
-	    		if (p8.Btn(0))
+            // button left
+            if (p8.Btn(0))
             {
                 // make the body rotate
                 Bodyrot -= Str_bodyrot;
             }
-	    		// button right
-	    		if (p8.Btn(1))
+            // button right
+            if (p8.Btn(1))
             {
                 // make the body rotate
                 Bodyrot += Str_bodyrot;
             }
-	    		// button up
-	    		if (p8.Btn(2))
+            // button up
+            if (p8.Btn(2))
             {
                 // only the back wheel is set in motion
                 Entities[Playeridx - 1].Vrot = Lerp(Entities[F32.FloorToInt(controlwheel) - 1].Vrot, -Base_speedfront * wheelside, Base_speedlerp);
                 // Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(otherwheel) - 1].Vrot, -Base_speedfront * wheelside, Base_speedlerp);
                 Bikeframe -= Base_frameadvfront;
             }
-	    		// button down
-	    		if (p8.Btn(3))
+            // button down
+            if (p8.Btn(3))
             {
                 // both wheels are slowed
                 Entities[Playeridx - 1].Vrot = Lerp(Entities[F32.FloorToInt(controlwheel) - 1].Vrot, Base_speedback * wheelside, Base_speedlerp);
@@ -1075,9 +1075,9 @@ public class Cyclo8
         }
 
         // update the physics
-	    	// using several substep
-	    	// to improve colision
-	    	foreach (EntityClass i in Entities)
+        // using several substep
+        // to improve colision
+        foreach (EntityClass i in Entities)
         {
             UpStartEntity(i);
         }
@@ -1089,48 +1089,48 @@ public class Cyclo8
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {i}" + Environment.NewLine);
             // update links
             UpLink(Link1);
-	    		// update wheels
-	    		foreach (EntityClass j in Entities)
+            // update wheels
+            foreach (EntityClass j in Entities)
             {
                 UpStepEntity(j);
             }
         }
-	    	foreach (EntityClass i in Entities)
+        foreach (EntityClass i in Entities)
         {
             UpEndEntity(i);
         }
 
         bool isdown = false;
 
-	    	// compute the body location
-	    	// according to the 2 wheels
-	    	// this is the upper body
-	    	(Charx, Chary, Chardown) = GetBikeRot(Entities[1 - 1], Entities[2 - 1], F32.FromDouble(4.0));
-	    	// this is the lower body
-	    	(Charx2, Chary2, isdown) = GetBikeRot(Entities[1 - 1], Entities[2 - 1], F32.FromDouble(1.0));
+        // compute the body location
+        // according to the 2 wheels
+        // this is the upper body
+        (Charx, Chary, Chardown) = GetBikeRot(Entities[1 - 1], Entities[2 - 1], F32.FromDouble(4.0));
+        // this is the lower body
+        (Charx2, Chary2, isdown) = GetBikeRot(Entities[1 - 1], Entities[2 - 1], F32.FromDouble(1.0));
 
         // make upper body a bit closer
         // to the lower body
         Charx += (Charx2 - Charx) * F32.FromDouble(0.5);
-        
-	    	// check the upper body colision
-	    	(F32 coldist, F32 colnx, F32 colny) = IsColiding(Charx, Chary);
-	    	if (coldist > F32.FromDouble(1.8))
+
+        // check the upper body colision
+        (F32 coldist, F32 colnx, F32 colny) = IsColiding(Charx, Chary);
+        if (coldist > F32.FromDouble(1.8))
         {
             // if there is a colision
-	    		// the player is dead
-	    		if (!Isdead)
+            // the player is dead
+            if (!Isdead)
             {
                 Isdead = true;
-	    			if (!Isfinish)
+                if (!Isfinish)
                 {
                     p8.Sfx(4, 2);
                 }
             }
         }
 
-	    	// check items colision
-	    	foreach (ItemClass i in Items)
+        // check items colision
+        foreach (ItemClass i in Items)
         {
             if (i != null)
             {
@@ -1162,7 +1162,7 @@ public class Cyclo8
             needkillplayer = true;
         }
 
-	    	if (needkillplayer)
+        if (needkillplayer)
         {
             if ((!Isfinish) && (!Isdead))
             {
@@ -1171,33 +1171,33 @@ public class Cyclo8
             ResetPlayer();
         }
 
-	    	// check the retry button (v)
-	    	if (p8.Btnp(5) && (!Isfinish))
+        // check the retry button (v)
+        if (p8.Btnp(5) && (!Isfinish))
         {
             p8.Sfx(7, 2);
             ResetPlayer();
         }
 
-	    	// debug cheating :
-	    	if (false)
+        // debug cheating :
+        if (false)
         {
             if (p8.Btnp(5, 1))
             {
                 FindNextCheckpoint();
             }
         }
-	    	
-	    	// update the camera :
 
-	    	// make the camer look back
-	    	// if(entities[playeridx].vx<-0.8) then
-	    	if (!Bikefaceright)
+        // update the camera :
+
+        // make the camer look back
+        // if(entities[playeridx].vx<-0.8) then
+        if (!Bikefaceright)
         {
             Camadvanx = -32;
         }
-	    	// make the camer look front
-	    	// if(entities[playeridx].vx>0.8) then
-	    	if (Bikefaceright)
+        // make the camer look front
+        // if(entities[playeridx].vx>0.8) then
+        if (Bikefaceright)
         {
             Camadvanx = 32;
         }
@@ -1224,7 +1224,7 @@ public class Cyclo8
         // clamp the camera goal to the level limit
         Goalcamx = F32.Max(Goalcamx, F32.FromInt(Levels[Currentlevel - 1].Camminx));
         Goalcamx = F32.Min(Goalcamx, F32.FromInt(Levels[Currentlevel - 1].Cammaxx));
-        
+
         Goalcamy = F32.Max(Goalcamy, F32.FromInt(Levels[Currentlevel - 1].Camminy));
         Goalcamy = F32.Min(Goalcamy, F32.FromInt(Levels[Currentlevel - 1].Cammaxy));
 
@@ -1234,28 +1234,28 @@ public class Cyclo8
         Camoffx = Lerp(Camoffx, Goalcamx, F32.FromDouble(0.2));
         Camoffy = Lerp(Camoffy, Goalcamy, F32.FromDouble(0.3));
 
-	    	// increment the timer
-	    	if (!Isfinish)
+        // increment the timer
+        if (!Isfinish)
         {
             Timer += 1;
         }
     }
 
-	    // draw a wheel entity
-	    private static void DrawEntity(EntityClass ent)
+    // draw a wheel entity
+    private static void DrawEntity(EntityClass ent)
     {
         int @base = 80;
         // the wheel sprite
         // depend on the wheel rotation
         F32 rfr = p8.Mod(F32.Floor(-ent.Rot * 4 * 5), F32.FromInt(5));
-	    	if (rfr < 0)
+        if (rfr < 0)
         {
             rfr += 5;
         }
         F32 cspr = @base + rfr;
 
-	    	// if (Math.Abs(ent.Vrot) > 0.14)
-	    	if (false)
+        // if (Math.Abs(ent.Vrot) > 0.14)
+        if (false)
         {
             rfr = p8.Mod(F32.Floor(-ent.Rot * 3), F32.FromInt(3));
             if (rfr < 0)
@@ -1265,20 +1265,20 @@ public class Cyclo8
             cspr = @base + 5 + rfr;
         }
 
-	    	// to avoid the wheel appearing
-	    	// to rotate backward
-	    	// if the speed is too strong
-	    	// we rotate slower but skip
-	    	// a frame each time
-	    	if (F32.Abs(ent.Vrot) > F32.FromDouble(0.14))
+        // to avoid the wheel appearing
+        // to rotate backward
+        // if the speed is too strong
+        // we rotate slower but skip
+        // a frame each time
+        if (F32.Abs(ent.Vrot) > F32.FromDouble(0.14))
         {
             rfr = p8.Mod(F32.Floor(-ent.Rot * 3), F32.FromInt(5));
-	    		if (rfr < 0)
+            if (rfr < 0)
             {
                 rfr += 5;
             }
             rfr *= 2;
-	    		if (rfr > 5)
+            if (rfr > 5)
             {
                 rfr -= 5;
             }
@@ -1289,13 +1289,13 @@ public class Cyclo8
         // p8.Line(ent.Lastcolx, ent.Lastcoly, ent.Lastcolx + ent.Lastcolnx * 15, ent.Lastcoly + ent.Lastcolny * 15, 8);
         // p8.Line(ent.X, ent.Y, ent.X + ent.Vx * 15, ent.Y + ent.Vy * 15, 11);
 
-	    	// p8.Circ(ent.Lastcolx, ent.Lastcoly, 3, 8);
+        // p8.Circ(ent.Lastcolx, ent.Lastcoly, 3, 8);
     }
 
-	    // take 2 wheel and give
-	    // a point between
-	    // with an perpendicular offset
-	    private static (F32, F32, bool) GetBikeRot(EntityClass ent1, EntityClass ent2, F32 offset)
+    // take 2 wheel and give
+    // a point between
+    // with an perpendicular offset
+    private static (F32, F32, bool) GetBikeRot(EntityClass ent1, EntityClass ent2, F32 offset)
     {
         F32 dirx = ent2.X - ent1.X;
         F32 diry = ent2.Y - ent1.Y;
@@ -1321,7 +1321,7 @@ public class Cyclo8
         // we want to know
         // is the point is below the bike
         bool isdown = false;
-	    	if (perpy > F32.FromDouble(0.5))
+        if (perpy > F32.FromDouble(0.5))
         {
             isdown = true;
         }
@@ -1340,42 +1340,42 @@ public class Cyclo8
     }
 
     // draw an item icon (apple, checkpoint)
-	    private void DrawItem(ItemClass it)
+    private void DrawItem(ItemClass it)
     {
         // only apples can be picked
         bool hide = false;
-	    	if ((it.Type == Item_apple) && (!it.Active))
-        {
-            hide = true;
-        }
-	    	
-	    	if (it.Type == Item_start)
+        if ((it.Type == Item_apple) && (!it.Active))
         {
             hide = true;
         }
 
-	    	if (!hide)
+        if (it.Type == Item_start)
+        {
+            hide = true;
+        }
+
+        if (!hide)
         {
             F32 sprite = F32.FromInt(56);
 
-	    		if (it.Type == Item_teleport)
+            if (it.Type == Item_teleport)
             {
                 sprite = 103 + p8.Mod(Flaganim, F32.FromInt(3));
             }
 
-	    		if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
+            if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
             {
                 sprite = 64 + p8.Mod(Flaganim, F32.FromInt(3));
 
                 // change the flag pole color
                 int flagcolor = 12;
-	    			if (it.Active)
+                if (it.Active)
                 {
                     if (it.Type == Item_finish)
                     {
                         flagcolor = 11;
                     }
-	    				else
+                    else
                     {
                         flagcolor = 8;
                     }
@@ -1385,19 +1385,19 @@ public class Cyclo8
 
             p8.Spr(sprite, it.X - F32.FromDouble(3.5), it.Y - F32.FromDouble(3.5), 1, 1);
 
-	    		// p8.Line(it.X, it.Y, Charx, Chary, 12);
+            // p8.Line(it.X, it.Y, Charx, Chary, 12);
         }
     }
 
-	    // draw the introduction and victory big flag
-	    private void DrawBigFlag(string text, int finishx, int finishy, int col)
+    // draw the introduction and victory big flag
+    private void DrawBigFlag(string text, int finishx, int finishy, int col)
     {
         // p8.Line(finishx - 1, finishy, finishx - 1, finishy + 15, 8);
         // p8.Line(finishx + 64, finishy, finishx + 64, finishy + 15, 8);
         // p8.Line(finishx - 1, finishy - 1, finishx + 64, finishy - 1, 8);
         // p8.Line(finishx - 1, finishy + 16, finishx + 64, finishy + 16, 8);
         p8.Rectfill(F32.FromInt(finishx), F32.FromInt(finishy), F32.FromInt(finishx + 63), F32.FromInt(finishy + 15), F32.FromInt(0));
-	    	for (int i = 0; i <= 31; i++)
+        for (int i = 0; i <= 31; i++)
         {
             F32 tmpx = finishx + p8.Mod(F32.FromInt(i), F32.FromInt(16)) * 4;
             F32 tmpy = finishy + (1 - p8.Mod(F32.FromInt(i), F32.FromInt(2))) * 4 + F32.FloorToInt(i / F32.FromDouble(16.0)) * 8;
@@ -1413,10 +1413,10 @@ public class Cyclo8
         p8.Sspr((sprite - 64) * 8, 4 * 8, 8, 8, finishx - 20, finishy - 4, 32, 32, true);
         p8.Sspr((sprite - 64) * 8, 4 * 8, 8, 8, finishx - 16 + 64, finishy - 4, 32, 32, false);
 
-	    	// p8.Pal();
+        // p8.Pal();
     }
 
-	    private static string GetTimeStr(int val)
+    private static string GetTimeStr(int val)
     {
         // transform timer to min:sec:dec
         F32 t_cent = p8.Mod(F32.Floor(val * 10 / F32.FromDouble(30.0)), F32.FromInt(10));
@@ -1424,7 +1424,7 @@ public class Cyclo8
         int t_min = F32.FloorToInt(F32.FromInt(val) / (F32.FromDouble(30.0) * F32.FromDouble(60.0)));
 
         string fill_sec = "";
-		    if (t_sec < 10)
+        if (t_sec < 10)
         {
             fill_sec = "0";
         }
@@ -1441,27 +1441,27 @@ public class Cyclo8
     {
         return (x2, x1);
     }
-		
+
     private void Rectlight(F32 x, int y, F32 sx)
     {
         F32 mx = F32.Min(x, sx);
         F32 ex = F32.Max(x, sx);
-		    for (int i = F32.FloorToInt(mx); i <= ex; i++)
+        for (int i = F32.FloorToInt(mx); i <= ex; i++)
         {
             p8.Pset(i, y, Pal[p8.Pget(i, y) + 1 - 1]);
         }
     }
-		
+
     private void Otri(F32 x1, F32 y1, F32 x2, F32 y2, F32 x3, F32 y3)
     {
         if (y2 < y1)
         {
-        	if (y3 < y2)
+            if (y3 < y2)
             {
                 (y1, y3) = Swap(y1, y3);
                 (x1, x3) = Swap(x1, x3);
             }
-        	else
+            else
             {
                 (y1, y2) = Swap(y1, y2);
                 (x1, x2) = Swap(x1, x2);
@@ -1496,7 +1496,7 @@ public class Cyclo8
 
         F32 sx = steps * (cl_y1 - y1) + x1;
         F32 ex = stepe * (cl_y1 - y1) + x1;
-        
+
         for (int y = F32.FloorToInt(cl_y1); y <= cl_miny; y++)
         {
             Rectlight(sx, y, ex);
@@ -1514,7 +1514,7 @@ public class Cyclo8
 
         F32 sx2 = sx + step2s * (cl_miny - miny);
         F32 ex2 = ex + step2e * (cl_miny - miny);
-        
+
         for (int y = F32.FloorToInt(cl_miny); y <= cl_maxy; y++)
         {
             Rectlight(sx2, y, ex2);
@@ -1545,8 +1545,8 @@ public class Cyclo8
         p8.Palt(3, true);
         p8.Palt(4, false);
 
-	    	// start menu
-	    	if (!Isstarted)
+        // start menu
+        if (!Isstarted)
         {
             p8.Rectfill(F32.FromInt(0), F32.FromInt(0), F32.FromInt(127), F32.FromInt(127), F32.FromInt(1));
 
@@ -1586,14 +1586,14 @@ public class Cyclo8
         F32 paral2y = (Camoffy - treeoff) * F32.FromDouble(0.75) + treeoff;
 
         int i = 1;
-	    	while (i <= 30)
+        while (i <= 30)
         {
             p8.Circfill(paral2x + i * 20 + Cloudsx[i - 1], paral2y + 45 + Cloudsy[i - 1], 10 + Cloudss[i - 1], 5);
             i += 1;
         }
 
         i = 1;
-	    	while (i <= 30)
+        while (i <= 30)
         {
             p8.Circfill(paral2x + i * 20 + Cloudsx[i - 1], paral2y + 62 + Cloudsy[i - 1], 10 + Cloudss[i - 1], 4);
             i += 1;
@@ -1626,48 +1626,48 @@ public class Cyclo8
         // draw the all level
         DrawMap(0);
 
-	    	foreach (ItemClass j in Items)
+        foreach (ItemClass j in Items)
         {
             if (j != null)
             {
                 DrawItem(j);
             }
         }
-	    	
-	    	// draw_entity(entities[1])
-	    	// draw_entity(entities[2])
-	    	foreach (EntityClass j in Entities)
+
+        // draw_entity(entities[1])
+        // draw_entity(entities[2])
+        foreach (EntityClass j in Entities)
         {
             DrawEntity(j);
         }
 
         // draw the player :
         F32 cspr = p8.Mod(F32.Floor(-Bikeframe), F32.FromInt(4));
-	    	if (cspr < 0)
+        if (cspr < 0)
         {
             cspr += 4;
         }
-	    	if (Isdead)
+        if (Isdead)
         {
             cspr = F32.FromInt(4);
         }
 
         int bodyadv = 0;
-	    	if (Bodyrot > 0)
+        if (Bodyrot > 0)
         {
             bodyadv = 1;
         }
-	    	if (Bodyrot < 0)
+        if (Bodyrot < 0)
         {
             bodyadv = -1;
         }
 
         F32 cspr2 = cspr + 16;
 
-	    	if (Chardown)
+        if (Chardown)
         {
             cspr = F32.FromInt(5);
-	    		if (Isdead)
+            if (Isdead)
             {
                 cspr = F32.FromInt(6);
             }
@@ -1680,7 +1680,7 @@ public class Cyclo8
 
         int wheelidx = 1;
         int sidefac = -1;
-	    	if (Bikefaceright)
+        if (Bikefaceright)
         {
             wheelidx = 2;
             sidefac = 1;
@@ -1710,8 +1710,8 @@ public class Cyclo8
 
         p8.Camera(F32.FromInt(0), F32.FromInt(0));
 
-	    	// display hud
-	    	if (true)
+        // display hud
+        if (true)
         {
             if (Timerlasteleport < 30)
             {
@@ -1721,7 +1721,7 @@ public class Cyclo8
                 }
                 Timerlasteleport += 1;
             }
-	    		
+
             // handle going to the next level
             if (Isfinish)
             {
@@ -1760,11 +1760,11 @@ public class Cyclo8
             if (Isfinish)
             {
                 DrawBigFlag("victory", 32, 90, 8);
-            }	
+            }
         }
 
-	    	// debug draw values
-	    	if (false)
+        // debug draw values
+        if (false)
         {
             /*p8.Print($"{(int)Math.Floor(Entities[Playeridx].X)}", 0, 112, 4);
             p8.Print($"{(int)Math.Floor(Entities[Playeridx].Y)}", 0, 120, 4);
