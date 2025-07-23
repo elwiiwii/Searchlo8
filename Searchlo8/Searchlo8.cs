@@ -1,9 +1,10 @@
-﻿using System.Collections.Concurrent;
-using Force.DeepCloner;
-using FixMath;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using FixMath;
+using Force.DeepCloner;
 
 namespace Searchlo8;
 
@@ -26,7 +27,7 @@ public class Searchlo8
         _cache = new();
         p8 = new();
         InitPathImage();
-        Solutions = [] ;
+        Solutions = [];
     }
 
     private void InitPathImage()
@@ -117,7 +118,7 @@ public class Searchlo8
     private bool ExitHeuristic(GameState state, int depth, int maxdepth)
     {
         var lvlrange = endflag.Y - startflag.Y;
-        
+
         var playerpercentage = (F32.FromRaw(state.Wheel0.Y) - startflag.Y) / lvlrange * 100;
         var depthpercentage = Math.Max(depth - 65, 0) / maxdepth * 100;
         return playerpercentage + 10 >= depthpercentage;
@@ -133,22 +134,33 @@ public class Searchlo8
         return AllowableActions();
     }
 
-    unsafe private GameState Transition(GameState state, int action)
+    unsafe private GameState Transition(GameState s, int action)
     {
-        var s = state.DeepClone();
-        p8.game.Link1 = new(1, 2) { Length = F32.FromRaw(s.Link.Length), Dirx = F32.FromRaw(s.Link.Dirx), Diry = F32.FromRaw(s.Link.Diry) };
-        p8.game.Entities = [
-            new(F32.FromRaw(s.Wheel0.X), F32.FromRaw(s.Wheel0.Y)) { Vx = F32.FromRaw(s.Wheel0.Vx), Vy = F32.FromRaw(s.Wheel0.Vy), Rot = F32.FromRaw(s.Wheel0.Rot), Vrot = F32.FromRaw(s.Wheel0.Vrot), Isflying = s.Wheel0.IsFlying, Link = p8.game.Link1, Linkside = s.Wheel0.Linkside },
-            new(F32.FromRaw(s.Wheel1.X), F32.FromRaw(s.Wheel1.Y)) { Vx = F32.FromRaw(s.Wheel1.Vx), Vy = F32.FromRaw(s.Wheel1.Vy), Rot = F32.FromRaw(s.Wheel1.Rot), Vrot = F32.FromRaw(s.Wheel1.Vrot), Isflying = s.Wheel1.IsFlying, Link = p8.game.Link1, Linkside = s.Wheel1.Linkside }];
-        p8.game.Items = [];
+        // 1. Reconstruct new mutable objects from struct data
+        var entities = new List<Cyclo8.EntityClass>
+        {
+            new Cyclo8.EntityClass(F32.FromRaw(s.Wheel0.X), F32.FromRaw(s.Wheel0.Y)) { Vx = F32.FromRaw(s.Wheel0.Vx), Vy = F32.FromRaw(s.Wheel0.Vy), Rot = F32.FromRaw(s.Wheel0.Rot), Vrot = F32.FromRaw(s.Wheel0.Vrot), Isflying = s.Wheel0.IsFlying, Link = p8.game.Link1, Linkside = s.Wheel0.Linkside },
+            new Cyclo8.EntityClass(F32.FromRaw(s.Wheel1.X), F32.FromRaw(s.Wheel1.Y)) { Vx = F32.FromRaw(s.Wheel1.Vx), Vy = F32.FromRaw(s.Wheel1.Vy), Rot = F32.FromRaw(s.Wheel1.Rot), Vrot = F32.FromRaw(s.Wheel1.Vrot), Isflying = s.Wheel1.IsFlying, Link = p8.game.Link1, Linkside = s.Wheel1.Linkside }
+        };
+        var link = new Cyclo8.LinkClass(1, 2) { Length = F32.FromRaw(s.Link.Length), Dirx = F32.FromRaw(s.Link.Dirx), Diry = F32.FromRaw(s.Link.Diry) };
+        var items = new List<Cyclo8.ItemClass>();
         for (int i = 0; i < 30; i++)
         {
-            p8.game.Items.Add(new(F32.FromRaw(s.ItemsX[i]), F32.FromRaw(s.ItemsY[i]), s.ItemsType[i]) { Active = s.ItemsActive[i] });
+            items.Add(new Cyclo8.ItemClass(F32.FromRaw(s.ItemsX[i]), F32.FromRaw(s.ItemsY[i]), s.ItemsType[i]) { Active = s.ItemsActive[i] });
         }
+
+        // 2. Assign these to the Pico8/game instance (shared or not)
+        p8.game.Entities = entities;
+        p8.game.Link1 = link;
+        p8.game.Items = items;
         p8.game.Isdead = s.IsDead;
         p8.game.Isfinish = s.IsFinish;
+
+        // 3. Step the simulation
         p8.SetBtnState(action);
         p8.Step();
+
+        // 4. Extract new state back into struct
         var newState = new GameState(p8.game.Entities[0], p8.game.Entities[1], p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
         return newState;
     }
@@ -209,7 +221,7 @@ public class Searchlo8
                 _cache.TryAdd(entry.Key, entry.Value);
             }
         }
-        
+
         return true;
     }
 
@@ -411,7 +423,7 @@ public class Searchlo8
             {
                 wall_contact = true;
             }
-            
+
             if (wall_contact)
             {
                 if (F32.Abs(F32.FromRaw(state.Wheel0.Y) - F32.FromRaw(state.Wheel1.Y)) < 10)
