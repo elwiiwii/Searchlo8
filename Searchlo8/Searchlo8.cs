@@ -106,7 +106,8 @@ namespace Searchlo8
             }
             else
             {
-                return PathFromImage(state.Entities, 3, Color.FromArgb(0, 0, 255, 0), 2);
+                return true;
+                //return PathFromImage(state.Entities, 3, Color.FromArgb(0, 0, 255, 0), 2);
             }
         }
 

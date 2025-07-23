@@ -71,29 +71,29 @@ namespace Searchlo8
 
         public bool Btn(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btn
         {
-            return (_btnState & (int)Math.Pow(2, i)) != 0;
+            return (_btnState & (int)Math.Pow(2, i >> 16)) != 0;
         }
 
 
         public bool Btnp(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btnp
         {
-            return (_btnState & (int)Math.Pow(2, i)) != 0;
+            return (_btnState & (int)Math.Pow(2, i >> 16)) != 0;
         }
 
 
-        public void Camera(F32 x, F32 y) // https://pico-8.fandom.com/wiki/Camera
+        public void Camera(int x, int y) // https://pico-8.fandom.com/wiki/Camera
         {
             return;
         }
 
 
-        public void Circ(F32 x, F32 y, F32 r, int c) // https://pico-8.fandom.com/wiki/Circ
+        public void Circ(int x, int y, float r, int c) // https://pico-8.fandom.com/wiki/Circ
         {
             return;
         }
 
 
-        public void Circfill(F32 x, F32 y, F32 r, int c) // https://pico-8.fandom.com/wiki/Circfill
+        public void Circfill(int x, int y, float r, int c) // https://pico-8.fandom.com/wiki/Circfill
         {
             return;
         }
@@ -107,41 +107,41 @@ namespace Searchlo8
 
         public int Fget(int n) // https://pico-8.fandom.com/wiki/Fget
         {
-            return _flags[n];
+            return _flags[n >> 16] << 16;
         }
 
 
-        public void Line(F32 x1, F32 y1, F32 x2, F32 y2, int col)
+        public void Line(int x1, int y1, int x2, int y2, int col)
         {
             return;
         }
 
 
-        public void Map(int celx, int cely, F32 sx, F32 sy, int celw, int celh, int flags = 0) // https://pico-8.fandom.com/wiki/Map
+        public void Map(int celx, int cely, int sx, int sy, int celw, int celh, int flags = 0) // https://pico-8.fandom.com/wiki/Map
         {
             return;
         }
 
 
-        public int Mget(F32 celx, F32 cely) // https://pico-8.fandom.com/wiki/Mget
+        public int Mget(int celx, int cely) // https://pico-8.fandom.com/wiki/Mget
         {
-            int xFlr = Math.Abs(F32.FloorToInt(celx));
-            int yFlr = Math.Abs(F32.FloorToInt(cely));
+            int xFlr = Math.Abs(celx >> 16);
+            int yFlr = Math.Abs(cely >> 16);
 
-            return _map[xFlr + yFlr * 128];
+            return _map[xFlr + yFlr * 128] << 16;
         }
 
 
-        public F32 Mod(F32 x, F32 m)
+        public int Mod(int x, int m)
         {
-            F32 r = x % m;
+            int r = x % m;
             return r < 0 ? r + m : r;
         }
 
 
         public void Mset(int celx, int cely, int snum) // https://pico-8.fandom.com/wiki/Mset
         {
-            _map[celx + cely * 128] = snum;
+            _map[celx + cely * 128] = snum >> 16;
         }
 
 
@@ -157,7 +157,7 @@ namespace Searchlo8
         }
 
 
-        public void Print(string str, int x, int y, F32 c) // https://pico-8.fandom.com/wiki/Print
+        public void Print(string str, int x, int y, int c) // https://pico-8.fandom.com/wiki/Print
         {
             return;
         }
@@ -175,22 +175,22 @@ namespace Searchlo8
         }
 
 
-        public void Rectfill(F32 x1, F32 y1, F32 x2, F32 y2, F32 c) // https://pico-8.fandom.com/wiki/Rectfill
+        public void Rectfill(int x1, int y1, int x2, int y2, int c) // https://pico-8.fandom.com/wiki/Rectfill
         {
             return;
         }
 
 
-        public F32 Rnd(double lower, double upper) // https://pico-8.fandom.com/wiki/Rnd
+        public int Rnd(int lower, int upper) // https://pico-8.fandom.com/wiki/Rnd
         {
             Random random = new();
             if (lower < upper)
             {
-                double n = random.NextDouble() * (upper - lower) + lower;
-                return F32.FromDouble(n);
+                int n = random.Next() * (upper - lower) + lower;
+                return n;
             }
-            double n2 = random.NextDouble() * (lower - upper) + upper;
-            return F32.FromDouble(n2);
+            int n2 = random.Next() * (lower - upper) + upper;
+            return n2;
         }
 
 
@@ -200,10 +200,10 @@ namespace Searchlo8
         }
 
 
-        public int Sget(F32 x, F32 y, int? idk = null)
+        public int Sget(int x, int y, int? idk = null)
         {
-            int xFlr = F32.FloorToInt(x);
-            int yFlr = F32.FloorToInt(y);
+            int xFlr = x >> 16;
+            int yFlr = y >> 16;
 
             if (xFlr < 0 || yFlr < 0 || xFlr > 127 || yFlr > 127)
             {
@@ -214,13 +214,13 @@ namespace Searchlo8
         }
 
 
-        public void Spr(F32 spriteNumber, F32 x, F32 y, int w = 1, int h = 1, bool flip_x = false) // https://pico-8.fandom.com/wiki/Spr
+        public void Spr(int spriteNumber, int x, int y, int w = 1, int h = 1, bool flip_x = false) // https://pico-8.fandom.com/wiki/Spr
         {
             return;
         }
 
 
-        public void Sspr(F32 sx, int sy, int sw, int sh, int dx, int dy, int dw, int dh, bool flip_x) // https://pico-8.fandom.com/wiki/Sspr
+        public void Sspr(int sx, int sy, int sw, int sh, int dx, int dy, int dw, int dh, bool flip_x) // https://pico-8.fandom.com/wiki/Sspr
         {
             return;
         }
