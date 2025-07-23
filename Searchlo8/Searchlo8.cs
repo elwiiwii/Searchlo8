@@ -134,26 +134,28 @@ public class Searchlo8
         return AllowableActions();
     }
 
-    unsafe private GameState Transition(GameState s, int action)
+    private GameState Transition(GameState s, int action)
     {
         var link = new Cyclo8.LinkClass(1, 2) { Length = F32.FromRaw(s.Link.Length), Dirx = F32.FromRaw(s.Link.Dirx), Diry = F32.FromRaw(s.Link.Diry) };
         var entities = new List<Cyclo8.EntityClass>
         {
-            new(F32.FromRaw(s.Wheel0.X), F32.FromRaw(s.Wheel0.Y)) { Vx = F32.FromRaw(s.Wheel0.Vx), Vy = F32.FromRaw(s.Wheel0.Vy), Rot = F32.FromRaw(s.Wheel0.Rot), Vrot = F32.FromRaw(s.Wheel0.Vrot), Isflying = s.Wheel0.IsFlying, Link = link, Linkside = s.Wheel0.Linkside },
-            new(F32.FromRaw(s.Wheel1.X), F32.FromRaw(s.Wheel1.Y)) { Vx = F32.FromRaw(s.Wheel1.Vx), Vy = F32.FromRaw(s.Wheel1.Vy), Rot = F32.FromRaw(s.Wheel1.Rot), Vrot = F32.FromRaw(s.Wheel1.Vrot), Isflying = s.Wheel1.IsFlying, Link = link, Linkside = s.Wheel1.Linkside }
+            new(F32.FromRaw(s.Wheel0.X), F32.FromRaw(s.Wheel0.Y)) { Vx = F32.FromRaw(s.Wheel0.Vx), Vy = F32.FromRaw(s.Wheel0.Vy), Rot = F32.FromRaw(s.Wheel0.Rot), Vrot = F32.FromRaw(s.Wheel0.Vrot), Isflying = s.Wheel0.IsFlying, Linkside = s.Wheel0.Linkside },
+            new(F32.FromRaw(s.Wheel1.X), F32.FromRaw(s.Wheel1.Y)) { Vx = F32.FromRaw(s.Wheel1.Vx), Vy = F32.FromRaw(s.Wheel1.Vy), Rot = F32.FromRaw(s.Wheel1.Rot), Vrot = F32.FromRaw(s.Wheel1.Vrot), Isflying = s.Wheel1.IsFlying, Linkside = s.Wheel1.Linkside }
         };
-        
-        var items = new List<Cyclo8.ItemClass>();
-        for (int i = 0; i < 30; i++)
-        {
-            items.Add(new Cyclo8.ItemClass(F32.FromRaw(s.ItemsX[i]), F32.FromRaw(s.ItemsY[i]), s.ItemsType[i]) { Active = s.ItemsActive[i] });
-        }
 
-        p8.game.Entities = entities;
-        p8.game.Link1 = link;
-        p8.game.Items = items;
-        p8.game.Isdead = s.IsDead;
-        p8.game.Isfinish = s.IsFinish;
+        //var items = new List<Cyclo8.ItemClass>();
+        //for (int i = 0; i < 30; i++)
+        //{
+        //    items.Add(new Cyclo8.ItemClass(F32.FromRaw(s.ItemsX[i]), F32.FromRaw(s.ItemsY[i]), s.ItemsType[i]) { Active = s.ItemsActive[i] });
+        //}
+
+        p8.game.Link1 = link.DeepClone();
+        p8.game.Entities = entities.DeepClone();
+        p8.game.Entities[0].Link = p8.game.Link1;
+        p8.game.Entities[1].Link = p8.game.Link1;
+        //p8.game.Items = items;
+        p8.game.Isdead = s.IsDead.DeepClone();
+        p8.game.Isfinish = s.IsFinish.DeepClone();
 
         p8.SetBtnState(action);
         p8.Step();
