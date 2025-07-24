@@ -658,7 +658,7 @@ namespace Searchlo8
             // we play some colision sounds
             // when both vector are opposite
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot}" + Environment.NewLine);
-            if (dot < F32.FromDouble(- 0.8))
+            if (dot < F32.FromDouble(-0.8))
             {
                 p8.Sfx(0, 3);
             }
