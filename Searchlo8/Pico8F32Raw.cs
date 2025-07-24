@@ -21,7 +21,7 @@ namespace Searchlo8
             _sprites = [];
             _flags = [];
             _map = [];
-            _cart = new(this);
+            //_cart = new(this);
             LoadGame(_cart);
         }
 
@@ -141,7 +141,11 @@ namespace Searchlo8
 
         public void Mset(int celx, int cely, int snum) // https://pico-8.fandom.com/wiki/Mset
         {
-            _map[celx + cely * 128] = snum >> 16;
+            int xFlr = Math.Abs(celx >> 16);
+            int yFlr = Math.Abs(cely >> 16);
+            int sFlr = snum >> 16;
+
+            _map[xFlr + yFlr * 128] = sFlr;
         }
 
 
