@@ -14,6 +14,7 @@ namespace Searchlo8
         #region globals
         private int _btnState;
         public Cyclo8F32Raw _cart;
+        private Dictionary<string, int[]> _memory;
         private Dictionary<string, SoundEffect> SoundEffectDictionary;
         private Dictionary<string, SoundEffect> MusicDictionary;
         private Texture2D Pixel;
@@ -21,30 +22,21 @@ namespace Searchlo8
         private GraphicsDevice GraphicsDevice;
         private (int, int) CameraOffset;
         private Dictionary<int, Texture2D> spriteTextures = [];
-
-        private int[] _sprites;
-        private int[] _flags;
-        private int[] _map;
         #endregion
 
         //public Pico8(Dictionary<string, SoundEffect> soundEffectDictionary, Dictionary<string, SoundEffect> musicDictionary, Texture2D pixel, SpriteBatch batch, GraphicsDevice graphicsDevice)
         public Pico8Graphics(Texture2D pixel, SpriteBatch batch, GraphicsDevice graphicsDevice)
         {
             _btnState = 0;
+            _memory = [];
             //SoundEffectDictionary = soundEffectDictionary;
             //MusicDictionary = musicDictionary;
-            resetColors = colors;
-            resetSprColors = colors;
-            sprColors = colors;
             Pixel = pixel;
             Batch = batch;
             GraphicsDevice = graphicsDevice;
             CameraOffset = (0, 0);
-            _sprites = [];
-            _flags = [];
-            _map = [];
             _cart = new(this);
-            //LoadGame(_cart,4);
+            //LoadGame(_cart);
         }
 
         private int[] DataToArray(string s, int n)
@@ -61,9 +53,14 @@ namespace Searchlo8
         public void LoadGame(Cyclo8F32Raw cart, int lvl)
         {
             _cart = cart;
-            _sprites = DataToArray(_cart.SpriteData, 1);
-            _flags = DataToArray(_cart.FlagData, 2);
-            _map = DataToArray(_cart.MapData, 2);
+            _memory = new() {
+                { "sprites", DataToArray(_cart.SpriteData, 1) },
+                { "flags", DataToArray(_cart.FlagData, 2) },
+                { "map", DataToArray(_cart.MapData, 2) }
+            };
+            Array.Copy(colors, resetColors, colors.Length);
+            Array.Copy(colors, sprColors, colors.Length);
+            Array.Copy(colors, resetSprColors, colors.Length);
             _cart.Init();
             _cart.LoadLevel(lvl);
             //while (!_cart.Isdead)
@@ -309,7 +306,7 @@ namespace Searchlo8
 
         public int Fget(int n) // https://pico-8.fandom.com/wiki/Fget
         {
-            return _flags[n >> 16] << 16;
+            return _memory["flags"][n >> 16] << 16;
         }
 
 
@@ -346,7 +343,8 @@ namespace Searchlo8
             int xFlr = Math.Abs(celx >> 16);
             int yFlr = Math.Abs(cely >> 16);
 
-            return _map[xFlr + yFlr * 128] << 16;
+            string s = $"0x{_cart.MapData.Substring(xFlr * 2 + (yFlr * 256), 2)}";
+            return Convert.ToInt32(s, 16) << 16;
         }
 
 
@@ -363,7 +361,7 @@ namespace Searchlo8
             int yFlr = Math.Abs(cely >> 16);
             int sFlr = snum >> 16;
 
-            _map[xFlr + yFlr * 128] = sFlr;
+            _memory["map"][xFlr + yFlr * 128] = sFlr;
         }
 
 
@@ -537,7 +535,9 @@ namespace Searchlo8
                 return 0;
             }
 
-            return _sprites[xFlr + yFlr * 128] << 16;
+            string c = $"0x{_cart.SpriteData[xFlr + (yFlr * 128)]}";
+
+            return Convert.ToInt32(c, 16) << 16;
         }
 
 
@@ -594,7 +594,7 @@ namespace Searchlo8
 
             if (!spriteTextures.TryGetValue(sFlr + colorCache, out var texture))
             {
-                texture = CreateTextureFromSpriteData(_sprites, spriteX, spriteY, spriteWidth * wFlr, spriteHeight * hFlr);
+                texture = CreateTextureFromSpriteData(_memory["sprites"], spriteX, spriteY, spriteWidth * wFlr, spriteHeight * hFlr);
                 spriteTextures[sFlr + colorCache] = texture;
             }
 
@@ -672,7 +672,7 @@ namespace Searchlo8
 
             if (!spriteTextures.TryGetValue(spriteNumberFlr + colorCache, out var texture))
             {
-                texture = CreateTextureFromSpriteData(_sprites, sxFlr, syFlr, swFlr, shFlr);
+                texture = CreateTextureFromSpriteData(_memory["sprites"], sxFlr, syFlr, swFlr, shFlr);
                 spriteTextures[spriteNumberFlr + colorCache] = texture;
             }
 

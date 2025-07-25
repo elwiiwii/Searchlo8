@@ -496,8 +496,8 @@ namespace Searchlo8
         private int GetSdf(int lx, int ly, int ox, int oy)
         {
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
-            int sx = F.DivPrecise(lx + ox, 524288);
-            int sy = F.DivPrecise(ly + oy, 524288);
+            int sx = F.Div(F.Floor(lx + ox), 524288);
+            int sy = F.Div(F.Floor(ly + oy), 524288);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)}" + Environment.NewLine);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
 
@@ -550,7 +550,7 @@ namespace Searchlo8
 
             // proper coordinates in sdf
             int wx = F.Mul(1048576, p8.Mod(sdfval, 524288)) + lx - F.Mul(sx, 524288) + 262144;
-            int wy = F.Mul(1048576, F.DivPrecise(sdfval, 524288)) + 6553600 + ly - F.Mul(sy, 524288);
+            int wy = F.Mul(1048576, F.Div(sdfval, 524288)) + 6553600 + ly - F.Mul(sy, 524288);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wx {F32.FromRaw(wx)} | sdfval {F32.FromRaw(sdfval)} | lx {F32.FromRaw(lx)} | sx {F32.FromRaw(sx)}" + Environment.NewLine);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wy {F32.FromRaw(wy)} | sdfval {F32.FromRaw(sdfval)} | ly {F32.FromRaw(ly)} | sy {F32.FromRaw(sy)}" + Environment.NewLine);
             // get distance
@@ -615,8 +615,8 @@ namespace Searchlo8
             // we ensure normal is normalized
             int len = F.SqrtPrecise(F.Mul(norx, norx) + F.Mul(nory, nory) + 65);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"len {F32.FromRaw(len)} | norx {F32.FromRaw(norx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
-            norx = F.DivPrecise(norx, len);
-            nory = F.DivPrecise(nory, len);
+            norx = F.Div(norx, len);
+            nory = F.Div(nory, len);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {F32.FromRaw(norx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
 
             return (final, norx, nory);
@@ -669,8 +669,8 @@ namespace Searchlo8
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"diry {F32.FromRaw(diry)} | Wheel1.y {F32.FromRaw(Wheel1.Y)} | Wheel0.y {F32.FromRaw(Wheel0.Y)}" + Environment.NewLine);
 
             link.Length = F.SqrtPrecise(F.Mul(dirx, dirx) + F.Mul(diry, diry) + 655);
-            link.Dirx = F.DivPrecise(dirx, link.Length);
-            link.Diry = F.DivPrecise(diry, link.Length);
+            link.Dirx = F.Div(dirx, link.Length);
+            link.Diry = F.Div(diry, link.Length);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"link.Length {F32.FromRaw(link.Length)} | link.Dirx {F32.FromRaw(link.Dirx)} | link.Diry {F32.FromRaw(link.Diry)}" + Environment.NewLine);
         }
 
@@ -712,8 +712,8 @@ namespace Searchlo8
                 File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {F32.FromRaw(perpx)} | Link1.Diry {F32.FromRaw(Link1.Diry)}" + Environment.NewLine);
                 File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {F32.FromRaw(perpy)} | -Link1.Dirx {F32.FromRaw(-Link1.Dirx)}" + Environment.NewLine);
 
-                ent.Vx += F.Mul(F.DivPrecise(F.Mul(perpx, Bodyrot), Stepnb), ent.Linkside);
-                ent.Vy += F.Mul(F.DivPrecise(F.Mul(perpy, Bodyrot), Stepnb), ent.Linkside);
+                ent.Vx += F.Mul(F.Div(F.Mul(perpx, Bodyrot), Stepnb), ent.Linkside);
+                ent.Vy += F.Mul(F.Div(F.Mul(perpy, Bodyrot), Stepnb), ent.Linkside);
                 File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | perpx {F32.FromRaw(perpx)} | Bodyrot {F32.FromRaw(Bodyrot)} | Stepnb {F32.FromRaw(Stepnb)} | ent.Linkside {F32.FromRaw(ent.Linkside)}" + Environment.NewLine);
                 File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {F32.FromRaw(ent.Vy)} | perpy {F32.FromRaw(perpy)} | Bodyrot {F32.FromRaw(Bodyrot)} | Stepnb {F32.FromRaw(Stepnb)} | ent.Linkside {F32.FromRaw(ent.Linkside)}" + Environment.NewLine);
             }
@@ -721,8 +721,8 @@ namespace Searchlo8
 
             // we test if the new location
             // is coliding
-            int x2 = ent.X + F.DivPrecise(ent.Vx, Stepnb);
-            int y2 = ent.Y + F.DivPrecise(ent.Vy, Stepnb);
+            int x2 = ent.X + F.Div(ent.Vx, Stepnb);
+            int y2 = ent.Y + F.Div(ent.Vy, Stepnb);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {F32.FromRaw(x2)} | ent.X {F32.FromRaw(ent.X)} | ent.Vx {F32.FromRaw(ent.Vx)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"y2 {F32.FromRaw(y2)} | ent.Y {F32.FromRaw(ent.Y)} | ent.Vy {F32.FromRaw(ent.Vy)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
 
@@ -769,8 +769,8 @@ namespace Searchlo8
             //}
 
             // apply the motion
-            ent.X += F.DivPrecise(ent.Vx, Stepnb);
-            ent.Y += F.DivPrecise(ent.Vy, Stepnb);
+            ent.X += F.Div(ent.Vx, Stepnb);
+            ent.Y += F.Div(ent.Vy, Stepnb);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {F32.FromRaw(ent.X)} | ent.Vx {F32.FromRaw(ent.Vx)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
             File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {F32.FromRaw(ent.Y)} | ent.Vy {F32.FromRaw(ent.Vy)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
             //Console.WriteLine(ent.Y);
@@ -822,7 +822,7 @@ namespace Searchlo8
 
                 // the new wheel rotation is
                 // the speed along the surface
-                ent.Vrot = F.DivPrecise(dotperp, angfac);
+                ent.Vrot = F.Div(dotperp, angfac);
                 File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vrot {F32.FromRaw(ent.Vrot)} | dotperp {F32.FromRaw(dotperp)} | angfac {F32.FromRaw(angfac)}" + Environment.NewLine);
 
                 // the wheel touch the ground
@@ -855,8 +855,8 @@ namespace Searchlo8
             // with squaring because of overflow
             // so we first divide by the item size
             // before squaring
-            int madx = F.DivPrecise(it.X - Charx, it.Size);
-            int mady = F.DivPrecise(it.Y - Chary, it.Size);
+            int madx = F.Div(it.X - Charx, it.Size);
+            int mady = F.Div(it.Y - Chary, it.Size);
             int sqrlen = F.Mul(madx, madx) + F.Mul(mady, mady);
 
             // if colision with an item
@@ -1290,8 +1290,8 @@ namespace Searchlo8
 
             // normalize the direction
             int length = F.SqrtPrecise(F.Mul(dirx, dirx) + F.Mul(diry, diry) + 655);
-            dirx = F.DivPrecise(dirx, length);
-            diry = F.DivPrecise(diry, length);
+            dirx = F.Div(dirx, length);
+            diry = F.Div(diry, length);
 
             // get the perpendicular
             int perpx = diry;
@@ -1378,7 +1378,7 @@ namespace Searchlo8
             for (int i = 0; i < 2097152; i += 65536)
             {
                 int tmpx = finishx + F.Mul(p8.Mod(i, 1048576), 262144);
-                int tmpy = finishy + F.Mul(65536 - p8.Mod(i, 131072), 262144) + F.Mul(F.Floor(F.DivPrecise(i, 1048576)), 524288);
+                int tmpy = finishy + F.Mul(65536 - p8.Mod(i, 131072), 262144) + F.Mul(F.Floor(F.Div(i, 1048576)), 524288);
                 p8.Rectfill(tmpx, tmpy, tmpx + 196608, tmpy + 196608, 393216);
             }
             CenterText(finishx + 2097152, finishy + 393216, text, col);
@@ -1392,9 +1392,9 @@ namespace Searchlo8
         private static string GetTimeStr(int val)
         {
             // transform timer to min:sec:dec
-            int t_cent = p8.Mod(F.Floor(F.DivPrecise(F.Mul(val, 655360), 1966080)), 655360);
-            int t_sec = p8.Mod(F.Floor(F.DivPrecise(val, 1966080)), 3932160);
-            int t_min = F.Floor(F.DivPrecise(val, F.Mul(1966080, 3932160)));
+            int t_cent = p8.Mod(F.Floor(F.Div(F.Mul(val, 655360), 1966080)), 655360);
+            int t_sec = p8.Mod(F.Floor(F.Div(val, 1966080)), 3932160);
+            int t_min = F.Floor(F.Div(val, F.Mul(1966080, 3932160)));
 
             string fill_sec = "";
             if (t_sec < 655360)
@@ -1464,8 +1464,8 @@ namespace Searchlo8
             int cl_miny = Clampy(miny);
             int cl_maxy = Clampy(maxy);
 
-            int steps = F.DivPrecise(x3 - x1, y3 - y1);
-            int stepe = F.DivPrecise(x2 - x1, y2 - y1);
+            int steps = F.Div(x3 - x1, y3 - y1);
+            int stepe = F.Div(x2 - x1, y2 - y1);
 
             int sx = F.Mul(steps, cl_y1 - y1) + x1;
             int ex = F.Mul(stepe, cl_y1 - y1) + x1;
@@ -1480,7 +1480,7 @@ namespace Searchlo8
             sx = F.Mul(steps, miny - y1) + x1;
             ex = F.Mul(stepe, miny - y1) + x1;
 
-            int df = F.DivPrecise(65536, maxy - miny);
+            int df = F.Div(65536, maxy - miny);
 
             int step2s = F.Mul(fx - sx, df);
             int step2e = F.Mul(fx - ex, df);
@@ -1576,7 +1576,7 @@ namespace Searchlo8
             // draw the bottom of the trees
             p8.Rectfill(Camoffx, paraly + 4194304 + 524288, Camoffx + 8388608, Camoffy + 8388608, 131072);
 
-            paralx = p8.Mod(paralx, 8388608) + F.Mul(F.Floor(F.DivPrecise(paralx, 8388608)), 16777216);
+            paralx = p8.Mod(paralx, 8388608) + F.Mul(F.Floor(F.Div(paralx, 8388608)), 16777216);
             // draw 2 series of trees
             // warping infinitly
             p8.Map(7340032, 2621440, paralx, paraly + 1048576, 1048576, 524288);
@@ -1690,7 +1690,7 @@ namespace Searchlo8
                 // handle going to the next level
                 if (Isfinish)
                 {
-                    int progress = Saturate(F.DivPrecise(F.DivPrecise(Timernextlevel, Timernextlevel_dur) - 19660, 32768));
+                    int progress = Saturate(F.Div(F.Div(Timernextlevel, Timernextlevel_dur) - 19660, 32768));
                     p8.Rectfill(-65536, 0, F.Mul(8388608, progress) - 65536, 8388608, 65536);
 
                     if (progress > 58982)
