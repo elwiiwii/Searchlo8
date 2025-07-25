@@ -44,7 +44,7 @@ namespace Searchlo8
             _flags = [];
             _map = [];
             _cart = new(this);
-            LoadGame(_cart,4);
+            //LoadGame(_cart,4);
         }
 
         private int[] DataToArray(string s, int n)
