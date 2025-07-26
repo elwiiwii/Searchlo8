@@ -1,26 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using static Searchlo8.Cyclo8;
 
 namespace Searchlo8;
 
-public class GameState
+public struct GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, Cyclo8.LinkStruct link, Cyclo8.ItemStruct[] items, bool isDead, bool isFinish)
 {
-    public List<Cyclo8.EntityClass> Entities { get; set; }
-    public Cyclo8.LinkClass Link { get; set; }
-    public List<Cyclo8.ItemClass> Items { get; set; }
-    public bool IsDead { get; set; }
-    public bool IsFinish { get; set; }
-    public GameState(List<Cyclo8.EntityClass> entities, Cyclo8.LinkClass link, List<Cyclo8.ItemClass> items, bool isDead, bool isFinish)
-    {
-        Entities = entities;
-        Link = link;
-        Items = items;
-        IsDead = isDead;
-        IsFinish = isFinish;
-    }
+    public Cyclo8.EntityStruct Wheel0 { get; set; } = wheel0;
+    public Cyclo8.EntityStruct Wheel1 { get; set; } = wheel1;
+    public Cyclo8.LinkStruct Link { get; set; } = link;
+    public Cyclo8.ItemStruct[] Items { get; set; } = items;
+    public bool IsDead { get; set; } = isDead;
+    public bool IsFinish { get; set; } = isFinish;
+
     public string StateToString()
     {
         string str = " | ";
-        foreach (var entity in Entities)
+        EntityStruct[] entities = [Wheel0, Wheel1];
+        foreach (var entity in entities)
         {
             str += $"{
                 entity.X}, {
@@ -29,12 +24,9 @@ public class GameState
                 entity.Vy}, {
                 entity.Rot}, {
                 entity.Vrot}, {
-                entity.Link.Ent1}, {
-                entity.Link.Ent2}, {
-                entity.Link.Baselen}, {
-                entity.Link.Length}, {
-                entity.Link.Dirx}, {
-                entity.Link.Diry}, {
+                Link.Length}, {
+                Link.Dirx}, {
+                Link.Diry}, {
                 entity.Linkside} | ";
         }
         return str;

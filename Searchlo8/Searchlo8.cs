@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
 using Force.DeepCloner;
-using FixMath;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Linq;
+using F = FixPointCS.Fixed32;
 
 namespace Searchlo8
 {
     public class Searchlo8
     {
         private ConcurrentDictionary<List<int>, GameState> _cache;
-        private Cyclo8.ItemClass endflag;
+        private Cyclo8.ItemStruct endflag;
         private Pico8 p8;
         private List<List<int>> Solutions;
-        private Cyclo8.ItemClass startflag;
+        private Cyclo8.ItemStruct startflag;
 
         private byte[] _pathImageData;
         private int _pathImageStride;
@@ -52,10 +49,10 @@ namespace Searchlo8
 
         private GameState InitState()
         {
-            p8.game.LoadLevel(3);
-            startflag = p8.game.Items.Find(item => item.Type == 3);
-            endflag = p8.game.Items.Find(item => item.Type == 4);
-            return new GameState(p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+            p8._cart.LoadLevel(3);
+            startflag = p8._cart.Items.Where(item => item.Type == 3).FirstOrDefault();
+            endflag = p8._cart.Items.Where(item => item.Type == 4).FirstOrDefault();
+            return new GameState(p8._cart.Wheel0, p8._cart.Wheel1, p8._cart.Link1, p8._cart.Items, p8._cart.Isdead, p8._cart.Isfinish);
         }
 
         public virtual int[] AllowableActions()
@@ -120,8 +117,8 @@ namespace Searchlo8
         {
             var lvlrange = endflag.Y - startflag.Y;
             
-            var playerpercentage = (state.Entities[0].Y - startflag.Y) / lvlrange * 100;
-            var depthpercentage = Math.Max(depth - 65, 0) / maxdepth * 100;
+            var playerpercentage = F.Mul(F.DivPrecise(p8._cart.Wheel0.Y - startflag.Y, lvlrange), 100);
+            var depthpercentage = F.Mul(F.DivPrecise(F.Max(depth - 65, 0), maxdepth), 100);
             return playerpercentage + 10 >= depthpercentage;
         }
 
@@ -137,14 +134,15 @@ namespace Searchlo8
 
         private GameState Transition(GameState state, int action)
         {
-            p8.game.Entities = state.Entities.DeepClone();
-            p8.game.Link1 = state.Link.DeepClone();
-            p8.game.Items = state.Items.DeepClone();
-            p8.game.Isdead = state.IsDead.DeepClone();
-            p8.game.Isfinish = state.IsFinish.DeepClone();
+            p8._cart.Wheel0 = state.Wheel0.DeepClone();
+            p8._cart.Wheel1 = state.Wheel1.DeepClone();
+            p8._cart.Link1 = state.Link.DeepClone();
+            p8._cart.Items = state.Items.DeepClone();
+            p8._cart.Isdead = state.IsDead.DeepClone();
+            p8._cart.Isfinish = state.IsFinish.DeepClone();
             p8.SetBtnState(action);
             p8.Step();
-            return new GameState(p8.game.Entities, p8.game.Link1, p8.game.Items, p8.game.Isdead, p8.game.Isfinish);
+            return new GameState(p8._cart.Wheel0, p8._cart.Wheel1, p8._cart.Link1, p8._cart.Items, p8._cart.Isdead, p8._cart.Isfinish);
         }
 
         private bool DepthCheck(int depth, int maxdepth)
@@ -187,15 +185,15 @@ namespace Searchlo8
                 var sorted = _cache
                 .OrderBy(kvp =>
                 {
-                    var point = kvp.Value.Entities[0];
-                    return F32.Abs(point.X - endflag.X) + F32.Abs(point.Y - endflag.Y);
+                    var point = kvp.Value.Wheel0;
+                    return F.Abs(point.X - endflag.X) + F.Abs(point.Y - endflag.Y);
                 })
                 .ToList();
-                Console.WriteLine(sorted[0].Value.Entities[0].X);
-                Console.WriteLine(sorted[0].Value.Entities[0].Y);
-                Console.WriteLine(sorted[0].Value.Entities[0].Isflying);
+                Console.WriteLine(sorted[0].Value.Wheel0.X);
+                Console.WriteLine(sorted[0].Value.Wheel0.Y);
+                Console.WriteLine(sorted[0].Value.Wheel0.Isflying);
                 var entries = _cache.Count;
-                var keep = 1000000; //(int)Math.Ceiling(entries * 0.5);
+                var keep = 1000000; //(int)F.Ceiling(entries * 0.5);
 
                 _cache = [];
                 foreach (var entry in sorted.Take(keep))
@@ -308,13 +306,13 @@ namespace Searchlo8
             */
         ];
 
-        private bool PathFromImage(List<Cyclo8.EntityClass> state, int lvl, Color color, int extralayers = 0)
+        private bool PathFromImage(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, int lvl, Color color, int extralayers = 0)
         {
-            int iX = F32.FloorToInt(F32.Min(state[0].X, state[1].X) + (F32.Max(state[0].X, state[1].X) - F32.Min(state[0].X, state[1].X)) / 2);
-            int iY = F32.FloorToInt(F32.Min(state[0].Y, state[1].Y) + (F32.Max(state[0].Y, state[1].Y) - F32.Min(state[0].Y, state[1].Y)) / 2);
-            var iLevel = p8.game.Levels[lvl - 1];
-            int startx = iLevel.Zones[0].Startx;
-            int starty = iLevel.Zones[0].Starty;
+            int iX = F.FloorToInt(F.DivPrecise(F.Min(wheel0.X, wheel1.X) + (F.Max(wheel0.X, wheel1.X) - F.Min(wheel0.X, wheel1.X)), 2));
+            int iY = F.FloorToInt(F.DivPrecise(F.Min(wheel0.Y, wheel1.Y) + (F.Max(wheel0.Y, wheel1.Y) - F.Min(wheel0.Y, wheel1.Y)), 2));
+            var iLevel = p8._cart.Levels[lvl - 1];
+            int startx = iLevel.Zones[0].Startx >> 16;
+            int starty = iLevel.Zones[0].Starty >> 16;
             iX -= startx * 8;
             iY -= starty * 8;
             iY += extralayers * 8;
@@ -343,14 +341,14 @@ namespace Searchlo8
             int maxx = 0;
             int miny = int.MaxValue;
             int maxy = 0;
-            foreach (var zone in p8.game.Levels[lvl - 1].Zones)
+            foreach (var zone in p8._cart.Levels[lvl - 1].Zones)
             {
                 if (zone != null)
                 {
-                    if (zone.Startx < minx) { minx = zone.Startx; }
-                    if (zone.Startx + zone.Sizex > maxx) { maxx = zone.Startx + zone.Sizex; }
-                    if (zone.Starty < miny) { miny = zone.Starty; }
-                    if (zone.Starty + zone.Sizey > maxy) { maxy = zone.Starty + zone.Sizey; }
+                    if (zone.Startx < minx) { minx = zone.Startx >> 16; }
+                    if (zone.Startx + zone.Sizex > maxx) { maxx = zone.Startx + zone.Sizex >> 16; }
+                    if (zone.Starty < miny) { miny = zone.Starty >> 16; }
+                    if (zone.Starty + zone.Sizey > maxy) { maxy = zone.Starty + zone.Sizey >> 16; }
                 }
             }
 
@@ -362,7 +360,7 @@ namespace Searchlo8
                     int snum = 0;
                     if (j > extralayers - 1)
                     {
-                        snum = p8.Mget(F32.FromInt(minx + i), F32.FromInt(miny + j - extralayers));
+                        snum = p8.Mget((minx + i) << 16, (miny + j - extralayers) << 16) >> 16;
                     }
                     for (int k = 0; k < 8; k++)
                     {
@@ -370,7 +368,7 @@ namespace Searchlo8
                         {
                             int sx = (snum * 8) % 128;
                             int sy = snum / 16;
-                            var col = p8.Sget(F32.FromInt(sx) + k, F32.FromInt(sy * 8) + l);
+                            var col = p8.Sget((sx + k) << 16, (sy * 8 + l) << 16) >> 16;
                             new_image.SetPixel(i * 8 + k, j * 8 + l, colors[col]);
                         }
                     }
@@ -390,7 +388,7 @@ namespace Searchlo8
         {
             int curcheck = 0;
             var checks = Checkpoints.ToList();
-            (int, int) checkpointcenter = (Math.Abs(checks[curcheck].Value.Item1.Item1 - checks[curcheck].Value.Item1.Item2), Math.Abs(checks[curcheck].Value.Item2.Item1 - checks[curcheck].Value.Item2.Item2));
+            (int, int) checkpointcenter = (F.Abs(checks[curcheck].Value.Item1.Item1 - checks[curcheck].Value.Item1.Item2), F.Abs(checks[curcheck].Value.Item2.Item1 - checks[curcheck].Value.Item2.Item2));
             if (depth < checks[curcheck].Key.Item1)
             {
                 return true;
@@ -398,16 +396,13 @@ namespace Searchlo8
             else if (depth >= checks[curcheck].Key.Item1 && depth <= checks[curcheck].Key.Item2)
             {
                 bool wall_contact = false;
-                foreach (var entity in state.Entities)
+                if (!(state.Wheel0.Isflying && state.Wheel1.Isflying))
                 {
-                    if (!entity.Isflying)
-                    {
-                        wall_contact = true;
-                    }
+                    wall_contact = true;
                 }
                 if (wall_contact)
                 {
-                    if (F32.Abs(state.Entities[0].Y - state.Entities[1].Y) < 10)
+                    if (F.Abs(state.Wheel0.Y - state.Wheel1.Y) < 655360)
                     {
                         return true;
                     }

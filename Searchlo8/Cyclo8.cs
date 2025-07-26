@@ -1,4 +1,4 @@
-﻿using FixMath;
+﻿using F = FixPointCS.Fixed32;
 
 namespace Searchlo8
 {
@@ -7,33 +7,33 @@ namespace Searchlo8
         #region globals
         private static Pico8 p8;
 
-        private readonly F32 Base_frameadvback;
-        private readonly F32 Base_frameadvfront;
-        private readonly F32 Base_speedback;
-        private readonly F32 Base_speedfront;
-        private readonly F32 Base_speedlerp;
+        private readonly int Base_frameadvback;
+        private readonly int Base_frameadvfront;
+        private readonly int Baselen;
+        private readonly int Base_speedback;
+        private readonly int Base_speedfront;
+        private readonly int Base_speedlerp;
         private bool Bikefaceright;
-        private F32 Bikeframe;
-        private F32 Bodyrot;
+        private int Bikeframe;
+        private int Bodyrot;
         private int Camadvanx;
-        private F32 Camoffx;
-        private F32 Camoffy;
+        private int Camoffx;
+        private int Camoffy;
         private bool Chardown;
-        private F32 Charx;
-        private F32 Charx2;
-        private F32 Chary;
-        private F32 Chary2;
-        private readonly List<F32> Cloudss;
-        private readonly List<F32> Cloudsx;
-        private readonly List<F32> Cloudsy;
+        private int Charx;
+        private int Charx2;
+        private int Chary;
+        private int Chary2;
+        private readonly int[] Cloudss;
+        private readonly int[] Cloudsx;
+        private readonly int[] Cloudsy;
         private int Currentlevel;
         private bool Dbg_checkfound;
         private int Dbg_curcheckcount;
         private int Dbg_lastcheckidx;
-        public List<EntityClass> Entities;
-        private F32 Flaganim;
-        private F32 Goalcamx;
-        private F32 Goalcamy;
+        private int Flaganim;
+        private int Goalcamx;
+        private int Goalcamy;
         public bool Isdead;
         public bool Isfinish;
         private bool Isstarted;
@@ -43,51 +43,52 @@ namespace Searchlo8
         private readonly int Item_start;
         private readonly int Item_teleport;
         private int Itemnb;
-        public List<ItemClass> Items;
-        public F32 Last_check_x;
-        public F32 Last_check_y;
+        public ItemStruct[] Items;
+        public int Last_check_x;
+        public int Last_check_y;
         private readonly int Levelnb;
-        public readonly List<LevelClass> Levels;
-        private readonly F32 Limit_col;
-        private readonly F32 Limit_wheel;
-        public LinkClass Link1;
+        public readonly LevelClass[] Levels;
+        private readonly int Limit_col;
+        private readonly int Limit_wheel;
+        public LinkStruct Link1;
         private int[] Pal;
-        private readonly int Playeridx;
         private bool Restartafterfinish;
         private int Retries;
         private int Score;
-        private readonly List<int> Sdflink;
+        private readonly int[] Sdflink;
         private readonly int Stepnb;
-        private readonly F32 Str_air;
-        private readonly F32 Str_bodyrot;
-        private readonly F32 Str_gravity;
-        private readonly F32 Str_link;
-        private readonly F32 Str_reflect;
-        private readonly F32 Str_wheel;
-        private readonly F32 Str_wheel_size;
+        private readonly int Str_air;
+        private readonly int Str_bodyrot;
+        private readonly int Str_gravity;
+        private readonly int Str_link;
+        private readonly int Str_reflect;
+        private readonly int Str_wheel;
+        private readonly int Str_wheel_size;
         private int Timer;
         private int Timerlasteleport;
-        private F32 Timernextlevel;
-        private readonly F32 Timernextlevel_dur;
+        private int Timernextlevel;
+        private readonly int Timernextlevel_dur;
         private int Totalleveldone;
         private int Totalretries;
         private int Totalscore;
         private int Totaltimer;
+        public EntityStruct Wheel0;
+        public EntityStruct Wheel1;
         #endregion
-        
+
         public Cyclo8(Pico8 pico8)
         {
             p8 = pico8;
-            
-            Camoffx = F32.FromInt(0);
-            Camoffy = F32.FromInt(-64);
-            Goalcamx = F32.FromInt(0);
-            Goalcamy = F32.FromInt(-64);
+
+            Camoffx = 0;
+            Camoffy = -4194304;
+            Goalcamx = 0;
+            Goalcamy = -4194304;
             Camadvanx = 0;
 
-            Bikeframe = F32.FromInt(0);
+            Bikeframe = 0;
 
-            Flaganim = F32.FromInt(0);
+            Flaganim = 0;
             Score = 0;
             Retries = 0;
             Timer = 0;
@@ -103,94 +104,90 @@ namespace Searchlo8
             Restartafterfinish = false;
             Isstarted = false;
 
-            Charx = F32.FromInt(0);
-            Chary = F32.FromInt(0);
-            Charx2 = F32.FromInt(0);
-            Chary2 = F32.FromInt(0);
+            Charx = 0;
+            Chary = 0;
+            Charx2 = 0;
+            Chary2 = 0;
             Chardown = false;
 
             // position of the last checkpoint
-            Last_check_x = F32.FromInt(0);
-            Last_check_y = F32.FromInt(0);
+            Last_check_x = 0;
+            Last_check_y = 0;
 
-            Dbg_curcheckcount = 1;
+            Dbg_curcheckcount = 65536;
             Dbg_checkfound = false;
             Dbg_lastcheckidx = 0;
 
             // physics settings :
             // nb of physics substeps
-            Stepnb = 10;
+            Stepnb = 655360;
             // strengh of rebound
-            Str_reflect = F32.FromDouble(1.1);
-            Str_gravity = F32.FromDouble(0.06);
-            Str_air = F32.FromDouble(0.99);
-            Str_wheel = F32.FromDouble(0.25);
-            Str_wheel_size = F32.FromDouble(1.0);
-            Str_link = F32.FromDouble(0.5);
+            Str_reflect = 72089;
+            Str_gravity = 3932;
+            Str_air = 64880;
+            Str_wheel = 16384;
+            Str_wheel_size = 65536;
+            Str_link = 32768;
             // rotation of the bike
             // according to arrow keys
-            Str_bodyrot = F32.FromDouble(0.04);
+            Str_bodyrot = 2621;
             // acceleration factor
-            Base_speedlerp = F32.FromDouble(0.5);
+            Base_speedlerp = 32768;
             // max speed front
-            Base_speedfront = F32.FromDouble(0.18);
+            Base_speedfront = 11796;
             // max speed back
-            Base_speedback = F32.FromDouble(0.03);
-            Base_frameadvfront = F32.FromDouble(0.3);
-            Base_frameadvback = F32.FromDouble(0.15);
+            Base_speedback = 1966;
+            Base_frameadvfront = 19660;
+            Base_frameadvback = 9830;
 
-            Limit_col = F32.FromDouble(2.0);
-            Limit_wheel = F32.FromDouble(1.5);
+            Limit_col = 131072;
+            Limit_wheel = 98304;
 
-            Bodyrot = F32.FromDouble(0.0);
-
-            Playeridx = 1;
+            Bodyrot = 0;
 
             Currentlevel = 1;
             Levelnb = 7;
 
-            Timernextlevel = F32.FromInt(0);
-            Timernextlevel_dur = F32.FromInt(30 * 7);
-            Timerlasteleport = 1000;
+            Timernextlevel = 0;
+            Timernextlevel_dur = 13762560;
+            Timerlasteleport = 65536000;
 
-            Cloudsx = new(new F32[60]);
-            Cloudsy = new(new F32[60]);
-            Cloudss = new(new F32[60]);
-            Levels = new(new LevelClass[7]);
-            Entities = new(new EntityClass[2]);
+            Cloudsx = new int[60];
+            Cloudsy = new int[60];
+            Cloudss = new int[60];
+            Levels = new LevelClass[7];
             Pal = [];
 
             Itemnb = 0;
-            Item_apple = 1;
-            Item_checkpoint = 2;
-            Item_start = 3;
-            Item_finish = 4;
-            Item_teleport = 5;
+            Item_apple = 65536;
+            Item_checkpoint = 131072;
+            Item_start = 196608;
+            Item_finish = 262144;
+            Item_teleport = 327680;
 
-            Items = new(new ItemClass[1]);
-            Link1 = LinkNew(1, 2);
+            Items = new ItemStruct[30];
+            Link1 = new();
+            Baselen = 524288;
 
             // array to link sprite to colision
-            Sdflink = new(new int[11 + 16 * 3])
-            {
-                [1 - 1] = 1,
-                [2 - 1] = 2,
-                [3 - 1] = 3,
-                [12 - 1] = 3,
-                [6 - 1] = 4,
-                [13 - 1] = 4,
-                [8 - 1] = 5,
-                [9 - 1] = 6,
-                [10 - 1] = 7,
-                [11 + 16 - 1] = 8,
-                [0 + 16 * 3 - 1] = 9,
-                [1 + 16 * 3 - 1] = 10,
-                [2 + 16 * 3 - 1] = 11,
-                [3 + 16 * 3 - 1] = 12,
-                [4 + 16 * 3 - 1] = 13,
-                [10 + 16 * 3 - 1] = 14,
-                [11 + 16 * 3 - 1] = 15
-            };
+            Sdflink = new int[59];
+            Sdflink[0] = 65536;
+            Sdflink[1] = 131072;
+            Sdflink[2] = 196608;
+            Sdflink[11] = 196608;
+            Sdflink[5] = 262144;
+            Sdflink[12] = 262144;
+            Sdflink[7] = 327680;
+            Sdflink[8] = 393216;
+            Sdflink[9] = 458752;
+            Sdflink[26] = 524288;
+            Sdflink[47] = 589824;
+            Sdflink[48] = 655360;
+            Sdflink[49] = 720896;
+            Sdflink[50] = 786432;
+            Sdflink[51] = 851968;
+            Sdflink[57] = 917504;
+            Sdflink[58] = 983040;
         }
 
         // map zone structure.
@@ -229,109 +226,90 @@ namespace Searchlo8
         }
 
         // entity = the 2 wheels
-        public class EntityClass(F32 inx, F32 iny)
+
+        public struct EntityStruct(int inx, int iny)
         {
-            public F32 X = inx;
-            public F32 Y = iny;
-            public F32 Vx = F32.FromDouble(0.0);
-            public F32 Vy = F32.FromDouble(0.0);
-            public F32 Rot = F32.FromDouble(0.0);
-            public F32 Vrot = F32.FromDouble(0.0);
+            public int X = inx;
+            public int Y = iny;
+            public int Vx = 0;
+            public int Vy = 0;
+            public int Rot = 0;
+            public int Vrot = 0;
             public bool Isflying = true;
-            // public int Lastcolx = X;
-            // public int Lastcoly = Y;
-            // public int Lastcolnx = 0;
-            // public int Lastcolny = 0;
-            public LinkClass? Link = null;
-            public int Linkside = 1;
+            public int Linkside = 65536;
         }
 
-        private static EntityClass EntityNew(F32 inx, F32 iny)
+        private static EntityStruct EntityNew(int inx, int iny)
         {
-            return new EntityClass(inx, iny);
+            return new EntityStruct(inx, iny);
         }
 
-        public class ItemClass(F32 inx, F32 iny, int inType)
+        public struct ItemStruct(int inx, int iny, int inType)
         {
-            public F32 X = inx;
-            public F32 Y = iny;
+            public int X = inx;
+            public int Y = iny;
             public int Type = inType;
             public bool Active = true;
-            public int Size = 8;
+            public int Size = 524288;
         }
 
-        private static ItemClass ItemNew(F32 inX, F32 inY, int inType)
+        private static ItemStruct ItemNew(int inX, int inY, int inType)
         {
-            return new ItemClass(inX, inY, inType);
+            return new ItemStruct(inX, inY, inType);
         }
 
         // a physic link between wheels
-        public class LinkClass(int ent1, int ent2)
+        public struct LinkStruct()
         {
-            public int Ent1 = ent1;
-            public int Ent2 = ent2;
-            public F32 Baselen = F32.FromDouble(8.0);
-            public F32 Length = F32.FromDouble(8.0);
-            public F32 Dirx = F32.FromDouble(0.0);
-            public F32 Diry = F32.FromDouble(0.0);
+            public int Length = 524288;
+            public int Dirx = 0;
+            public int Diry = 0;
         }
 
-        private static LinkClass LinkNew(int ent1, int ent2)
-        {
-            return new LinkClass(ent1, ent2);
-        }
-
-        private static F32 Lerp(F32 a, F32 b, F32 alpha)
+        private static int Lerp(int a, int b, int alpha)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Lerp()" + Environment.NewLine);
-            return a * (F32.FromDouble(1.0) - alpha) + b * alpha;
+            return F.Mul(a, 65536 - alpha) + F.Mul(b, alpha);
         }
 
-        private static F32 Saturate(F32 a)
+        private static int Saturate(int a)
         {
-            return F32.Max(F32.FromInt(0), F32.Min(F32.FromInt(1), a));
+            return F.Max(0, F.Min(65536, a));
         }
 
         private void CreateLevels()
         {
-            int l = 1;
-            Levels[l - 1] = LevelNew("long road", 256, 144, 512, 896, -1000, 128);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(64, 16, 64, 16);
-            Levels[l - 1].Zonenb = 1;
+            Levels[0] = LevelNew("long road", 16777216, 9437184, 33554432, 58720256, -65536000, 8388608);
+            Levels[0].Zones[0] = ZoneNew(4194304, 1048576, 4194304, 1048576);
+            Levels[0].Zonenb = 1;
 
-            l = 2;
-            Levels[l - 1] = LevelNew("easy wheely", 125, 16, 0, 400, -1000, 58);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(0, 0, 64, 16);
-            Levels[l - 1].Zones[2 - 1] = ZoneNew(32, 16, 32, 4);
-            Levels[l - 1].Zonenb = 2;
+            Levels[1] = LevelNew("easy wheely", 8192000, 1048576, 0, 26214400, -65536000, 3801088);
+            Levels[1].Zones[0] = ZoneNew(0, 0, 4194304, 1048576);
+            Levels[1].Zones[1] = ZoneNew(2097152, 1048576, 2097152, 262144);
+            Levels[1].Zonenb = 2;
 
-            l = 3;
-            Levels[l - 1] = LevelNew("central pit", 256, 144, 0, 128, -1000, 128);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(0, 16, 32, 16);
-            Levels[l - 1].Zonenb = 1;
+            Levels[2] = LevelNew("central pit", 16777216, 9437184, 0, 8388608, -65536000, 8388608);
+            Levels[2].Zones[0] = ZoneNew(0, 1048576, 2097152, 1048576);
+            Levels[2].Zonenb = 1;
 
-            l = 4;
-            Levels[l - 1] = LevelNew("spiral", 125, 16, 834, 896, 2, 2);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(104, 0, 24, 16);
-            Levels[l - 1].Zonenb = 1;
+            Levels[3] = LevelNew("spiral", 8192000, 1048576, 54657024, 58720256, 131072, 131072);
+            Levels[3].Zones[0] = ZoneNew(6815744, 0, 1572864, 1048576);
+            Levels[3].Zonenb = 1;
 
-            l = 5;
-            Levels[l - 1] = LevelNew("sky fall", 125, 16, 512, 700, -1000, 0);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(64, 0, 40, 16);
-            Levels[l - 1].Zonenb = 1;
+            Levels[4] = LevelNew("sky fall", 8192000, 1048576, 33554432, 45875200, -65536000, 0);
+            Levels[4].Zones[0] = ZoneNew(4194304, 0, 2621440, 1048576);
+            Levels[4].Zonenb = 1;
 
-            l = 6;
-            Levels[l - 1] = LevelNew("here and there", 386, 272, 384, 896, -1000, 256);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(48, 32, 64, 16);
-            Levels[l - 1].Zones[2 - 1] = ZoneNew(112, 32, 16, 8);
-            Levels[l - 1].Zonenb = 2;
-            Levels[l - 1].Startright = false;
+            Levels[5] = LevelNew("here and there", 25296896, 17825792, 25165824, 58720256, -65536000, 16777216);
+            Levels[5].Zones[0] = ZoneNew(3145728, 2097152, 4194304, 1048576);
+            Levels[5].Zones[1] = ZoneNew(7340032, 2097152, 1048576, 524288);
+            Levels[5].Zonenb = 2;
+            Levels[5].Startright = false;
 
-            l = 7;
-            Levels[l - 1] = LevelNew("ninja rise", 386, 256, 0, 385, -1000, 256);
-            Levels[l - 1].Zones[1 - 1] = ZoneNew(0, 32, 48, 16);
-            Levels[l - 1].Zones[2 - 1] = ZoneNew(32, 20, 32, 12);
-            Levels[l - 1].Zonenb = 2;
+            Levels[6] = LevelNew("ninja rise", 25296896, 16777216, 0, 25231360, -65536000, 16777216);
+            Levels[6].Zones[0] = ZoneNew(0, 2097152, 3145728, 1048576);
+            Levels[6].Zones[1] = ZoneNew(2097152, 1310720, 2097152, 786432);
+            Levels[6].Zonenb = 2;
         }
 
         public void Init()
@@ -340,30 +318,43 @@ namespace Searchlo8
             // to regenerate sdf sprite
             // GenAllSdf();
 
-            Pal = [5, 13, 15, 11, 9, 6, 7, 7, 14, 10, 7, 7, 7, 6, 15, 7];
+            Pal = [327680,
+                851968,
+                983040,
+                720896,
+                589824,
+                393216,
+                458752,
+                458752,
+                917504,
+                655360,
+                458752,
+                458752,
+                458752,
+                393216,
+                983040,
+                458752
+            ];
 
             CreateEntities();
             CreateLevels();
-            CreateClouds();
         }
 
         private void CreateClouds()
         {
-            int i = 1;
-            while (i <= 60)
+            for (int i = 0; i < 60; i++)
             {
-                Cloudsx[i - 1] = p8.Rnd(0, 10);
-                Cloudsy[i - 1] = p8.Rnd(0, 5);
-                Cloudss[i - 1] = p8.Rnd(0, 10);
-                i += 1;
+                Cloudsx[i] = p8.Rnd(0, 655360);
+                Cloudsy[i] = p8.Rnd(0, 327680);
+                Cloudss[i] = p8.Rnd(0, 655360);
             }
         }
 
-        private void StartLevel(int levelidx)
+        private void StartLevel(int level)
         {
-            Currentlevel = levelidx;
+            Currentlevel = level;
 
-            Items = new(new ItemClass[30]);
+            Items = new ItemStruct[30];
             Itemnb = 0;
             Bikefaceright = Levels[Currentlevel - 1].Startright;
 
@@ -374,47 +365,45 @@ namespace Searchlo8
             Retries = 0;
             Timer = 0;
             Restartafterfinish = false;
-
-            p8.Sfx(7, 2);
         }
 
         private void FindReplaceItemsZone(int startx, int starty, int sizex, int sizey)
         {
-            for (int i = startx; i <= startx + sizex - 1; i++)
+            for (int i = startx; i < startx + sizex; i += 65536)
             {
-                for (int j = starty; j <= starty + sizey - 1; j++)
+                for (int j = starty; j < starty + sizey; j += 65536)
                 {
-                    int col = p8.Mget(F32.FromInt(i), F32.FromInt(j));
+                    int col = p8.Mget(i, j);
                     int flags = p8.Fget(col);
                     int itemtype = 0;
-                    
-                    if ((flags & 4) > 0)
+
+                    if (((flags >> 16) & 4) > 0)
                     {
                         itemtype = Item_teleport;
-                        if (col == 56)
+                        if (col == 3670016)
                         {
                             itemtype = Item_apple;
                         }
                     }
-                    if ((flags & 8) > 0)
+                    if (((flags >> 16) & 8) > 0)
                     {
                         itemtype = Item_checkpoint;
-                        if (col == 67)
+                        if (col == 4390912)
                         {
                             itemtype = Item_start;
-                            Last_check_x = F32.FromInt(8 * i + 4);
-                            Last_check_y = F32.FromInt(8 * j + 4);
+                            Last_check_x = F.Mul(524288, i) + 262144;
+                            Last_check_y = F.Mul(524288, j) + 262144;
                         }
-                        if (col == 68)
+                        if (col == 4456448)
                         {
                             itemtype = Item_finish;
                         }
                     }
                     //if we found an item
-				    if (itemtype != 0)
+                    if (itemtype != 0)
                     {
                         Itemnb += 1;
-                        Items[Itemnb - 1] = ItemNew(i * 8 + F32.FromDouble(3.5), j * 8 + F32.FromDouble(3.5), itemtype);
+                        Items[Itemnb - 1] = ItemNew(F.Mul(i, 524288) + 229376, F.Mul(j, 524288) + 229376, itemtype);
 
                         // remove from the map
                         p8.Mset(i, j, 0);
@@ -435,8 +424,6 @@ namespace Searchlo8
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
                 FindReplaceItemsZone(curzone.Startx, curzone.Starty, curzone.Sizex, curzone.Sizey);
             }
-            // FindReplaceItemsZone(0,0,128,16);
-            // FindReplaceItemsZone(32,16,64,8);
         }
 
         // display the level
@@ -447,101 +434,95 @@ namespace Searchlo8
             for (int i = 0; i < Levels[Currentlevel - 1].Zonenb; i++)
             {
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
-                p8.Map(curzone.Startx, curzone.Starty, F32.FromInt(curzone.Startx * 8), F32.FromInt(curzone.Starty * 8), curzone.Sizex, curzone.Sizey, flags);
+                p8.Map(curzone.Startx, curzone.Starty, F.Mul(curzone.Startx, 524288), F.Mul(curzone.Starty, 524288), curzone.Sizex, curzone.Sizey, flags);
             }
-            // p8.Map(0,0,0,0,128,16,flags);
-            // p8.Map(32,16,32*8,16*8,64,8,flags);
         }
 
         // reset player state
-	    // after a retry
-	    private void ResetPlayer()
+        // after a retry
+        private void ResetPlayer()
         {
             Isdead = true;
-            Entities[Playeridx - 1].X = Last_check_x;
-            Entities[Playeridx - 1].Y = Last_check_y;
-            Entities[Playeridx - 1].Vx = F32.FromInt(0);
-            Entities[Playeridx - 1].Vy = F32.FromInt(0);
-            Entities[Playeridx - 1].Vrot = F32.FromInt(0);
+            Wheel0.X = Last_check_x;
+            Wheel0.Y = Last_check_y;
+            Wheel0.Vx = 0;
+            Wheel0.Vy = 0;
+            Wheel0.Vrot = 0;
 
-            Entities[Playeridx + 1 - 1].X = Last_check_x + 8;
-            Entities[Playeridx + 1 - 1].Y = Last_check_y;
-            Entities[Playeridx + 1 - 1].Vx = F32.FromInt(0);
-            Entities[Playeridx + 1 - 1].Vy = F32.FromInt(0);
-            Entities[Playeridx + 1 - 1].Vrot = F32.FromInt(0);
+            Wheel1.X = Last_check_x + 524288;
+            Wheel1.Y = Last_check_y;
+            Wheel1.Vx = 0;
+            Wheel1.Vy = 0;
+            Wheel1.Vrot = 0;
 
-            // Camoffx = 0; Camoffy = -64;
-            // Goalcamx = 0; Goalcamy = -64;
-
-            // Bikefaceright = true;
             Isdead = false;
 
-	    	if (Isfinish)
+            if (Isfinish)
             {
                 Restartafterfinish = true;
             }
-	    	if (!Isfinish)
+            if (!Isfinish)
             {
-                Retries += 1;
+                Retries += 65536;
             }
         }
 
         private void ResetCamera()
         {
-            Camoffx = Last_check_x - 16;  // -64
-            Camoffy = Last_check_y - 64;  // -96
+            Camoffx = Last_check_x - 1048576;
+            Camoffy = Last_check_y - 4194304;
             Goalcamx = Camoffx;
             Goalcamy = Camoffy;
         }
 
         // create the 2 wheels
-	    // and init some variables
-	    private void CreateEntities()
+        // and init some variables
+        private void CreateEntities()
         {
-            Entities[1 - 1] = EntityNew(F32.FromInt(0), F32.FromInt(0));
-            Entities[2 - 1] = EntityNew(F32.FromInt(0 + 8), F32.FromInt(0));
-            Entities[1 - 1].Link = Link1;
-            Entities[1 - 1].Linkside = 1;
-            Entities[2 - 1].Link = Link1;
-            Entities[2 - 1].Linkside = -1;
+            Wheel0 = EntityNew(0, 0);
+            Wheel1 = EntityNew(524288, 0);
+            //Wheel0.Link = Link1;
+            Wheel0.Linkside = 65536;
+            //Wheel1.Link = Link1;
+            Wheel1.Linkside = -65536;
         }
 
         // get the value of sdf
         // at location lx,ly
         // according to a sprite
         // chosen at an offset ox,oy
-        private F32 GetSdf(F32 lx, F32 ly, int ox, int oy)
+        private int GetSdf(int lx, int ly, int ox, int oy)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
-            int sx = F32.FloorToInt((lx + ox) / F32.FromDouble(8.0));
-            int sy = F32.FloorToInt((ly + oy) / F32.FromDouble(8.0));
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | lx {lx} | ox {ox}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | ly {ly} | oy {oy}" + Environment.NewLine);
+            int sx = F.Floor(F.DivPrecise(lx + ox, 524288));
+            int sy = F.Floor(F.DivPrecise(ly + oy, 524288));
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
 
             // get the sprite at the offset
-            int col = p8.Mget((lx + ox) / F32.FromDouble(8.0), ((ly + oy) / F32.FromDouble(8.0)));
+            int col = p8.Mget(sx, sy);
             int flags = p8.Fget(col);
-            int isc = flags & 1;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"col {col} | lx {lx} | ox {ox} | ly {ly} | oy {oy}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flags {flags} | isc {isc}" + Environment.NewLine);
+            int isc = ((flags >> 16) & 1) << 16;
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"col {F32.FromRaw(col)} | lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)} | ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flags {F32.FromRaw(flags)} | isc {F32.FromRaw(isc)}" + Environment.NewLine);
 
             // check if its a colision
             if (isc == 0)
             {
-                return F32.FromInt(0);
+                return 0;
             }
 
             // check if its in the level zone
             bool inlevelzone = false;
-	    	for (int i = 0; i < Levels[Currentlevel-1].Zonenb; i++)
+            for (int i = 0; i < Levels[Currentlevel - 1].Zonenb; i++)
             {
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"for loop {i}" + Environment.NewLine);
                 ZoneClass curzone = Levels[Currentlevel - 1].Zones[i];
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {sx} | curzone.Startx {curzone.Startx} | curzone.Sizex {curzone.Sizex}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {sy} | curzone.Starty {curzone.Starty} | curzone.Sizey {curzone.Sizey}" + Environment.NewLine);
-                if ((sx >= curzone.Startx) && (sx < (curzone.Startx+curzone.Sizex)))
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | curzone.Startx {F32.FromRaw(curzone.Startx)} | curzone.Sizex {F32.FromRaw(curzone.Sizex)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | curzone.Starty {F32.FromRaw(curzone.Starty)} | curzone.Sizey {F32.FromRaw(curzone.Sizey)}" + Environment.NewLine);
+                if ((sx >= curzone.Startx) && (sx < (curzone.Startx + curzone.Sizex)))
                 {
-                    if ((sy >= curzone.Starty) && (sy < (curzone.Starty+curzone.Sizey)))
+                    if ((sy >= curzone.Starty) && (sy < (curzone.Starty + curzone.Sizey)))
                     {
                         inlevelzone = true;
                         //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"inlevelzone {inlevelzone}" + Environment.NewLine);
@@ -552,119 +533,117 @@ namespace Searchlo8
 
             if (!inlevelzone)
             {
-                return F32.FromInt(0);
+                return 0;
             }
 
             // get the colision profile
-            int sdfval = Sdflink[col - 1];
+            int sdfval = Sdflink[(col >> 16) - 1];
             // if none is found, use the full square
             //sdfval ??= 0;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sdfval {sdfval} | col {col}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sdfval {F32.FromRaw(sdfval)} | col {F32.FromRaw(col)}" + Environment.NewLine);
 
             // proper coordinates in sdf
-            F32 wx = 2 * 8 * p8.Mod(F32.FromInt(sdfval), F32.FromInt(8)) + lx - sx * 8 + 4;
-            F32 wy = 2 * 8 * F32.FloorToInt(sdfval / F32.FromDouble(8.0)) + 8 * 12 + ly - sy * 8 + 4;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wx {wx} | sdfval {sdfval} | lx {lx} | sx {sx}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wy {wy} | sdfval {sdfval} | ly {ly} | sy {sy}" + Environment.NewLine);
+            int wx = F.Mul(1048576, p8.Mod(sdfval, 524288)) + lx - F.Mul(sx, 524288) + 262144;
+            int wy = F.Mul(1048576, F.Floor(F.DivPrecise(sdfval, 524288))) + 6553600 + ly - F.Mul(sy, 524288);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wx {F32.FromRaw(wx)} | sdfval {F32.FromRaw(sdfval)} | lx {F32.FromRaw(lx)} | sx {F32.FromRaw(sx)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wy {F32.FromRaw(wy)} | sdfval {F32.FromRaw(sdfval)} | ly {F32.FromRaw(ly)} | sy {F32.FromRaw(sy)}" + Environment.NewLine);
             // get distance
             int dist = p8.Sget(wx, wy);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dist {dist} | wx {wx} | wy {wy}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dist {F32.FromRaw(dist)} | wx {F32.FromRaw(wx)} | wy {F32.FromRaw(wy)}" + Environment.NewLine);
 
-            return F32.FromInt(dist);
+            return dist;
         }
 
         // get the combined sdf
-	    // of the 4 closest cells
-	    private F32 IsPointcol(F32 lx, F32 ly)
+        // of the 4 closest cells
+        private int IsPointcol(int lx, int ly)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsPointCol()" + Environment.NewLine);
-            F32 v0 = GetSdf(lx, ly, -3, -3);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {v0} | lx {lx} | ly {ly}" + Environment.NewLine);
-            F32 v1 = GetSdf(lx, ly, 4, -3);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {v1} | lx {lx} | ly {ly}" + Environment.NewLine);
-            F32 v2 = GetSdf(lx, ly, 4, 4);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {v2} | lx {lx} | ly {ly}" + Environment.NewLine);
-            F32 v3 = GetSdf(lx, ly, -3, 4);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {v3} | lx {lx} | ly {ly}" + Environment.NewLine);
+            int v0 = GetSdf(lx, ly, -196608, -196608);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {F32.FromRaw(v0)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            int v1 = GetSdf(lx, ly, 262144, -196608);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {F32.FromRaw(v1)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            int v2 = GetSdf(lx, ly, 262144, 262144);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {F32.FromRaw(v2)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            int v3 = GetSdf(lx, ly, -196608, 262144);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {F32.FromRaw(v3)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
 
-            return F32.Max(F32.Max(v0, v1), F32.Max(v2, v3));
+            return F.Max(F.Max(v0, v1), F.Max(v2, v3));
         }
 
         // get the colision distance
         // and surface normal
-        private (F32 final, F32 norx, F32 nory) IsColiding(F32 lx, F32 ly)
+        private (int final, int norx, int nory) IsColiding(int lx, int ly)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"IsColiding()" + Environment.NewLine);
             // we take the 4 points
             // at the center of the wheel
-            F32 v0 = IsPointcol(lx - F32.FromDouble(0.5), ly - F32.FromDouble(0.5));
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {v0} | lx {lx} | ly {ly}" + Environment.NewLine);
-            F32 v1 = IsPointcol(lx + F32.FromDouble(0.5), ly - F32.FromDouble(0.5));
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {v1} | lx {lx} | ly {ly}" + Environment.NewLine);
-            F32 v2 = IsPointcol(lx + F32.FromDouble(0.5), ly + F32.FromDouble(0.5));
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {v2} | lx {lx} | ly {ly}" + Environment.NewLine);
-            F32 v3 = IsPointcol(lx - F32.FromDouble(0.5), ly + F32.FromDouble(0.5));
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {v3} | lx {lx} | ly {ly}" + Environment.NewLine);
+            int v0 = IsPointcol(lx - 32768, ly - 32768);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v0 {F32.FromRaw(v0)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            int v1 = IsPointcol(lx + 32768, ly - 32768);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v1 {F32.FromRaw(v1)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            int v2 = IsPointcol(lx + 32768, ly + 32768);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {F32.FromRaw(v2)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            int v3 = IsPointcol(lx - 32768, ly + 32768);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {F32.FromRaw(v3)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
 
             // we iterpolate the distance
             // with bilinear
-            F32 llx = lx - F32.FromDouble(0.5) - F32.FloorToInt(lx - F32.FromDouble(0.5));
-            F32 lly = ly - F32.FromDouble(0.5) - F32.FloorToInt(ly - F32.FromDouble(0.5));
-            F32 lerp1 = (F32.FromDouble(1.0) - llx) * v0 + llx * v1;
-            F32 lerp2 = (F32.FromDouble(1.0) - llx) * v3 + llx * v2;
-            F32 final = (F32.FromDouble(1.0) - lly) * lerp1 + lly * lerp2;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"llx {llx} | lx {lx}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lly {lly} | ly {ly}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp1 {lerp1} | llx {llx} | v0 {v0} | v1 {v1}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp2 {lerp2} | llx {llx} | v3 {v3} | v2 {v2}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"final {final} | lly {lly} | lerp1 {lerp1} | lerp2 {lerp2}" + Environment.NewLine);
+            int llx = lx - 32768 - F.Floor(lx - 32768);
+            int lly = ly - 32768 - F.Floor(ly - 32768);
+            int lerp1 = F.Mul(65536 - llx, v0) + F.Mul(llx, v1);
+            int lerp2 = F.Mul(65536 - llx, v3) + F.Mul(llx, v2);
+            int final = F.Mul(65536 - lly, lerp1) + F.Mul(lly, lerp2);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"llx {F32.FromRaw(llx)} | lx {F32.FromRaw(lx)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lly {F32.FromRaw(lly)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp1 {F32.FromRaw(lerp1)} | llx {F32.FromRaw(llx)} | v0 {F32.FromRaw(v0)} | v1 {F32.FromRaw(v1)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerp2 {F32.FromRaw(lerp2)} | llx {F32.FromRaw(llx)} | v3 {F32.FromRaw(v3)} | v2 {F32.FromRaw(v2)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"final {F32.FromRaw(final)} | lly {F32.FromRaw(lly)} | lerp1 {F32.FromRaw(lerp1)} | lerp2 {F32.FromRaw(lerp2)}" + Environment.NewLine);
 
             // the normal is a gradient
-            F32 norx = (v0 - v1 + v3 - v2) * F32.FromDouble(0.5);
-            F32 nory = (v0 - v3 + v1 - v2) * F32.FromDouble(0.5);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {norx} | v0 {v0} | v1 {v1} | v3 {v3} | v2 {v2}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"nory {nory} | v0 {v0} | v3 {v3} | v1 {v1} | v2 {v2}" + Environment.NewLine);
+            int norx = F.Mul(v0 - v1 + v3 - v2, 32768);
+            int nory = F.Mul(v0 - v3 + v1 - v2, 32768);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {F32.FromRaw(norx)} | v0 {F32.FromRaw(v0)} | v1 {F32.FromRaw(v1)} | v3 {F32.FromRaw(v3)} | v2 {F32.FromRaw(v2)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"nory {F32.FromRaw(nory)} | v0 {F32.FromRaw(v0)} | v3 {F32.FromRaw(v3)} | v1 {F32.FromRaw(v1)} | v2 {F32.FromRaw(v2)}" + Environment.NewLine);
 
             // we ensure normal is normalized
-            F32 len = F32.Sqrt(norx * norx + nory * nory + F32.FromDouble(0.001));
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"len {len} | norx {norx} | nory {nory}" + Environment.NewLine);
-            norx /= len;
-            nory /= len;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {norx} | nory {nory}" + Environment.NewLine);
-
-            // F32 final = IsPointcol(lx,ly);
+            int len = F.SqrtPrecise(F.Mul(norx, norx) + F.Mul(nory, nory) + 65);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"len {F32.FromRaw(len)} | norx {F32.FromRaw(norx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
+            norx = F.DivPrecise(norx, len);
+            nory = F.DivPrecise(nory, len);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"norx {F32.FromRaw(norx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
 
             return (final, norx, nory);
         }
 
         // this take a velocity vector
-	    // and reflect it by a normal
-	    // a damping is applyed of the reflection
-	    private (F32, F32) Reflect(F32 vx, F32 vy, F32 nx, F32 ny)
+        // and reflect it by a normal
+        // a damping is applyed of the reflection
+        private (int, int) Reflect(int vx, int vy, int nx, int ny)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Reflect()" + Environment.NewLine);
-            F32 dot = vx * nx + vy * ny;
-            F32 bx = dot * nx;
-            F32 by = dot * ny;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot} | vx {vx} | nx {nx} | vy {vy} | ny {ny}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"bx {bx} | dot {dot} | nx {nx}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"by {by} | dot {dot} | nx {ny}" + Environment.NewLine);
+            int dot = F.Mul(vx, nx) + F.Mul(vy, ny);
+            int bx = F.Mul(dot, nx);
+            int by = F.Mul(dot, ny);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {F32.FromRaw(dot)} | vx {F32.FromRaw(vx)} | nx {F32.FromRaw(nx)} | vy {F32.FromRaw(vy)} | ny {F32.FromRaw(ny)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"bx {F32.FromRaw(bx)} | dot {F32.FromRaw(dot)} | nx {F32.FromRaw(nx)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"by {F32.FromRaw(by)} | dot {F32.FromRaw(dot)} | nx {F32.FromRaw(ny)}" + Environment.NewLine);
 
-            F32 rx = vx - Str_reflect * bx;
-            F32 ry = vy - Str_reflect * by;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"rx {rx} | vx {vx} | Str_reflect {Str_reflect} | bx {bx}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ry {ry} | vy {vy} | Str_reflect {Str_reflect} | by {by}" + Environment.NewLine);
+            int rx = vx - F.Mul(Str_reflect, bx);
+            int ry = vy - F.Mul(Str_reflect, by);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"rx {F32.FromRaw(rx)} | vx {F32.FromRaw(vx)} | Str_reflect {F32.FromRaw(Str_reflect)} | bx {F32.FromRaw(bx)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ry {F32.FromRaw(ry)} | vy {F32.FromRaw(vy)} | Str_reflect {F32.FromRaw(Str_reflect)} | by {F32.FromRaw(by)}" + Environment.NewLine);
 
             // we play some colision sounds
             // when both vector are opposite
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {dot}" + Environment.NewLine);
-            if (dot < F32.FromDouble(-0.8))
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dot {F32.FromRaw(dot)}" + Environment.NewLine);
+            if (dot < -52428)
             {
                 p8.Sfx(0, 3);
             }
-	    	else
+            else
             {
-                if (dot < F32.FromDouble(-0.2))
+                if (dot < -13107)
                 {
                     p8.Sfx(6, 3);
                 }
@@ -674,23 +653,23 @@ namespace Searchlo8
         }
 
         // this update the state of a link
-	    // between 2 wheels
-	    private void UpLink(LinkClass link)
+        // between 2 wheels
+        private void UpLink(ref LinkStruct link)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpLink()" + Environment.NewLine);
-            F32 dirx = Entities[link.Ent2 - 1].X - Entities[link.Ent1 - 1].X;
-            F32 diry = Entities[link.Ent2 - 1].Y - Entities[link.Ent1 - 1].Y;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dirx {dirx} | Entities[link.Ent2 - 1].x {Entities[link.Ent2 - 1].X} | Entities[link.Ent1 - 1].x {Entities[link.Ent1 - 1].X}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"diry {diry} | Entities[link.Ent2 - 1].y {Entities[link.Ent2 - 1].Y} | Entities[link.Ent1 - 1].y {Entities[link.Ent1 - 1].Y}" + Environment.NewLine);
-            
-            link.Length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
-            link.Dirx = dirx / link.Length;
-            link.Diry = diry / link.Length;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"link.Length {link.Length} | link.Dirx {link.Dirx} | link.Diry {link.Diry}" + Environment.NewLine);
+            int dirx = Wheel1.X - Wheel0.X;
+            int diry = Wheel1.Y - Wheel0.Y;
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dirx {F32.FromRaw(dirx)} | Wheel1.x {F32.FromRaw(Wheel1.X)} | Wheel0.x {F32.FromRaw(Wheel0.X)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"diry {F32.FromRaw(diry)} | Wheel1.y {F32.FromRaw(Wheel1.Y)} | Wheel0.y {F32.FromRaw(Wheel0.Y)}" + Environment.NewLine);
+
+            link.Length = F.SqrtPrecise(F.Mul(dirx, dirx) + F.Mul(diry, diry) + 655);
+            link.Dirx = F.DivPrecise(dirx, link.Length);
+            link.Diry = F.DivPrecise(diry, link.Length);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"link.Length {F32.FromRaw(link.Length)} | link.Dirx {F32.FromRaw(link.Dirx)} | link.Diry {F32.FromRaw(link.Diry)}" + Environment.NewLine);
         }
 
         // pre physic update of a wheel
-	    private void UpStartEntity(EntityClass ent)
+        private void UpStartEntity(ref EntityStruct ent)
         {
             // apply gravity
             ent.Vy += Str_gravity;
@@ -698,58 +677,58 @@ namespace Searchlo8
         }
 
         // do one step of physic on a wheel
-	    private void UpStepEntity(EntityClass ent)
+        private void UpStepEntity(ref EntityStruct ent)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpStepEntity()" + Environment.NewLine);
             // apply link force
-            if (ent.Link != null)
-            {
-                // force according to base length
-                F32 flink = (ent.Link.Length - ent.Link.Baselen) * Str_link;
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flink {flink} | ent.Link.Length {ent.Link.Length} | ent.Link.Baselen {ent.Link.Baselen} | Str_link {Str_link}" + Environment.NewLine);
-                
-                // add the force
-                ent.Vx += ent.Link.Dirx * ent.Linkside * flink;
-                ent.Vy += ent.Link.Diry * ent.Linkside * flink;
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Link.Dirx {ent.Link.Dirx} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | ent.Link.Diry {ent.Link.Diry} | ent.Linkside {ent.Linkside} | flink {flink}" + Environment.NewLine);
-                
-                // apply the rotation
-                // due to the body
-                // if not on the ground ?
-                // if(ent.isflying) then
-                if (true)
-                {
-                    // force perpendicular
-                    // to the link axis
-                    F32 perpx = ent.Link.Diry;
-                    F32 perpy = -ent.Link.Dirx;
-                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {perpx} | ent.Link.Diry {ent.Link.Diry}" + Environment.NewLine);
-                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {perpy} | -ent.Link.Dirx {-ent.Link.Dirx}" + Environment.NewLine);
+            //if (Link1 is not null)
+            //{
+            // force according to base length
+            int flink = F.Mul(Link1.Length - Baselen, Str_link);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flink {F32.FromRaw(flink)} | Link1.Length {F32.FromRaw(Link1.Length)} | Link1.Baselen {F32.FromRaw(Link1.Baselen)} | Str_link {F32.FromRaw(Str_link)}" + Environment.NewLine);
 
-                    ent.Vx += perpx * Bodyrot / Stepnb * ent.Linkside;
-                    ent.Vy += perpy * Bodyrot / Stepnb * ent.Linkside;
-                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | perpx {perpx} | Bodyrot {Bodyrot} | Stepnb {Stepnb} | ent.Linkside {ent.Linkside}" + Environment.NewLine);
-                    //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | perpy {perpy} | Bodyrot {Bodyrot} | Stepnb {Stepnb} | ent.Linkside {ent.Linkside}" + Environment.NewLine);
-                }
+            // add the force
+            ent.Vx += F.Mul(F.Mul(Link1.Dirx, ent.Linkside), flink);
+            ent.Vy += F.Mul(F.Mul(Link1.Diry, ent.Linkside), flink);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | Link1.Dirx {F32.FromRaw(Link1.Dirx)} | ent.Linkside {F32.FromRaw(ent.Linkside)} | flink {F32.FromRaw(flink)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {F32.FromRaw(ent.Vy)} | Link1.Diry {F32.FromRaw(Link1.Diry)} | ent.Linkside {F32.FromRaw(ent.Linkside)} | flink {F32.FromRaw(flink)}" + Environment.NewLine);
+
+            // apply the rotation
+            // due to the body
+            // if not on the ground ?
+            // if(ent.isflying) then
+            if (true)
+            {
+                // force perpendicular
+                // to the link axis
+                int perpx = Link1.Diry;
+                int perpy = -Link1.Dirx;
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {F32.FromRaw(perpx)} | Link1.Diry {F32.FromRaw(Link1.Diry)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {F32.FromRaw(perpy)} | -Link1.Dirx {F32.FromRaw(-Link1.Dirx)}" + Environment.NewLine);
+
+                ent.Vx += F.Mul(F.DivPrecise(F.Mul(perpx, Bodyrot), Stepnb), ent.Linkside);
+                ent.Vy += F.Mul(F.DivPrecise(F.Mul(perpy, Bodyrot), Stepnb), ent.Linkside);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | perpx {F32.FromRaw(perpx)} | Bodyrot {F32.FromRaw(Bodyrot)} | Stepnb {F32.FromRaw(Stepnb)} | ent.Linkside {F32.FromRaw(ent.Linkside)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {F32.FromRaw(ent.Vy)} | perpy {F32.FromRaw(perpy)} | Bodyrot {F32.FromRaw(Bodyrot)} | Stepnb {F32.FromRaw(Stepnb)} | ent.Linkside {F32.FromRaw(ent.Linkside)}" + Environment.NewLine);
             }
+            //}
 
             // we test if the new location
             // is coliding
-            F32 x2 = ent.X + ent.Vx / Stepnb;
-            F32 y2 = ent.Y + ent.Vy / Stepnb;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {x2} | ent.X {ent.X} | ent.Vx {ent.Vx} | Stepnb {Stepnb}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"y2 {y2} | ent.Y {ent.Y} | ent.Vy {ent.Vy} | Stepnb {Stepnb}" + Environment.NewLine);
+            int x2 = ent.X + F.DivPrecise(ent.Vx, Stepnb);
+            int y2 = ent.Y + F.DivPrecise(ent.Vy, Stepnb);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {F32.FromRaw(x2)} | ent.X {F32.FromRaw(ent.X)} | ent.Vx {F32.FromRaw(ent.Vx)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"y2 {F32.FromRaw(y2)} | ent.Y {F32.FromRaw(ent.Y)} | ent.Vy {F32.FromRaw(ent.Vy)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
 
-            if (ent.Y > F32.FromDouble(16.1)) //F32.FromDouble(16.9132))
-            {
+            //if (ent.Y > F32.FromDouble(16.1)) //F32.FromDouble(16.9132))
+            //{
+            //
+            //}
 
-            }
+            (int iscol, int norx, int nory) = IsColiding(x2, y2); // should all be 0
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {F32.FromRaw(x2)} | y2 {F32.FromRaw(y2)} | iscol {F32.FromRaw(iscol)} | norx {F32.FromRaw(norx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
 
-            (F32 iscol, F32 norx, F32 nory) = IsColiding(x2, y2); // should all be 0
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"x2 {x2} | y2 {y2} | iscol {iscol} | norx {norx} | nory {nory}" + Environment.NewLine);
-
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {F32.FromRaw(iscol)} | Limit_col {F32.FromRaw(Limit_col)}" + Environment.NewLine);
             // if coliding
             if (iscol > Limit_col)
             {
@@ -763,82 +742,82 @@ namespace Searchlo8
                 // reflect the velocity by
                 // the surface normal
 
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Vy {ent.Vy}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | ent.Vy {F32.FromRaw(ent.Vy)}" + Environment.NewLine);
                 (ent.Vx, ent.Vy) = Reflect(ent.Vx, ent.Vy, norx, nory);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | ent.Vy {ent.Vy} | norx {norx} | nory {nory}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | ent.Vy {F32.FromRaw(ent.Vy)} | norx {F32.FromRaw(norx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
                 //Console.WriteLine($"iscol {iscol}");
                 //Console.WriteLine($"Limit_col {Limit_col}");
                 //Console.WriteLine($"ent.Vx {ent.Vx}");
                 //Console.WriteLine($"ent.Vy {ent.Vy}");
 
                 // ensure we are not inside the colision
-                ent.X += norx * (iscol - Limit_col);
-                ent.Y += nory * (iscol - Limit_col);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {ent.X} | norx {norx} | iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {ent.Y} | nory {nory} | iscol {iscol} | Limit_col {Limit_col}" + Environment.NewLine);
+                ent.X += F.Mul(norx, iscol - Limit_col);
+                ent.Y += F.Mul(nory, iscol - Limit_col);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {F32.FromRaw(ent.X)} | norx {F32.FromRaw(norx)} | iscol {F32.FromRaw(iscol)} | Limit_col {F32.FromRaw(Limit_col)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {F32.FromRaw(ent.Y)} | nory {F32.FromRaw(nory)} | iscol {F32.FromRaw(iscol)} | Limit_col {F32.FromRaw(Limit_col)}" + Environment.NewLine);
             }
 
-            if (ent.Vx < -1)
-            {
-
-            }
+            //if (ent.Vx < -1)
+            //{
+            //
+            //}
 
             // apply the motion
-            ent.X += ent.Vx / Stepnb;
-            ent.Y += ent.Vy / Stepnb;
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {ent.X} | ent.Vx {ent.Vx} | Stepnb {Stepnb}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {ent.Y} | ent.Vy {ent.Vy} | Stepnb {Stepnb}" + Environment.NewLine);
+            ent.X += F.DivPrecise(ent.Vx, Stepnb);
+            ent.Y += F.DivPrecise(ent.Vy, Stepnb);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.X {F32.FromRaw(ent.X)} | ent.Vx {F32.FromRaw(ent.Vx)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Y {F32.FromRaw(ent.Y)} | ent.Vy {F32.FromRaw(ent.Vy)} | Stepnb {F32.FromRaw(Stepnb)}" + Environment.NewLine);
             //Console.WriteLine(ent.Y);
 
             // if wheel is near the ground
             // we apply the wheel force
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {iscol} | Limit_wheel {Limit_wheel}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"iscol {F32.FromRaw(iscol)} | Limit_wheel {F32.FromRaw(Limit_wheel)}" + Environment.NewLine);
             if (iscol > Limit_wheel)
             {
                 // force direction
                 // perpendicular to the
                 // surface normal
-                F32 perpx = nory;
-                F32 perpy = -norx;
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {perpx} | nory {nory}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {perpy} | -norx {-norx}" + Environment.NewLine);
+                int perpx = nory;
+                int perpy = -norx;
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {F32.FromRaw(perpx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {F32.FromRaw(perpy)} | -norx {F32.FromRaw(-norx)}" + Environment.NewLine);
 
-                F32 angfac = F32.FromDouble(3.1415) * 8 * Str_wheel_size;
+                int angfac = F.Mul(F.Mul(205881, 524288), Str_wheel_size);
                 // transform wheel speed to force
-                F32 angrot = ent.Vrot * angfac;
-                F32 wantx = angrot * perpx;
-                F32 wanty = angrot * perpy;
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angfac {angfac} | Str_wheel_size {Str_wheel_size}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angrot {angrot} | ent.Vrot {ent.Vrot} | angfac {angfac}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wantx {wantx} | angrot {angrot} | perpx {perpx}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wanty {wanty} | angrot {angrot} | perpy {perpy}" + Environment.NewLine);
+                int angrot = F.Mul(ent.Vrot, angfac);
+                int wantx = F.Mul(angrot, perpx);
+                int wanty = F.Mul(angrot, perpy);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angfac {F32.FromRaw(angfac)} | Str_wheel_size {F32.FromRaw(Str_wheel_size)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"angrot {F32.FromRaw(angrot)} | ent.Vrot {F32.FromRaw(ent.Vrot)} | angfac {F32.FromRaw(angfac)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wantx {F32.FromRaw(wantx)} | angrot {F32.FromRaw(angrot)} | perpx {F32.FromRaw(perpx)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wanty {F32.FromRaw(wanty)} | angrot {F32.FromRaw(angrot)} | perpy {F32.FromRaw(perpy)}" + Environment.NewLine);
 
-                F32 distfactor = F32.FromDouble(1.0);  // Saturate((iscol - Limit_wheel)*1.0)
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"distfactor {distfactor}" + Environment.NewLine);
+                //int distfactor = 65536; // F32.FromDouble(1.0);  // Saturate((iscol - Limit_wheel)*1.0)
+                ////File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"distfactor {distfactor}" + Environment.NewLine);
 
                 // interpolate between
                 // wheel motion
                 // and entity motion
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | wantx {wantx} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | wanty {wanty} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
-                F32 lerpx = Lerp(ent.Vx, wantx, Str_wheel * distfactor);
-                F32 lerpy = Lerp(ent.Vy, wanty, Str_wheel * distfactor);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpx {lerpx} | ent.Vx {ent.Vx} | wantx {wantx} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpy {lerpy} | ent.Vy {ent.Vy} | wanty {wanty} | Str_wheel {Str_wheel} | distfactor {distfactor}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | wantx {F32.FromRaw(wantx)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {F32.FromRaw(ent.Vy)} | wanty {F32.FromRaw(wanty)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
+                int lerpx = Lerp(ent.Vx, wantx, Str_wheel);
+                int lerpy = Lerp(ent.Vy, wanty, Str_wheel);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpx {F32.FromRaw(lerpx)} | ent.Vx {F32.FromRaw(ent.Vx)} | wantx {F32.FromRaw(wantx)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpy {F32.FromRaw(lerpy)} | ent.Vy {F32.FromRaw(ent.Vy)} | wanty {F32.FromRaw(wanty)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
 
                 ent.Vx = lerpx;
                 ent.Vy = lerpy;
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {ent.Vx} | lerpx {lerpx}" + Environment.NewLine);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {ent.Vy} | lerpy {lerpy}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | lerpx {F32.FromRaw(lerpx)}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {F32.FromRaw(ent.Vy)} | lerpy {F32.FromRaw(lerpy)}" + Environment.NewLine);
 
                 // get the wheel speed along the surface
-                F32 dotperp = (ent.Vx * perpx + ent.Vy * perpy);
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dotperp {dotperp} | ent.Vx {ent.Vx} | perpx {perpx} | ent.Vy {ent.Vy} | perpy {perpy}" + Environment.NewLine);
+                int dotperp = F.Mul(ent.Vx, perpx) + F.Mul(ent.Vy, perpy);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"dotperp {F32.FromRaw(dotperp)} | ent.Vx {F32.FromRaw(ent.Vx)} | perpx {F32.FromRaw(perpx)} | ent.Vy {F32.FromRaw(ent.Vy)} | perpy {F32.FromRaw(perpy)}" + Environment.NewLine);
 
                 // the new wheel rotation is
                 // the speed along the surface
-                ent.Vrot = dotperp / angfac;
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vrot {ent.Vrot} | dotperp {dotperp} | angfac {angfac}" + Environment.NewLine);
+                ent.Vrot = F.DivPrecise(dotperp, angfac);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vrot {F32.FromRaw(ent.Vrot)} | dotperp {F32.FromRaw(dotperp)} | angfac {F32.FromRaw(angfac)}" + Environment.NewLine);
 
                 // the wheel touch the ground
                 ent.Isflying = false;
@@ -847,63 +826,63 @@ namespace Searchlo8
         }
 
         // post physic update of a wheel
-	    private void UpEndEntity(EntityClass ent)
+        private void UpEndEntity(ref EntityStruct ent)
         {
             // apply air friction
-	    	if (!ent.Isflying)
+            if (!ent.Isflying)
             {
-                ent.Vx *= Str_air;
-                ent.Vy *= Str_air;
+                ent.Vx = F.Mul(ent.Vx, Str_air);
+                ent.Vy = F.Mul(ent.Vy, Str_air);
             }
 
             // make the wheel turn
             ent.Rot += ent.Vrot;
-	    	// we could apply a wheel friction
-	    	// ent.Vrot *= 0.94
+            // we could apply a wheel friction
+            // ent.Vrot *= 0.94
         }
 
         // check if an item
-	    // is near the player
-	    private void CheckItem(ItemClass it)
+        // is near the player
+        private void CheckItem(ref ItemStruct it)
         {
             // need to be carefull
             // with squaring because of overflow
             // so we first divide by the item size
             // before squaring
-            F32 madx = (it.X - Charx) / it.Size;
-            F32 mady = (it.Y - Chary) / it.Size;
-            F32 sqrlen = madx * madx + mady * mady;
+            int madx = F.DivPrecise(it.X - Charx, it.Size);
+            int mady = F.DivPrecise(it.Y - Chary, it.Size);
+            int sqrlen = F.Mul(madx, madx) + F.Mul(mady, mady);
 
-	    	// if colision with an item
-	    	if ((!Isdead) && (sqrlen < 1))
+            // if colision with an item
+            if ((!Isdead) && (sqrlen < 65536))
             {
                 // apples
-	    		if ((it.Type == Item_apple) && it.Active)
+                if ((it.Type == Item_apple) && it.Active)
                 {
                     if (!Restartafterfinish)
                     {
                         it.Active = false;
-                        Score += 1;
-	    				if (Isfinish)
+                        Score += 65536;
+                        if (Isfinish)
                         {
-                            Totalscore += 1;  // special case
+                            Totalscore += 65536; // special case
                         }
                         p8.Sfx(3, 3);
                     }
                 }
-	    		// teleports
-	    		if ((it.Type == Item_teleport) && it.Active)
+                // teleports
+                if ((it.Type == Item_teleport) && it.Active)
                 {
-                    if ((!Isfinish) &&(!Isdead))
+                    if ((!Isfinish) && (!Isdead))
                     {
                         p8.Sfx(7, 2);
-                        Retries -= 1;  // free retry
+                        Retries -= 65536; // free retry
                         Timerlasteleport = 0;
                         ResetPlayer();
                     }
                 }
-	    		// checkpoints
-	    		if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
+                // checkpoints
+                if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
                 {
                     if (it.Active)
                     {
@@ -911,17 +890,17 @@ namespace Searchlo8
                         Last_check_x = it.X;
                         Last_check_y = it.Y;
 
-	    				if (it.Type == Item_finish)
+                        if (it.Type == Item_finish)
                         {
                             Isfinish = true;
                             // cumul total values
                             Totalscore += Score;
                             Totaltimer += Timer;
                             Totalretries += Retries;
-                            Totalleveldone += 1;
+                            Totalleveldone += 65536;
                             p8.Sfx(5, 2);
                         }
-	    				else
+                        else
                         {
                             p8.Sfx(7, 2);
                         }
@@ -931,39 +910,41 @@ namespace Searchlo8
         }
 
         // debug function
-	    // find the next checkpoint in the list of item
-	    private void FindNextCheckpoint()
+        // find the next checkpoint in the list of item
+        private void FindNextCheckpoint()
         {
-            Dbg_curcheckcount = 1;
+            Dbg_curcheckcount = 65536;
             Dbg_checkfound = false;
-	    	foreach (ItemClass i in Items)
+            for (int i = 0; i < Items.Length; i++)
             {
-                LoopNextCheckpoint(i);
+                var item = Items[i];
+                LoopNextCheckpoint(ref item);
+                Items[i] = item;
             }
-	    	if (Dbg_checkfound)
+            if (Dbg_checkfound)
             {
-                Dbg_lastcheckidx += 1;
-                Retries -= 1;
+                Dbg_lastcheckidx += 65536;
+                Retries -= 65536;
                 ResetPlayer();
             }
-	    	else
+            else
             {
                 Dbg_lastcheckidx = 0;
             }
         }
 
-        private void LoopNextCheckpoint(ItemClass it)
+        private void LoopNextCheckpoint(ref ItemStruct it)
         {
-		    if (it.Type == Item_checkpoint)
+            if (it.Type == Item_checkpoint)
             {
-                if (Dbg_curcheckcount == Dbg_lastcheckidx + 1)
+                if (Dbg_curcheckcount == Dbg_lastcheckidx + 65536)
                 {
                     it.Active = true;
                     Last_check_x = it.X;
                     Last_check_y = it.Y;
                     Dbg_checkfound = true;
                 }
-                Dbg_curcheckcount += 1;
+                Dbg_curcheckcount += 65536;
             }
         }
 
@@ -979,190 +960,194 @@ namespace Searchlo8
         public void Update()
         {
             // start menu
-	    	if (!Isstarted)
-            {
-                // start the game
-	    		if (p8.Btnp(4))
-                {
-                    LoadLevel(Currentlevel);
-                }
-	    		// change current level
-	    		if (p8.Btnp(0) || p8.Btnp(3))
-                {
-                    Currentlevel -= 1;
-	    			if (Currentlevel <= 0)
-                    {
-                        Currentlevel = Levelnb;
-                    }
-                    p8.Sfx(0, 3);
-                }
-	    		if (p8.Btnp(1) || p8.Btnp(2))
-                {
-                    Currentlevel += 1;
-                    if (Currentlevel > Levelnb)
-                    {
-                        Currentlevel = 1;
-                    }
-                    p8.Sfx(0, 3);
-                }
-                // debug
-                // Isstarted = true;
-                return;
-            }
+            //if (!Isstarted)
+            //{
+            //    // start the game
+            //    if (p8.Btnp(4))
+            //    {
+            //        LoadLevel(Currentlevel);
+            //    }
+            //    // change current level
+            //    if (p8.Btnp(0) || p8.Btnp(3))
+            //    {
+            //        Currentlevel -= 1;
+            //        if (Currentlevel <= 0)
+            //        {
+            //            Currentlevel = Levelnb;
+            //        }
+            //        p8.Sfx(0, 3);
+            //    }
+            //    if (p8.Btnp(1) || p8.Btnp(2))
+            //    {
+            //        Currentlevel += 1;
+            //        if (Currentlevel > Levelnb)
+            //        {
+            //            Currentlevel = 1;
+            //        }
+            //        p8.Sfx(0, 3);
+            //    }
+            //    // debug
+            //    // Isstarted = true;
+            //    return;
+            //}
 
-	    	// handle going to the next level
-	    	if (Isfinish)
-            {
-                if (Timernextlevel > Timernextlevel_dur)
-                {
-                    if (Currentlevel != Levelnb)
-                    {
-                        Isfinish = false;
-                        StartLevel(Currentlevel + 1);
-                        Timernextlevel = F32.FromInt(0);
-                    }
-                }
-                Timernextlevel += 1;
-            }
-            Bodyrot = F32.FromDouble(0.0);
+            // handle going to the next level
+            //if (Isfinish)
+            //{
+            //    if (Timernextlevel > Timernextlevel_dur)
+            //    {
+            //        if (Currentlevel != Levelnb)
+            //        {
+            //            Isfinish = false;
+            //            StartLevel(Currentlevel + 1);
+            //            Timernextlevel = 0;
+            //        }
+            //    }
+            //    Timernextlevel += 65536;
+            //}
+            //Bodyrot = 0;
 
-	    	// player control
-	    	if ((!Isdead) && (!Isfinish))
+            // player control
+            if ((!Isdead) && (!Isfinish))
             {
                 // flip button (c)
-	    		if (p8.Btnp(4))
+                if (p8.Btnp(4))
                 {
                     Bikefaceright = !Bikefaceright;
                     p8.Sfx(8, 3);
                 }
-                F32 controlwheel = F32.FromInt(Playeridx);
-                F32 otherwheel = F32.FromInt(Playeridx + 1);
-                F32 wheelside = F32.FromDouble(1.0);
-	    		// invert all values if bike face left
-	    		if (!Bikefaceright)
+                EntityStruct controlwheel = Wheel0;
+                EntityStruct otherwheel = Wheel1;
+                int wheelside = 65536;
+                // invert all values if bike face left
+                if (!Bikefaceright)
                 {
                     (controlwheel, otherwheel) = (otherwheel, controlwheel);
-                    wheelside = F32.FromDouble(-1.0);
+                    wheelside = -65536;
                 }
-	    		// button left
-	    		if (p8.Btn(0))
+                // button left
+                if (p8.Btn(0))
                 {
                     // make the body rotate
                     Bodyrot -= Str_bodyrot;
                 }
-	    		// button right
-	    		if (p8.Btn(1))
+                // button right
+                if (p8.Btn(1))
                 {
                     // make the body rotate
                     Bodyrot += Str_bodyrot;
                 }
-	    		// button up
-	    		if (p8.Btn(2))
+                // button up
+                if (p8.Btn(2))
                 {
                     // only the back wheel is set in motion
-                    Entities[Playeridx - 1].Vrot = Lerp(Entities[F32.FloorToInt(controlwheel) - 1].Vrot, -Base_speedfront * wheelside, Base_speedlerp);
-                    // Entities[Playeridx - 1].Vrot = Lerp(Entities[(int)Math.Floor(otherwheel) - 1].Vrot, -Base_speedfront * wheelside, Base_speedlerp);
+                    Wheel0.Vrot = Lerp(controlwheel.Vrot, F.Mul(-Base_speedfront, wheelside), Base_speedlerp);
                     Bikeframe -= Base_frameadvfront;
                 }
-	    		// button down
-	    		if (p8.Btn(3))
+                // button down
+                if (p8.Btn(3))
                 {
                     // both wheels are slowed
-                    Entities[Playeridx - 1].Vrot = Lerp(Entities[F32.FloorToInt(controlwheel) - 1].Vrot, Base_speedback * wheelside, Base_speedlerp);
-                    Entities[Playeridx - 1].Vrot = Lerp(Entities[F32.FloorToInt(otherwheel) - 1].Vrot, Base_speedback * wheelside, Base_speedlerp);
+                    Wheel0.Vrot = Lerp(controlwheel.Vrot, F.Mul(Base_speedback, wheelside), Base_speedlerp);
+                    Wheel0.Vrot = Lerp(otherwheel.Vrot, F.Mul(Base_speedback, wheelside), Base_speedlerp);
                     Bikeframe += Base_frameadvback;
                 }
             }
 
             // update the physics
-	    	// using several substep
-	    	// to improve colision
-	    	foreach (EntityClass i in Entities)
-            {
-                UpStartEntity(i);
-            }
+            // using several substep
+            // to improve colision
+            //foreach (EntityStruct i in Entities)
+            //{
+            UpStartEntity(ref Wheel0);
+            UpStartEntity(ref Wheel1);
+            //}
             //Console.WriteLine($"Timer {Timer}");
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {Timer}" + Environment.NewLine);
-            for (int i = 0; i <= Stepnb - 1; i++)
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {F32.FromRaw(Timer)}" + Environment.NewLine);
+            for (int i = 0; i < Stepnb; i += 65536)
             {
                 //Console.WriteLine($"physics loop {i}");
-                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {i}" + Environment.NewLine);
+                //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {F32.FromRaw(i)}" + Environment.NewLine);
                 // update links
-                UpLink(Link1);
-	    		// update wheels
-	    		foreach (EntityClass j in Entities)
-                {
-                    UpStepEntity(j);
-                }
+                UpLink(ref Link1);
+                // update wheels
+                //foreach (EntityStruct j in Entities)
+                //{
+                UpStepEntity(ref Wheel0);
+                UpStepEntity(ref Wheel1);
+                //}
             }
-	    	foreach (EntityClass i in Entities)
-            {
-                UpEndEntity(i);
-            }
+            //foreach (EntityStruct i in Entities)
+            //{
+            UpEndEntity(ref Wheel0);
+            UpEndEntity(ref Wheel1);
+            //}
 
             bool isdown = false;
 
-	    	// compute the body location
-	    	// according to the 2 wheels
-	    	// this is the upper body
-	    	(Charx, Chary, Chardown) = GetBikeRot(Entities[1 - 1], Entities[2 - 1], F32.FromDouble(4.0));
-	    	// this is the lower body
-	    	(Charx2, Chary2, isdown) = GetBikeRot(Entities[1 - 1], Entities[2 - 1], F32.FromDouble(1.0));
+            // compute the body location
+            // according to the 2 wheels
+            // this is the upper body
+            (Charx, Chary, Chardown) = GetBikeRot(ref Wheel0, ref Wheel1, 262144);
+            // this is the lower body
+            (Charx2, Chary2, isdown) = GetBikeRot(ref Wheel0, ref Wheel1, 65536);
 
             // make upper body a bit closer
             // to the lower body
-            Charx += (Charx2 - Charx) * F32.FromDouble(0.5);
-            
-	    	// check the upper body colision
-	    	(F32 coldist, F32 colnx, F32 colny) = IsColiding(Charx, Chary);
-	    	if (coldist > F32.FromDouble(1.8))
+            Charx += F.Mul(Charx2 - Charx, 32768);
+
+            // check the upper body colision
+            (int coldist, int colnx, int colny) = IsColiding(Charx, Chary);
+            if (coldist > 117964)
             {
                 // if there is a colision
-	    		// the player is dead
-	    		if (!Isdead)
+                // the player is dead
+                if (!Isdead)
                 {
                     Isdead = true;
-	    			if (!Isfinish)
+                    if (!Isfinish)
                     {
                         p8.Sfx(4, 2);
                     }
                 }
             }
 
-	    	// check items colision
-	    	foreach (ItemClass i in Items)
+            // check items colision
+            for (int i = 0; i < Items.Length; i++)
             {
-                if (i != null)
+                var item = Items[i];
+                if (item.Active) // replaced null check
                 {
-                    CheckItem(i);
+                    CheckItem(ref item);
+                    Items[i] = item;
                 }
             }
 
             bool needkillplayer = false;
             // check the killing floor
-            if (Entities[Playeridx - 1].Y > Levels[Currentlevel - 1].Zkill)
+            if (Wheel0.Y > Levels[Currentlevel - 1].Zkill)
             {
                 needkillplayer = true;
             }
             // check the killing camera limit
-            if (Entities[Playeridx - 1].X > Levels[Currentlevel - 1].Cammaxx + 128)
+            if (Wheel0.X > Levels[Currentlevel - 1].Cammaxx + 8388608)
             {
                 needkillplayer = true;
             }
-            if (Entities[Playeridx - 1].X < Levels[Currentlevel - 1].Camminx)
+            if (Wheel0.X < Levels[Currentlevel - 1].Camminx)
             {
                 needkillplayer = true;
             }
-            if (Entities[Playeridx - 1].Y > Levels[Currentlevel - 1].Cammaxy + 128)
+            if (Wheel0.Y > Levels[Currentlevel - 1].Cammaxy + 8388608)
             {
                 needkillplayer = true;
             }
-            if (Entities[Playeridx - 1].Y < Levels[Currentlevel - 1].Camminy)
+            if (Wheel0.Y < Levels[Currentlevel - 1].Camminy)
             {
                 needkillplayer = true;
             }
 
-	    	if (needkillplayer)
+            if (needkillplayer)
             {
                 if ((!Isfinish) && (!Isdead))
                 {
@@ -1171,297 +1156,279 @@ namespace Searchlo8
                 ResetPlayer();
             }
 
-	    	// check the retry button (v)
-	    	if (p8.Btnp(5) && (!Isfinish))
+            // check the retry button (v)
+            if (p8.Btnp(5) && (!Isfinish))
             {
                 p8.Sfx(7, 2);
                 ResetPlayer();
             }
 
-	    	// debug cheating :
-	    	if (false)
+            // debug cheating :
+            if (false)
             {
                 if (p8.Btnp(5, 1))
                 {
                     FindNextCheckpoint();
                 }
             }
-	    	
-	    	// update the camera :
 
-	    	// make the camer look back
-	    	// if(entities[playeridx].vx<-0.8) then
-	    	if (!Bikefaceright)
+            // update the camera :
+
+            // make the camer look back
+            // if(entities[playeridx].vx<-0.8) then
+            if (!Bikefaceright)
             {
-                Camadvanx = -32;
+                Camadvanx = -2097152;
             }
-	    	// make the camer look front
-	    	// if(entities[playeridx].vx>0.8) then
-	    	if (Bikefaceright)
+            // make the camer look front
+            // if(entities[playeridx].vx>0.8) then
+            if (Bikefaceright)
             {
-                Camadvanx = 32;
+                Camadvanx = 2097152;
             }
 
             // update the camera goal
-            Goalcamx = Goalcamx * F32.FromDouble(0.9) + (Entities[Playeridx - 1].X - 64 + Camadvanx) * F32.FromDouble(0.1);
+            Goalcamx = F.Mul(Goalcamx, 58982) + F.Mul(Wheel0.X - 4194304 + Camadvanx, 6553);
 
             // in y there is a safe zone
-            if (Camoffy > Entities[Playeridx - 1].Y - 64 + 32)
+            if (Camoffy > Wheel0.Y - 6291456)
             {
-                Goalcamy = Entities[Playeridx - 1].Y - 64 + 32;
+                Goalcamy = Wheel0.Y - 6291456;
             }
-            if (Camoffy < Entities[Playeridx - 1].Y - 64 - 32)
+            if (Camoffy < Wheel0.Y - 2097152)
             {
-                Goalcamy = Entities[Playeridx - 1].Y - 64 - 32;
+                Goalcamy = Wheel0.Y - 2097152;
             }
             // or else the camera is only updated
             // when the wheel touch ground
-            if (!Entities[Playeridx - 1].Isflying)
+            if (!Wheel0.Isflying)
             {
-                Goalcamy = Entities[Playeridx - 1].Y - 64;
+                Goalcamy = Wheel0.Y - 4194304;
             }
 
             // clamp the camera goal to the level limit
-            Goalcamx = F32.Max(Goalcamx, F32.FromInt(Levels[Currentlevel - 1].Camminx));
-            Goalcamx = F32.Min(Goalcamx, F32.FromInt(Levels[Currentlevel - 1].Cammaxx));
-            
-            Goalcamy = F32.Max(Goalcamy, F32.FromInt(Levels[Currentlevel - 1].Camminy));
-            Goalcamy = F32.Min(Goalcamy, F32.FromInt(Levels[Currentlevel - 1].Cammaxy));
+            Goalcamx = F.Max(Goalcamx, Levels[Currentlevel - 1].Camminx);
+            Goalcamx = F.Min(Goalcamx, Levels[Currentlevel - 1].Cammaxx);
+
+            Goalcamy = F.Max(Goalcamy, Levels[Currentlevel - 1].Camminy);
+            Goalcamy = F.Min(Goalcamy, Levels[Currentlevel - 1].Cammaxy);
 
             // the camera location is lerped
-            // Camoffx = Camoffx * 0.8 + Goalcamx * 0.2;
-            // Camoffy = Camoffy * 0.7 + Goalcamy * 0.3;
-            Camoffx = Lerp(Camoffx, Goalcamx, F32.FromDouble(0.2));
-            Camoffy = Lerp(Camoffy, Goalcamy, F32.FromDouble(0.3));
+            Camoffx = Lerp(Camoffx, Goalcamx, 13107);
+            Camoffy = Lerp(Camoffy, Goalcamy, 19660);
 
-	    	// increment the timer
-	    	if (!Isfinish)
+            // increment the timer
+            if (!Isfinish)
             {
-                Timer += 1;
+                Timer += 65536;
             }
         }
 
-	    // draw a wheel entity
-	    private static void DrawEntity(EntityClass ent)
+        // draw a wheel entity
+        private static void DrawEntity(ref EntityStruct ent)
         {
-            int @base = 80;
+            int @base = 5242880;
             // the wheel sprite
             // depend on the wheel rotation
-            F32 rfr = p8.Mod(F32.Floor(-ent.Rot * 4 * 5), F32.FromInt(5));
-	    	if (rfr < 0)
+            int rfr = p8.Mod(F.Floor(F.Mul(F.Mul(-ent.Rot, 262144), 327680)), 327680);
+            if (rfr < 0)
             {
-                rfr += 5;
+                rfr += 327680;
             }
-            F32 cspr = @base + rfr;
+            int cspr = @base + rfr;
 
-	    	// if (Math.Abs(ent.Vrot) > 0.14)
-	    	if (false)
+            // if (Math.Abs(ent.Vrot) > 0.14)
+            if (false)
             {
-                rfr = p8.Mod(F32.Floor(-ent.Rot * 3), F32.FromInt(3));
+                rfr = p8.Mod(F.Floor(F.Mul(-ent.Rot, 196608)), 196608);
                 if (rfr < 0)
                 {
-                    rfr += 3;
+                    rfr += 196608;
                 }
-                cspr = @base + 5 + rfr;
+                cspr = @base + 327680 + rfr;
             }
 
-	    	// to avoid the wheel appearing
-	    	// to rotate backward
-	    	// if the speed is too strong
-	    	// we rotate slower but skip
-	    	// a frame each time
-	    	if (F32.Abs(ent.Vrot) > F32.FromDouble(0.14))
+            // to avoid the wheel appearing
+            // to rotate backward
+            // if the speed is too strong
+            // we rotate slower but skip
+            // a frame each time
+            if (F.Abs(ent.Vrot) > 9175)
             {
-                rfr = p8.Mod(F32.Floor(-ent.Rot * 3), F32.FromInt(5));
-	    		if (rfr < 0)
+                rfr = p8.Mod(F.Floor(F.Mul(-ent.Rot, 196608)), 327680);
+                if (rfr < 0)
                 {
-                    rfr += 5;
+                    rfr += 327680;
                 }
-                rfr *= 2;
-	    		if (rfr > 5)
+                rfr = F.Mul(rfr, 131072);
+                if (rfr > 327680)
                 {
-                    rfr -= 5;
+                    rfr -= 327680;
                 }
                 cspr = @base + rfr;
             }
-            p8.Spr(cspr, ent.X - F32.FromDouble(3.5), ent.Y - F32.FromDouble(3.5), 1, 1);
-
-            // p8.Line(ent.Lastcolx, ent.Lastcoly, ent.Lastcolx + ent.Lastcolnx * 15, ent.Lastcoly + ent.Lastcolny * 15, 8);
-            // p8.Line(ent.X, ent.Y, ent.X + ent.Vx * 15, ent.Y + ent.Vy * 15, 11);
-
-	    	// p8.Circ(ent.Lastcolx, ent.Lastcoly, 3, 8);
+            p8.Spr(cspr, ent.X - 229376, ent.Y - 229376, 65536, 65536);
         }
 
-	    // take 2 wheel and give
-	    // a point between
-	    // with an perpendicular offset
-	    private static (F32, F32, bool) GetBikeRot(EntityClass ent1, EntityClass ent2, F32 offset)
+        // take 2 wheel and give
+        // a point between
+        // with an perpendicular offset
+        private static (int, int, bool) GetBikeRot(ref EntityStruct ent1, ref EntityStruct ent2, int offset)
         {
-            F32 dirx = ent2.X - ent1.X;
-            F32 diry = ent2.Y - ent1.Y;
+            int dirx = ent2.X - ent1.X;
+            int diry = ent2.Y - ent1.Y;
 
             // average to get the center
-            F32 centx = ent1.X + dirx * F32.FromDouble(0.5);
-            F32 centy = ent1.Y + diry * F32.FromDouble(0.5);
+            int centx = ent1.X + F.Mul(dirx, 32768);
+            int centy = ent1.Y + F.Mul(diry, 32768);
 
             // normalize the direction
-            F32 length = F32.Sqrt(dirx * dirx + diry * diry + F32.FromDouble(0.01));
-            dirx /= length;
-            diry /= length;
+            int length = F.SqrtPrecise(F.Mul(dirx, dirx) + F.Mul(diry, diry) + 655);
+            dirx = F.DivPrecise(dirx, length);
+            diry = F.DivPrecise(diry, length);
 
             // get the perpendicular
-            F32 perpx = diry;
-            F32 perpy = -dirx;
+            int perpx = diry;
+            int perpy = -dirx;
 
             // offset the point
             // along the perpendicular
-            centx += perpx * offset;
-            centy += perpy * offset;
+            centx += F.Mul(perpx, offset);
+            centy += F.Mul(perpy, offset);
 
             // we want to know
             // is the point is below the bike
             bool isdown = false;
-	    	if (perpy > F32.FromDouble(0.5))
+            if (perpy > 32768)
             {
                 isdown = true;
             }
             return (centx, centy, isdown);
         }
 
-        private static void CenterText(int posx, int posy, string text, F32 col)
+        private static void CenterText(int posx, int posy, string text, int col)
         {
-            int sposx = posx - text.Length * 2;
+            int sposx = posx - F.Mul(text.Length << 16, 131072);
             int sposy = posy;
-            p8.Print(text, sposx + 1, sposy, F32.FromInt(0));
-            p8.Print(text, sposx - 1, sposy, F32.FromInt(0));
-            p8.Print(text, sposx, sposy + 1, F32.FromInt(0));
-            p8.Print(text, sposx, sposy - 1, F32.FromInt(0));
+            p8.Print(text, sposx + 65536, sposy, 0);
+            p8.Print(text, sposx - 65536, sposy, 0);
+            p8.Print(text, sposx, sposy + 65536, 0);
+            p8.Print(text, sposx, sposy - 65536, 0);
             p8.Print(text, sposx, sposy, col);
         }
 
         // draw an item icon (apple, checkpoint)
-	    private void DrawItem(ItemClass it)
+        private void DrawItem(ref ItemStruct it)
         {
             // only apples can be picked
             bool hide = false;
-	    	if ((it.Type == Item_apple) && (!it.Active))
-            {
-                hide = true;
-            }
-	    	
-	    	if (it.Type == Item_start)
+            if ((it.Type == Item_apple) && (!it.Active))
             {
                 hide = true;
             }
 
-	    	if (!hide)
+            if (it.Type == Item_start)
             {
-                F32 sprite = F32.FromInt(56);
+                hide = true;
+            }
 
-	    		if (it.Type == Item_teleport)
+            if (!hide)
+            {
+                int sprite = 3670016;
+
+                if (it.Type == Item_teleport)
                 {
-                    sprite = 103 + p8.Mod(Flaganim, F32.FromInt(3));
+                    sprite = 6750208 + p8.Mod(Flaganim, 196608);
                 }
 
-	    		if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
+                if ((it.Type == Item_checkpoint) || (it.Type == Item_finish))
                 {
-                    sprite = 64 + p8.Mod(Flaganim, F32.FromInt(3));
+                    sprite = 4194304 + p8.Mod(Flaganim, 196608);
 
                     // change the flag pole color
-                    int flagcolor = 12;
-	    			if (it.Active)
+                    int flagcolor = 786432;
+                    if (it.Active)
                     {
                         if (it.Type == Item_finish)
                         {
-                            flagcolor = 11;
+                            flagcolor = 720896;
                         }
-	    				else
+                        else
                         {
-                            flagcolor = 8;
+                            flagcolor = 524288;
                         }
                     }
-                    p8.Line(it.X - 1, it.Y - 3, it.X - 1, it.Y + 12, flagcolor);
+                    p8.Line(it.X - 65536, it.Y - 196608, it.X - 65536, it.Y + 786432, flagcolor);
                 }
 
-                p8.Spr(sprite, it.X - F32.FromDouble(3.5), it.Y - F32.FromDouble(3.5), 1, 1);
-
-	    		// p8.Line(it.X, it.Y, Charx, Chary, 12);
+                p8.Spr(sprite, it.X - 229376, it.Y - 229376, 65536, 65536);
             }
         }
 
-	    // draw the introduction and victory big flag
-	    private void DrawBigFlag(string text, int finishx, int finishy, int col)
+        // draw the introduction and victory big flag
+        private void DrawBigFlag(string text, int finishx, int finishy, int col)
         {
-            // p8.Line(finishx - 1, finishy, finishx - 1, finishy + 15, 8);
-            // p8.Line(finishx + 64, finishy, finishx + 64, finishy + 15, 8);
-            // p8.Line(finishx - 1, finishy - 1, finishx + 64, finishy - 1, 8);
-            // p8.Line(finishx - 1, finishy + 16, finishx + 64, finishy + 16, 8);
-            p8.Rectfill(F32.FromInt(finishx), F32.FromInt(finishy), F32.FromInt(finishx + 63), F32.FromInt(finishy + 15), F32.FromInt(0));
-	    	for (int i = 0; i <= 31; i++)
+            p8.Rectfill(finishx, finishy, finishx + 4128768, finishy + 983040, 0);
+            for (int i = 0; i < 2097152; i += 65536)
             {
-                F32 tmpx = finishx + p8.Mod(F32.FromInt(i), F32.FromInt(16)) * 4;
-                F32 tmpy = finishy + (1 - p8.Mod(F32.FromInt(i), F32.FromInt(2))) * 4 + F32.FloorToInt(i / F32.FromDouble(16.0)) * 8;
-                p8.Rectfill(tmpx, tmpy, tmpx + 3, tmpy + 3, F32.FromInt(6));
+                int tmpx = finishx + F.Mul(p8.Mod(i, 1048576), 262144);
+                int tmpy = finishy + F.Mul(65536 - p8.Mod(i, 131072), 262144) + F.Mul(F.Floor(F.DivPrecise(i, 1048576)), 524288);
+                p8.Rectfill(tmpx, tmpy, tmpx + 196608, tmpy + 196608, 393216);
             }
-            CenterText(finishx + 32, finishy + 6, text, F32.FromInt(col));
+            CenterText(finishx + 2097152, finishy + 393216, text, col);
 
-            // p8.Pal(7, 10);
+            int sprite = 4194304 + p8.Mod(F.Floor(F.Mul(Flaganim, 45875)), 196608);
 
-            F32 sprite = 64 + p8.Mod(F32.Floor(Flaganim * F32.FromDouble(0.7)), F32.FromInt(3));
-            // p8.Spr(sprite, finishx - 6, finishy, 1, 1, true);
-            // p8.Spr(sprite, finishx - 2 + 64, finishy, 1, 1, false);
-            p8.Sspr((sprite - 64) * 8, 4 * 8, 8, 8, finishx - 20, finishy - 4, 32, 32, true);
-            p8.Sspr((sprite - 64) * 8, 4 * 8, 8, 8, finishx - 16 + 64, finishy - 4, 32, 32, false);
-
-	    	// p8.Pal();
+            p8.Sspr(F.Mul(sprite - 4194304, 524288), F.Mul(524288, 524288), 524288, 524288, finishx - 1310720, finishy - 524288, 2097152, 2097152, true);
+            p8.Sspr(F.Mul(sprite - 4194304, 524288), F.Mul(524288, 524288), 524288, 524288, finishx - 1048576 + 4194304, finishy - 524288, 2097152, 2097152, false);
         }
 
-	    private static string GetTimeStr(int val)
+        private static string GetTimeStr(int val)
         {
             // transform timer to min:sec:dec
-            F32 t_cent = p8.Mod(F32.Floor(val * 10 / F32.FromDouble(30.0)), F32.FromInt(10));
-            F32 t_sec = p8.Mod(F32.Floor(val / F32.FromDouble(30.0)), F32.FromInt(60));
-            int t_min = F32.FloorToInt(F32.FromInt(val) / (F32.FromDouble(30.0) * F32.FromDouble(60.0)));
+            int t_cent = p8.Mod(F.Floor(F.DivPrecise(F.Mul(val, 655360), 1966080)), 655360);
+            int t_sec = p8.Mod(F.Floor(F.DivPrecise(val, 1966080)), 3932160);
+            int t_min = F.Floor(F.DivPrecise(val, F.Mul(1966080, 3932160)));
 
             string fill_sec = "";
-		    if (t_sec < 10)
+            if (t_sec < 655360)
             {
                 fill_sec = "0";
             }
 
-            return $"{t_min}:{fill_sec}{t_sec}:{t_cent}";
+            return $"{t_min >> 16}:{fill_sec}{t_sec >> 16}:{t_cent >> 16}";
         }
 
-        private static F32 Clampy(F32 v)
+        private static int Clampy(int v)
         {
             return v; // return max(0,min(128,v))
         }
 
-        private static (F32, F32) Swap(F32 x1, F32 x2)
+        private static (int, int) Swap(int x1, int x2)
         {
             return (x2, x1);
         }
-		
-        private void Rectlight(F32 x, int y, F32 sx)
+
+        private void Rectlight(int x, int y, int sx)
         {
-            F32 mx = F32.Min(x, sx);
-            F32 ex = F32.Max(x, sx);
-		    for (int i = F32.FloorToInt(mx); i <= ex; i++)
+            int mx = F.Min(x, sx);
+            int ex = F.Max(x, sx);
+            for (int i = F.Floor(mx); i <= ex; i += 65536)
             {
-                p8.Pset(i, y, Pal[p8.Pget(i, y) + 1 - 1]);
+                p8.Pset(i, y, Pal[p8.Pget(i, y) + 65536 - 65536]);
             }
         }
-		
-        private void Otri(F32 x1, F32 y1, F32 x2, F32 y2, F32 x3, F32 y3)
+
+        private void Otri(int x1, int y1, int x2, int y2, int x3, int y3)
         {
             if (y2 < y1)
             {
-            	if (y3 < y2)
+                if (y3 < y2)
                 {
                     (y1, y3) = Swap(y1, y3);
                     (x1, x3) = Swap(x1, x3);
                 }
-            	else
+                else
                 {
                     (y1, y2) = Swap(y1, y2);
                     (x1, x2) = Swap(x1, x2);
@@ -1476,46 +1443,46 @@ namespace Searchlo8
                 }
             }
 
-            y1 += F32.FromDouble(0.001);
+            y1 += 65;
 
-            F32 miny = F32.Min(y2, y3);
-            F32 maxy = F32.Max(y2, y3);
+            int miny = F.Min(y2, y3);
+            int maxy = F.Max(y2, y3);
 
-            F32 fx = x2;
+            int fx = x2;
             if (y2 < y3)
             {
                 fx = x3;
             }
 
-            F32 cl_y1 = (Clampy(y1));
-            F32 cl_miny = (Clampy(miny));
-            F32 cl_maxy = (Clampy(maxy));
+            int cl_y1 = Clampy(y1);
+            int cl_miny = Clampy(miny);
+            int cl_maxy = Clampy(maxy);
 
-            F32 steps = (x3 - x1) / (y3 - y1);
-            F32 stepe = (x2 - x1) / (y2 - y1);
+            int steps = F.DivPrecise(x3 - x1, y3 - y1);
+            int stepe = F.DivPrecise(x2 - x1, y2 - y1);
 
-            F32 sx = steps * (cl_y1 - y1) + x1;
-            F32 ex = stepe * (cl_y1 - y1) + x1;
-            
-            for (int y = F32.FloorToInt(cl_y1); y <= cl_miny; y++)
+            int sx = F.Mul(steps, cl_y1 - y1) + x1;
+            int ex = F.Mul(stepe, cl_y1 - y1) + x1;
+
+            for (int y = F.Floor(cl_y1); y <= cl_miny; y += 65536)
             {
                 Rectlight(sx, y, ex);
                 sx += steps;
                 ex += stepe;
             }
 
-            sx = steps * (miny - y1) + x1;
-            ex = stepe * (miny - y1) + x1;
+            sx = F.Mul(steps, miny - y1) + x1;
+            ex = F.Mul(stepe, miny - y1) + x1;
 
-            F32 df = 1 / (maxy - miny);
+            int df = F.DivPrecise(65536, maxy - miny);
 
-            F32 step2s = (fx - sx) * df;
-            F32 step2e = (fx - ex) * df;
+            int step2s = F.Mul(fx - sx, df);
+            int step2e = F.Mul(fx - ex, df);
 
-            F32 sx2 = sx + step2s * (cl_miny - miny);
-            F32 ex2 = ex + step2e * (cl_miny - miny);
-            
-            for (int y = F32.FloorToInt(cl_miny); y <= cl_maxy; y++)
+            int sx2 = sx + F.Mul(step2s, cl_miny - miny);
+            int ex2 = ex + F.Mul(step2e, cl_miny - miny);
+
+            for (int y = F.Floor(cl_miny); y <= cl_maxy; y += 65536)
             {
                 Rectlight(sx2, y, ex2);
                 sx2 += step2s;
@@ -1523,13 +1490,13 @@ namespace Searchlo8
             }
         }
 
-        private void Lamp(F32 lampx, F32 lampy, F32 lampdirx, F32 lampdiry, F32 lampperpx, F32 lampperpy, int sidefac, int lamplen, int lampwid)
+        private void Lamp(int lampx, int lampy, int lampdirx, int lampdiry, int lampperpx, int lampperpy, int sidefac, int lamplen, int lampwid)
         {
-            F32 lampp1x = lampx + lampdirx * lamplen * sidefac + lampperpx * lampwid;
-            F32 lampp1y = lampy + lampdiry * lamplen * sidefac + lampperpy * lampwid;
-            F32 lampp2x = lampx + lampdirx * lamplen * sidefac - lampperpx * lampwid;
-            F32 lampp2y = lampy + lampdiry * lamplen * sidefac - lampperpy * lampwid;
-            Otri(F32.Floor(lampx), F32.Floor(lampy), F32.Floor(lampp1x), F32.Floor(lampp1y), F32.Floor(lampp2x), F32.Floor(lampp2y));
+            int lampp1x = lampx + F.Mul(F.Mul(lampdirx, lamplen), sidefac) + F.Mul(lampperpx, lampwid);
+            int lampp1y = lampy + F.Mul(F.Mul(lampdiry, lamplen), sidefac) + F.Mul(lampperpy, lampwid);
+            int lampp2x = lampx + F.Mul(F.Mul(lampdirx, lamplen), sidefac) - F.Mul(lampperpx, lampwid);
+            int lampp2y = lampy + F.Mul(F.Mul(lampdiry, lamplen), sidefac) - F.Mul(lampperpy, lampwid);
+            Otri(F.Floor(lampx), F.Floor(lampy), F.Floor(lampp1x), F.Floor(lampp1y), F.Floor(lampp2x), F.Floor(lampp2y));
         }
 
         // main draw function
@@ -1537,234 +1504,226 @@ namespace Searchlo8
         {
             p8.Cls();
 
-            p8.Camera(F32.FromInt(0), F32.FromInt(0));
+            p8.Camera(0, 0);
 
             // black will not be translucent
             // dark green will be
             p8.Palt(0, false);
-            p8.Palt(3, true);
-            p8.Palt(4, false);
+            p8.Palt(196608, true);
+            p8.Palt(262144, false);
 
-	    	// start menu
-	    	if (!Isstarted)
+            // start menu
+            if (!Isstarted)
             {
-                p8.Rectfill(F32.FromInt(0), F32.FromInt(0), F32.FromInt(127), F32.FromInt(127), F32.FromInt(1));
+                p8.Rectfill(0, 0, 8323072, 8323072, 65536);
 
-                int c = 16;
+                int c = 1048576;
 
-                CenterText(64, c, "nusan present", F32.FromInt(5));
-                DrawBigFlag("cyclo 8", 32, c + 12, 10);
+                CenterText(4194304, c, "nusan present", 327680);
+                DrawBigFlag("cyclo 8", 2097152, c + 786432, 655360);
 
-                c = 58;
-                CenterText(32, c, "up = gas", F32.FromInt(7));
-                CenterText(32, c + 8, "down = brake", F32.FromDouble(7));
-                CenterText(64, c + 16, "left-right = rotate the bike", F32.FromDouble(7));
-                CenterText(96, c, "c = flip bike", F32.FromInt(7));
-                CenterText(96, c + 8, "v = retry", F32.FromInt(7));
+                c = 3801088;
+                CenterText(2097152, c, "up = gas", 458752);
+                CenterText(2097152, c + 524288, "down = brake", 458752);
+                CenterText(4194304, c + 1048576, "left-right = rotate the bike", 458752);
+                CenterText(6291456, c, "c = flip bike", 458752);
+                CenterText(6291456, c + 524288, "v = retry", 458752);
 
-                F32 flipcol = 6 + p8.Mod(F32.Floor(Flaganim * F32.FromDouble(0.5)), F32.FromInt(2));
+                int flipcol = 393216 + p8.Mod(F.Floor(F.Mul(Flaganim, 32768)), 131072);
 
-                c = 94;
-                CenterText(64, c, "starting level :", F32.FromInt(7));
-                CenterText(64, c + 8, $"< {Currentlevel} - {Levels[Currentlevel - 1].Name} >", F32.FromInt(8));
-                CenterText(64, c + 18, "press c to start", flipcol);
+                c = 6160384;
+                CenterText(4194304, c, "starting level :", 458752);
+                CenterText(4194304, c + 524288, $"< {Currentlevel} - {Levels[Currentlevel - 1].Name} >", 524288);
+                CenterText(4194304, c + 1179648, "press c to start", flipcol);
 
-                Flaganim += F32.FromDouble(0.2);
+                Flaganim += 13107;
 
                 return;
             }
 
             // background color
-            p8.Rectfill(F32.FromInt(0), F32.FromInt(0), F32.FromInt(127), F32.FromInt(127), F32.FromInt(4));
+            p8.Rectfill(0, 0, 8323072, 8323072, 262144);
 
             p8.Camera(Camoffx, Camoffy);
 
             int treeoff = Levels[Currentlevel - 1].Backy;
 
             // draw the cloud in background :
-            F32 paral2x = (Camoffx) * F32.FromDouble(0.75);
-            F32 paral2y = (Camoffy - treeoff) * F32.FromDouble(0.75) + treeoff;
+            int paral2x = F.Mul(Camoffx, 49152);
+            int paral2y = F.Mul(Camoffy - treeoff, 49152) + treeoff;
 
-            int i = 1;
-	    	while (i <= 30)
+            for (int i = 0; i < 30; i++)
             {
-                p8.Circfill(paral2x + i * 20 + Cloudsx[i - 1], paral2y + 45 + Cloudsy[i - 1], 10 + Cloudss[i - 1], 5);
-                i += 1;
+                p8.Circfill(paral2x + (i * 20) << 16 + Cloudsx[i], paral2y + 2949120 + Cloudsy[i], 655360 + Cloudss[i], 327680);
             }
 
-            i = 1;
-	    	while (i <= 30)
+            for (int j = 0; j < 30; j++)
             {
-                p8.Circfill(paral2x + i * 20 + Cloudsx[i - 1], paral2y + 62 + Cloudsy[i - 1], 10 + Cloudss[i - 1], 4);
-                i += 1;
+                p8.Circfill(paral2x + (j * 20) << 16 + Cloudsx[j], paral2y + 4063232 + Cloudsy[j], 655360 + Cloudss[j], 262144);
             }
 
             // draw the trees :
-            F32 paralx = (Camoffx) * F32.FromDouble(0.5);
-            F32 paraly = (Camoffy - treeoff) * F32.FromDouble(0.5) + treeoff;
-            p8.Palt(3, false);
-            p8.Palt(4, true);
+            int paralx = F.Mul(Camoffx, 32768);
+            int paraly = F.Mul(Camoffy - treeoff, 32768) + treeoff;
+            p8.Palt(196608, false);
+            p8.Palt(262144, true);
             // draw the bottom of the trees
-            p8.Rectfill(Camoffx, paraly + 64 + 8, Camoffx + 128, Camoffy + 128, F32.FromInt(2));
+            p8.Rectfill(Camoffx, paraly + 4194304 + 524288, Camoffx + 8388608, Camoffy + 8388608, 131072);
 
-            paralx = p8.Mod(paralx, F32.FromInt(128)) + F32.Floor(paralx / 128) * 256;
+            paralx = p8.Mod(paralx, 8388608) + F.Mul(F.Floor(F.DivPrecise(paralx, 8388608)), 16777216);
             // draw 2 series of trees
             // warping infinitly
-            p8.Map(112, 40, paralx, paraly + 16, 16, 8);
-            p8.Map(112, 40, paralx + 128, paraly + 16, 16, 8);
-            p8.Palt(3, true);
-            p8.Palt(4, false);
+            p8.Map(7340032, 2621440, paralx, paraly + 1048576, 1048576, 524288);
+            p8.Map(7340032, 2621440, paralx + 8388608, paraly + 1048576, 1048576, 524288);
+            p8.Palt(196608, true);
+            p8.Palt(262144, false);
 
             // draw the bottom line
             // in black to mask bottom
             // of the level
-            p8.Rectfill(Camoffx, F32.FromInt(108 + treeoff), Camoffx + 128, F32.FromInt(110 + treeoff), F32.FromInt(12));
-            p8.Rectfill(Camoffx, F32.FromInt(109 + treeoff), Camoffx + 128, Camoffy + treeoff + 128, F32.FromInt(0));
+            p8.Rectfill(Camoffx, 7077888 + treeoff, Camoffx + 8388608, 7208960 + treeoff, 786432);
+            p8.Rectfill(Camoffx, 7143424 + treeoff, Camoffx + 8388608, Camoffy + treeoff + 8388608, 0);
 
             // draw_col()
 
             // draw the all level
             DrawMap(0);
 
-	    	foreach (ItemClass j in Items)
+            for (int j = 0; j < Items.Length; j++)
             {
-                if (j != null)
+                var item = Items[j];
+                if (item.X + item.Y != 0) // replaced null check
                 {
-                    DrawItem(j);
+                    DrawItem(ref item);
+                    Items[j] = item;
                 }
             }
-	    	
-	    	// draw_entity(entities[1])
-	    	// draw_entity(entities[2])
-	    	foreach (EntityClass j in Entities)
-            {
-                DrawEntity(j);
-            }
+
+            // draw_entity(entities[1])
+            // draw_entity(entities[2])
+            //foreach (EntityStruct j in Entities)
+            //{
+            DrawEntity(ref Wheel0);
+            DrawEntity(ref Wheel1);
+            //}
 
             // draw the player :
-            F32 cspr = p8.Mod(F32.Floor(-Bikeframe), F32.FromInt(4));
-	    	if (cspr < 0)
+            int cspr = p8.Mod(F.Floor(-Bikeframe), 262144);
+            if (cspr < 0)
             {
-                cspr += 4;
+                cspr += 262144;
             }
-	    	if (Isdead)
+            if (Isdead)
             {
-                cspr = F32.FromInt(4);
+                cspr = 262144;
             }
 
             int bodyadv = 0;
-	    	if (Bodyrot > 0)
+            if (Bodyrot > 0)
             {
-                bodyadv = 1;
+                bodyadv = 65536;
             }
-	    	if (Bodyrot < 0)
+            if (Bodyrot < 0)
             {
-                bodyadv = -1;
+                bodyadv = -65536;
             }
 
-            F32 cspr2 = cspr + 16;
+            int cspr2 = cspr + 1048576;
 
-	    	if (Chardown)
+            if (Chardown)
             {
-                cspr = F32.FromInt(5);
-	    		if (Isdead)
+                cspr = 327680;
+                if (Isdead)
                 {
-                    cspr = F32.FromInt(6);
+                    cspr = 393216;
                 }
             }
 
             // player lower body
-            p8.Spr(96 + cspr2, Charx2 - F32.FromDouble(3.5), Chary2 - F32.FromDouble(4.5), 1, 1, !Bikefaceright);
+            p8.Spr(6291456 + cspr2, Charx2 - 229376, Chary2 - 294912, 65536, 65536, !Bikefaceright);
             // player upper body
-            p8.Spr(96 + cspr, Charx - F32.FromDouble(3.5) + bodyadv * 2, Chary - 6, 1, 1, !Bikefaceright);
+            p8.Spr(6291456 + cspr, Charx - 229376 + F.Mul(bodyadv, 131072), Chary - 393216, 65536, 65536, !Bikefaceright);
 
-            int wheelidx = 1;
-            int sidefac = -1;
-	    	if (Bikefaceright)
+            EntityStruct wheel = Wheel0;
+            int sidefac = -65536;
+            if (Bikefaceright)
             {
-                wheelidx = 2;
-                sidefac = 1;
+                wheel = Wheel1;
+                sidefac = 65536;
             }
 
-            F32 lampdirx = Entities[Playeridx - 1].Link.Dirx;
-            F32 lampdiry = Entities[Playeridx - 1].Link.Diry;
-            F32 lampperpx = lampdiry;
-            F32 lampperpy = -lampdirx;
-            F32 lampx = Entities[wheelidx - 1].X + lampperpx * 4 + lampdirx * sidefac * 2;
-            F32 lampy = Entities[wheelidx - 1].Y + lampperpy * 4 + lampdiry * sidefac * 2;
+            int lampdirx = Link1.Dirx;
+            int lampdiry = Link1.Diry;
+            int lampperpx = lampdiry;
+            int lampperpy = -lampdirx;
+            int lampx = wheel.X + F.Mul(lampperpx, 262144) + F.Mul(F.Mul(lampdirx, sidefac), 131072);
+            int lampy = wheel.Y + F.Mul(lampperpy, 262144) + F.Mul(F.Mul(lampdiry, sidefac), 131072);
 
-            Lamp(lampx, lampy, lampdirx, lampdiry, lampperpx, lampperpy, sidefac, 20, 10);
-            // Lamp(lampx, lampy, lampdirx, lampdiry, lampperpx, lampperpy, sidefac, 10, 5);
-            // Lamp(lampx, lampy, lampdirx, lampdiry, lampperpx, lampperpy, sidefac, 5, 2);
-            p8.Circ(F32.Floor(lampx), F32.Floor(lampy), F32.FromInt(1), 1);
-            p8.Pset(F32.FloorToInt(lampx), F32.FloorToInt(lampy), 7);
+            Lamp(lampx, lampy, lampdirx, lampdiry, lampperpx, lampperpy, sidefac, 1310720, 655360);
+
+            p8.Circ(F.Floor(lampx), F.Floor(lampy), 65536, 65536);
+            p8.Pset(F.FloorToInt(lampx), F.Floor(lampy), 458752);
 
             // draw the foreground part of the level
             DrawMap(~0x2);
 
-            // Otri((int)Math.Floor(lampx), (int)Math.Floor(lampy), (int)Math.Floor(lampp1x), (int)Math.Floor(lampp1y), (int)Math.Floor(lampp2x), (int)Math.Floor(lampp2y), 10);
+            p8.Camera(0, 0);
 
-            // p8.Circfill(Charx, Chary, 1, 11);
-
-            // DrawCol();
-
-            p8.Camera(F32.FromInt(0), F32.FromInt(0));
-
-	    	// display hud
-	    	if (true)
+            // display hud
+            if (true)
             {
-                if (Timerlasteleport < 30)
+                if (Timerlasteleport < 1966080)
                 {
-                    if (p8.Mod(F32.FromInt(Timerlasteleport), F32.FromInt(4)) < 2)
+                    if (p8.Mod(Timerlasteleport, 262144) < 131072)
                     {
-                        CenterText(64, 64, "teleport", F32.FromInt(12));
+                        CenterText(4194304, 4194304, "teleport", 786432);
                     }
-                    Timerlasteleport += 1;
+                    Timerlasteleport += 65536;
                 }
-	    		
+
                 // handle going to the next level
                 if (Isfinish)
                 {
-                    F32 progress = Saturate((Timernextlevel / Timernextlevel_dur - F32.FromDouble(0.3)) / F32.FromDouble(0.5));
-                    p8.Rectfill(F32.FromInt(-1), F32.FromInt(0), 128 * progress - 1, F32.FromInt(128), F32.FromInt(1));
+                    int progress = Saturate(F.DivPrecise(F.DivPrecise(Timernextlevel, Timernextlevel_dur) - 19660, 32768));
+                    p8.Rectfill(-65536, 0, F.Mul(8388608, progress) - 65536, 8388608, 65536);
 
-                    if (progress > F32.FromDouble(0.9))
+                    if (progress > 58982)
                     {
                         if (Currentlevel >= Levelnb)
                         {
-                            int c = 36;
-                            CenterText(64, c, "nusan present", F32.FromInt(5));
-                            DrawBigFlag("cyclo 8", 32, c + 12, 10);
-                            CenterText(66, 72, "thanks for playing", F32.FromInt(7));
+                            int c = 2359296;
+                            CenterText(4194304, c, "nusan present", 327680);
+                            DrawBigFlag("cyclo 8", 2097152, c + 786432, 655360);
+                            CenterText(4325376, 4718592, "thanks for playing", 458752);
                         }
                         else
                         {
-                            CenterText(64, 64, "next level :", F32.FromInt(7));
-                            CenterText(64, 74, $"{Currentlevel + 1} - {Levels[Currentlevel + 1 - 1].Name}", F32.FromInt(7));
+                            CenterText(4194304, 4194304, "next level :", 458752);
+                            CenterText(4194304, 4849664, $"{Currentlevel + 1} - {Levels[Currentlevel].Name}", 458752);
                         }
                     }
-                    CenterText(64, 14, $"total over {Totalleveldone} levels", F32.FromInt(12));
-                    CenterText(22, 22, $"retries:{Totalretries}", F32.FromInt(12));
-                    CenterText(64, 24, $"score:{Totalscore}", F32.FromInt(12));
-                    CenterText(112, 22, $"{GetTimeStr(Totaltimer)}", F32.FromInt(12));
+                    CenterText(4194304, 917504, $"total over {Totalleveldone >> 16} levels", 786432);
+                    CenterText(1441792, 1441792, $"retries:{Totalretries >> 16}", 786432);
+                    CenterText(4194304, 1572864, $"score:{Totalscore >> 16}", 786432);
+                    CenterText(7340032, 1441792, $"{GetTimeStr(Totaltimer)}", 786432);
                 }
-                CenterText(22, 4, $"retries:{Retries}", F32.FromInt(8));
-                CenterText(64, 2, $"score:{Score}", F32.FromInt(8));
-                CenterText(112, 4, $"{GetTimeStr(Timer)}", F32.FromInt(8));
+                CenterText(1441792, 262144, $"retries:{Retries >> 16}", 524288);
+                CenterText(4194304, 131072, $"score:{Score >> 16}", 524288);
+                CenterText(7340032, 262144, $"{GetTimeStr(Timer)}", 524288);
 
                 if (Isdead && (!Isfinish))
                 {
-                    CenterText(64, 20, "you are dead", F32.FromInt(8));
-                    CenterText(64, 28, "press v to retry", F32.FromInt(8));
+                    CenterText(4194304, 1310720, "you are dead", 524288);
+                    CenterText(4194304, 1835008, "press v to retry", 524288);
                 }
                 if (Isfinish)
                 {
-                    DrawBigFlag("victory", 32, 90, 8);
-                }	
+                    DrawBigFlag("victory", 2097152, 2097152, 524288);
+                }
             }
 
-	    	// debug draw values
-	    	if (false)
+            // debug draw values
+            if (false)
             {
                 /*p8.Print($"{(int)Math.Floor(Entities[Playeridx].X)}", 0, 112, 4);
                 p8.Print($"{(int)Math.Floor(Entities[Playeridx].Y)}", 0, 120, 4);
@@ -1774,12 +1733,13 @@ namespace Searchlo8
 
                 p8.Print($"{(int)Math.Floor(Camoffx)}", 64, 112, 4);
                 p8.Print($"{(int)Math.Floor(Camoffy)}", 64, 120, 4);*/
-                p8.Print($"cpu {p8.Stat(1)}", 96, 112, F32.FromInt(7));
+                p8.Print($"cpu {p8.Stat(1)}", 6291456, 6291456, 458752);
             }
-            Flaganim += F32.FromDouble(0.2);
+            Flaganim += 13107;
         }
 
-        public string SpriteData = @"
+
+        public string SpriteData => @"
 333333337733333333333333333333331110d100001d011133333333333333333333337773333333333333377777777733333333333333331000000000110001
 33333333667733333333333333333333d61010d11d01016d33333333333333333333776667333333333333766666666633333333333333331100000111111011
 33333333d66677333333333333333333dd11016dd61011dd33333333333333333377666dd67333333333376ddddddddd33333333333333333111111111111111
@@ -1910,12 +1870,12 @@ a24200000000a0a172824100000051e00000f1e10000e04100830052634200512202e022e0f02212
 00122222222221000012222100000000000000000000000000000000000000000000000000000000000000001222210000122210000000000000000001222100
 ".Replace("\n", "").Replace("\r", "");
 
-        public string FlagData = @"
+        public string FlagData => @"
 0001010101010100010101010101020201010101000000010101010100000202020202020000000101010101010102020101010101010101040101010202020208080808080200000000000000000000000000000000000000000000000000000000000000000004040400000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 ".Replace("\n", "").Replace("\r", "");
 
-        public string MapData = @"
+        public string MapData => @"
 030000000000380d1d060c0000003800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000380000001510140000000000000000000000003800000000000000252a292736132827282a292813121110282917
 10140000000a0b1a16271901081b1b09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d0202030000251224000000000000000000000d082b2c140000430000252811123a2021220e0f202122233b13112717
 12240006081a3a23252827282a3512190103000000000000000000000000000000000000000000000000000000000038000000000000000000000000000000000000430000000000000000000000001532383b283e3f25352400000000000000060230320e3b2900060203380025123a0e003800002e2f38004038003b121329
