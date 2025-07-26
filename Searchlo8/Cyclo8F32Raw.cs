@@ -495,13 +495,11 @@ namespace Searchlo8
         // chosen at an offset ox,oy
         private int GetSdf(int lx, int ly, int ox, int oy)
         {
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
-            int sx = F.DivPrecise(F.Floor(lx + ox), 524288);
-            int sy = F.DivPrecise(F.Floor(ly + oy), 524288);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | F.Floor(lx + ox) {F.Floor(lx + ox)}" + Environment.NewLine);
-            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | F.Floor(ly + oy) {F.Floor(ly + oy)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
+            int sx = F.Floor(F.DivPrecise(lx + ox, 524288));
+            int sy = F.Floor(F.DivPrecise(ly + oy, 524288));
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)}" + Environment.NewLine);
+            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
 
             // get the sprite at the offset
             int col = p8.Mget(sx, sy);
@@ -552,7 +550,7 @@ namespace Searchlo8
 
             // proper coordinates in sdf
             int wx = F.Mul(1048576, p8.Mod(sdfval, 524288)) + lx - F.Mul(sx, 524288) + 262144;
-            int wy = F.Mul(1048576, F.DivPrecise(sdfval, 524288)) + 6553600 + ly - F.Mul(sy, 524288);
+            int wy = F.Mul(1048576, F.Floor(F.DivPrecise(sdfval, 524288))) + 6553600 + ly - F.Mul(sy, 524288);
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wx {F32.FromRaw(wx)} | sdfval {F32.FromRaw(sdfval)} | lx {F32.FromRaw(lx)} | sx {F32.FromRaw(sx)}" + Environment.NewLine);
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"wy {F32.FromRaw(wy)} | sdfval {F32.FromRaw(sdfval)} | ly {F32.FromRaw(ly)} | sy {F32.FromRaw(sy)}" + Environment.NewLine);
             // get distance
