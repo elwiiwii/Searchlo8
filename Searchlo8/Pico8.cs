@@ -32,6 +32,12 @@ namespace Searchlo8
 
         private static int[] DataToArray(string s, int n)
         {
+            if (string.IsNullOrEmpty(s))
+            {
+                Console.WriteLine($"WARNING: Empty or null data string in thread {Thread.CurrentThread.ManagedThreadId}");
+                return new int[8192]; // Return a default-sized array
+            }
+            
             int[] val = new int[s.Length / n];
             for (int i = 0; i < s.Length / n; i++)
             {
@@ -47,12 +53,32 @@ namespace Searchlo8
             _sprites = DataToArray(game.SpriteData, 1);
             _flags = DataToArray(game.FlagData, 2);
             _map = DataToArray(game.MapData, 2);
+            
+            // Ensure all arrays have reasonable sizes
+            if (_sprites.Length == 0)
+            {
+                Console.WriteLine($"WARNING: _sprites is empty after LoadGame in thread {Thread.CurrentThread.ManagedThreadId}");
+                _sprites = new int[8192]; // Default size
+            }
+            
+            if (_flags.Length == 0)
+            {
+                Console.WriteLine($"WARNING: _flags is empty after LoadGame in thread {Thread.CurrentThread.ManagedThreadId}");
+                _flags = new int[256]; // Default size for flags
+            }
+            
+            if (_map.Length == 0)
+            {
+                Console.WriteLine($"WARNING: _map is empty after LoadGame in thread {Thread.CurrentThread.ManagedThreadId}");
+                _map = new int[8192]; // Default size
+            }
+            
             game.Init();
         }
 
         public void Step()
         {
-            _cart.Update();
+            game.Update();
         }
 
         public void SetInputs(int l = 0, int r = 0, int u = 0, int d = 0, int z = 0, int x = 0)
@@ -104,7 +130,15 @@ namespace Searchlo8
 
         public int Fget(int n) // https://pico-8.fandom.com/wiki/Fget
         {
-            return _flags[n >> 16] << 16;
+            int index = n >> 16;
+            
+            // Safety check
+            if (_flags == null || index >= _flags.Length)
+            {
+                return 0;
+            }
+            
+            return _flags[index] << 16;
         }
 
 
@@ -125,7 +159,20 @@ namespace Searchlo8
             int xFlr = Math.Abs(celx >> 16);
             int yFlr = Math.Abs(cely >> 16);
 
-            return _map[xFlr + yFlr * 128] << 16;
+            if (xFlr < 0 || yFlr < 0 || xFlr > 127 || yFlr > 127)
+            {
+                return 0;
+            }
+
+            int index = xFlr + yFlr * 128;
+            
+            // Safety check
+            if (_map == null || index >= _map.Length)
+            {
+                return 0;
+            }
+
+            return (_map[index]) << 16;
         }
 
 
@@ -141,6 +188,11 @@ namespace Searchlo8
             int xFlr = Math.Abs(celx >> 16);
             int yFlr = Math.Abs(cely >> 16);
             int sFlr = snum >> 16;
+
+            if (xFlr < 0 || yFlr < 0 || xFlr > 127 || yFlr > 127)
+            {
+                return;
+            }
 
             _map[xFlr + yFlr * 128] = sFlr;
         }
@@ -211,7 +263,15 @@ namespace Searchlo8
                 return 0;
             }
 
-            return _sprites[xFlr + yFlr * 128] << 16;
+            int index = xFlr + yFlr * 128;
+            
+            // Safety check
+            if (_sprites == null || index >= _sprites.Length)
+            {
+                return 0;
+            }
+
+            return _sprites[index] << 16;
         }
 
 

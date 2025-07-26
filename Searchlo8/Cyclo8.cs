@@ -634,7 +634,7 @@ namespace Searchlo8
 
         // this update the state of a link
         // between 2 wheels
-        private void UpLink(ref LinkStruct link)
+        private void UpLink(LinkStruct link)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpLink()" + Environment.NewLine);
             int dirx = Wheel1.X - Wheel0.X;
@@ -649,7 +649,7 @@ namespace Searchlo8
         }
 
         // pre physic update of a wheel
-        private void UpStartEntity(ref EntityStruct ent)
+        private void UpStartEntity(EntityStruct ent)
         {
             // apply gravity
             ent.Vy += Str_gravity;
@@ -657,7 +657,7 @@ namespace Searchlo8
         }
 
         // do one step of physic on a wheel
-        private void UpStepEntity(ref EntityStruct ent)
+        private void UpStepEntity(EntityStruct ent)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpStepEntity()" + Environment.NewLine);
             // apply link force
@@ -806,7 +806,7 @@ namespace Searchlo8
         }
 
         // post physic update of a wheel
-        private void UpEndEntity(ref EntityStruct ent)
+        private void UpEndEntity(EntityStruct ent)
         {
             // apply air friction
             if (!ent.Isflying)
@@ -823,7 +823,7 @@ namespace Searchlo8
 
         // check if an item
         // is near the player
-        private void CheckItem(ref ItemStruct it)
+        private void CheckItem(ItemStruct it)
         {
             // need to be carefull
             // with squaring because of overflow
@@ -898,7 +898,7 @@ namespace Searchlo8
             for (int i = 0; i < Items.Length; i++)
             {
                 var item = Items[i];
-                LoopNextCheckpoint(ref item);
+                LoopNextCheckpoint(item);
                 Items[i] = item;
             }
             if (Dbg_checkfound)
@@ -913,7 +913,7 @@ namespace Searchlo8
             }
         }
 
-        private void LoopNextCheckpoint(ref ItemStruct it)
+        private void LoopNextCheckpoint(ItemStruct it)
         {
             if (it.Type == Item_checkpoint)
             {
@@ -1039,8 +1039,8 @@ namespace Searchlo8
             // to improve colision
             //foreach (EntityStruct i in Entities)
             //{
-            UpStartEntity(ref Wheel0);
-            UpStartEntity(ref Wheel1);
+            UpStartEntity(Wheel0);
+            UpStartEntity(Wheel1);
             //}
             //Console.WriteLine($"Timer {Timer}");
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {F32.FromRaw(Timer)}" + Environment.NewLine);
@@ -1049,18 +1049,18 @@ namespace Searchlo8
                 //Console.WriteLine($"physics loop {i}");
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {F32.FromRaw(i)}" + Environment.NewLine);
                 // update links
-                UpLink(ref Link1);
+                UpLink(Link1);
                 // update wheels
                 //foreach (EntityStruct j in Entities)
                 //{
-                UpStepEntity(ref Wheel0);
-                UpStepEntity(ref Wheel1);
+                UpStepEntity(Wheel0);
+                UpStepEntity(Wheel1);
                 //}
             }
             //foreach (EntityStruct i in Entities)
             //{
-            UpEndEntity(ref Wheel0);
-            UpEndEntity(ref Wheel1);
+            UpEndEntity(Wheel0);
+            UpEndEntity(Wheel1);
             //}
 
             bool isdown = false;
@@ -1068,9 +1068,9 @@ namespace Searchlo8
             // compute the body location
             // according to the 2 wheels
             // this is the upper body
-            (Charx, Chary, Chardown) = GetBikeRot(ref Wheel0, ref Wheel1, 262144);
+            (Charx, Chary, Chardown) = GetBikeRot(Wheel0, Wheel1, 262144);
             // this is the lower body
-            (Charx2, Chary2, isdown) = GetBikeRot(ref Wheel0, ref Wheel1, 65536);
+            (Charx2, Chary2, isdown) = GetBikeRot(Wheel0, Wheel1, 65536);
 
             // make upper body a bit closer
             // to the lower body
@@ -1098,7 +1098,7 @@ namespace Searchlo8
                 var item = Items[i];
                 if (item is not null) // .Active) // replaced null check
                 {
-                    CheckItem(ref item);
+                    CheckItem(item);
                     Items[i] = item;
                 }
             }
@@ -1205,7 +1205,7 @@ namespace Searchlo8
         }
 
         // draw a wheel entity
-        private static void DrawEntity(ref EntityStruct ent)
+        private static void DrawEntity(EntityStruct ent)
         {
             int @base = 5242880;
             // the wheel sprite
@@ -1253,7 +1253,7 @@ namespace Searchlo8
         // take 2 wheel and give
         // a point between
         // with an perpendicular offset
-        private static (int, int, bool) GetBikeRot(ref EntityStruct ent1, ref EntityStruct ent2, int offset)
+        private static (int, int, bool) GetBikeRot(EntityStruct ent1, EntityStruct ent2, int offset)
         {
             int dirx = ent2.X - ent1.X;
             int diry = ent2.Y - ent1.Y;
@@ -1298,7 +1298,7 @@ namespace Searchlo8
         }
 
         // draw an item icon (apple, checkpoint)
-        private void DrawItem(ref ItemStruct it)
+        private void DrawItem(ItemStruct it)
         {
             // only apples can be picked
             bool hide = false;
@@ -1572,9 +1572,9 @@ namespace Searchlo8
             for (int j = 0; j < Items.Length; j++)
             {
                 var item = Items[j];
-                if (item.X + item.Y != 0) // replaced null check
+                if (item is not null) //.X + item.Y != 0) // replaced null check
                 {
-                    DrawItem(ref item);
+                    DrawItem(item);
                     Items[j] = item;
                 }
             }
@@ -1583,8 +1583,8 @@ namespace Searchlo8
             // draw_entity(entities[2])
             //foreach (EntityStruct j in Entities)
             //{
-            DrawEntity(ref Wheel0);
-            DrawEntity(ref Wheel1);
+            DrawEntity(Wheel0);
+            DrawEntity(Wheel1);
             //}
 
             // draw the player :
