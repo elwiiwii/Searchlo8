@@ -50,8 +50,9 @@ namespace Searchlo8
         private GameState InitState()
         {
             p8._cart.LoadLevel(3);
-            startflag = p8._cart.Items.Where(item => item.Type == 3).FirstOrDefault();
-            endflag = p8._cart.Items.Where(item => item.Type == 4).FirstOrDefault();
+            startflag = p8._cart.Items.Where(item => item is not null && item.Type == 3).FirstOrDefault();
+
+            endflag = p8._cart.Items.Where(item => item is not null && item.Type == 4).FirstOrDefault();
             return new GameState(p8._cart.Wheel0, p8._cart.Wheel1, p8._cart.Link1, p8._cart.Items, p8._cart.Isdead, p8._cart.Isfinish);
         }
 
@@ -343,7 +344,7 @@ namespace Searchlo8
             int maxy = 0;
             foreach (var zone in p8._cart.Levels[lvl - 1].Zones)
             {
-                if (zone != null)
+                if (zone is not null)
                 {
                     if (zone.Startx < minx) { minx = zone.Startx >> 16; }
                     if (zone.Startx + zone.Sizex > maxx) { maxx = zone.Startx + zone.Sizex >> 16; }

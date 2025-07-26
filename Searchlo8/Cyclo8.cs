@@ -200,16 +200,11 @@ namespace Searchlo8
             public int Sizey = inSizey;
         }
 
-        private static ZoneClass ZoneNew(int inStartX, int inStartY, int inSizeX, int inSizeY)
-        {
-            return new ZoneClass(inStartX, inStartY, inSizeX, inSizeY);
-        }
-
         // level structure
         public class LevelClass(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
         {
             public string Name = inName;
-            public List<ZoneClass> Zones = new(new ZoneClass[2]);
+            public ZoneClass[] Zones = new ZoneClass[2];
             public int Zonenb = 0;
             public int Zkill = inZkill;
             public int Backy = inBacky;
@@ -220,14 +215,9 @@ namespace Searchlo8
             public bool Startright = true;
         }
 
-        private static LevelClass LevelNew(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
-        {
-            return new LevelClass(inName, inZkill, inBacky, inCamminx, inCammaxx, inCamminy, inCammaxy);
-        }
-
         // entity = the 2 wheels
 
-        public struct EntityStruct(int inx, int iny)
+        public class EntityStruct(int inx, int iny)
         {
             public int X = inx;
             public int Y = iny;
@@ -239,12 +229,7 @@ namespace Searchlo8
             public int Linkside = 65536;
         }
 
-        private static EntityStruct EntityNew(int inx, int iny)
-        {
-            return new EntityStruct(inx, iny);
-        }
-
-        public struct ItemStruct(int inx, int iny, int inType)
+        public class ItemStruct(int inx, int iny, int inType)
         {
             public int X = inx;
             public int Y = iny;
@@ -253,13 +238,8 @@ namespace Searchlo8
             public int Size = 524288;
         }
 
-        private static ItemStruct ItemNew(int inX, int inY, int inType)
-        {
-            return new ItemStruct(inX, inY, inType);
-        }
-
         // a physic link between wheels
-        public struct LinkStruct()
+        public class LinkStruct()
         {
             public int Length = 524288;
             public int Dirx = 0;
@@ -279,36 +259,36 @@ namespace Searchlo8
 
         private void CreateLevels()
         {
-            Levels[0] = LevelNew("long road", 16777216, 9437184, 33554432, 58720256, -65536000, 8388608);
-            Levels[0].Zones[0] = ZoneNew(4194304, 1048576, 4194304, 1048576);
+            Levels[0] = new("long road", 16777216, 9437184, 33554432, 58720256, -65536000, 8388608);
+            Levels[0].Zones[0] = new(4194304, 1048576, 4194304, 1048576);
             Levels[0].Zonenb = 1;
 
-            Levels[1] = LevelNew("easy wheely", 8192000, 1048576, 0, 26214400, -65536000, 3801088);
-            Levels[1].Zones[0] = ZoneNew(0, 0, 4194304, 1048576);
-            Levels[1].Zones[1] = ZoneNew(2097152, 1048576, 2097152, 262144);
+            Levels[1] = new("easy wheely", 8192000, 1048576, 0, 26214400, -65536000, 3801088);
+            Levels[1].Zones[0] = new(0, 0, 4194304, 1048576);
+            Levels[1].Zones[1] = new(2097152, 1048576, 2097152, 262144);
             Levels[1].Zonenb = 2;
 
-            Levels[2] = LevelNew("central pit", 16777216, 9437184, 0, 8388608, -65536000, 8388608);
-            Levels[2].Zones[0] = ZoneNew(0, 1048576, 2097152, 1048576);
+            Levels[2] = new("central pit", 16777216, 9437184, 0, 8388608, -65536000, 8388608);
+            Levels[2].Zones[0] = new(0, 1048576, 2097152, 1048576);
             Levels[2].Zonenb = 1;
 
-            Levels[3] = LevelNew("spiral", 8192000, 1048576, 54657024, 58720256, 131072, 131072);
-            Levels[3].Zones[0] = ZoneNew(6815744, 0, 1572864, 1048576);
+            Levels[3] = new("spiral", 8192000, 1048576, 54657024, 58720256, 131072, 131072);
+            Levels[3].Zones[0] = new(6815744, 0, 1572864, 1048576);
             Levels[3].Zonenb = 1;
 
-            Levels[4] = LevelNew("sky fall", 8192000, 1048576, 33554432, 45875200, -65536000, 0);
-            Levels[4].Zones[0] = ZoneNew(4194304, 0, 2621440, 1048576);
+            Levels[4] = new("sky fall", 8192000, 1048576, 33554432, 45875200, -65536000, 0);
+            Levels[4].Zones[0] = new(4194304, 0, 2621440, 1048576);
             Levels[4].Zonenb = 1;
 
-            Levels[5] = LevelNew("here and there", 25296896, 17825792, 25165824, 58720256, -65536000, 16777216);
-            Levels[5].Zones[0] = ZoneNew(3145728, 2097152, 4194304, 1048576);
-            Levels[5].Zones[1] = ZoneNew(7340032, 2097152, 1048576, 524288);
+            Levels[5] = new("here and there", 25296896, 17825792, 25165824, 58720256, -65536000, 16777216);
+            Levels[5].Zones[0] = new(3145728, 2097152, 4194304, 1048576);
+            Levels[5].Zones[1] = new(7340032, 2097152, 1048576, 524288);
             Levels[5].Zonenb = 2;
             Levels[5].Startright = false;
 
-            Levels[6] = LevelNew("ninja rise", 25296896, 16777216, 0, 25231360, -65536000, 16777216);
-            Levels[6].Zones[0] = ZoneNew(0, 2097152, 3145728, 1048576);
-            Levels[6].Zones[1] = ZoneNew(2097152, 1310720, 2097152, 786432);
+            Levels[6] = new("ninja rise", 25296896, 16777216, 0, 25231360, -65536000, 16777216);
+            Levels[6].Zones[0] = new(0, 2097152, 3145728, 1048576);
+            Levels[6].Zones[1] = new(2097152, 1310720, 2097152, 786432);
             Levels[6].Zonenb = 2;
         }
 
@@ -403,7 +383,7 @@ namespace Searchlo8
                     if (itemtype != 0)
                     {
                         Itemnb += 1;
-                        Items[Itemnb - 1] = ItemNew(F.Mul(i, 524288) + 229376, F.Mul(j, 524288) + 229376, itemtype);
+                        Items[Itemnb - 1] = new(F.Mul(i, 524288) + 229376, F.Mul(j, 524288) + 229376, itemtype);
 
                         // remove from the map
                         p8.Mset(i, j, 0);
@@ -479,8 +459,8 @@ namespace Searchlo8
         // and init some variables
         private void CreateEntities()
         {
-            Wheel0 = EntityNew(0, 0);
-            Wheel1 = EntityNew(524288, 0);
+            Wheel0 = new(0, 0);
+            Wheel1 = new(524288, 0);
             //Wheel0.Link = Link1;
             Wheel0.Linkside = 65536;
             //Wheel1.Link = Link1;
@@ -1116,7 +1096,7 @@ namespace Searchlo8
             for (int i = 0; i < Items.Length; i++)
             {
                 var item = Items[i];
-                if (item.Active) // replaced null check
+                if (item is not null) // .Active) // replaced null check
                 {
                     CheckItem(ref item);
                     Items[i] = item;

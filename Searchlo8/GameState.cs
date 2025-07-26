@@ -2,7 +2,7 @@
 
 namespace Searchlo8;
 
-public struct GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, Cyclo8.LinkStruct link, Cyclo8.ItemStruct[] items, bool isDead, bool isFinish)
+public class GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, Cyclo8.LinkStruct link, Cyclo8.ItemStruct[] items, bool isDead, bool isFinish)
 {
     public Cyclo8.EntityStruct Wheel0 { get; set; } = wheel0;
     public Cyclo8.EntityStruct Wheel1 { get; set; } = wheel1;

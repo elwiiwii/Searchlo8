@@ -24,6 +24,12 @@ namespace Searchlo8
             LoadGame(_cart);
         }
 
+        public Cyclo8 game
+        {
+            get => _cart;
+            set => _cart = value;
+        }
+
         private static int[] DataToArray(string s, int n)
         {
             int[] val = new int[s.Length / n];
@@ -37,12 +43,11 @@ namespace Searchlo8
         
         public void LoadGame(Cyclo8 cart)
         {
-            _cart = cart;
-            _sprites = DataToArray(_cart.SpriteData, 1);
-            _flags = DataToArray(_cart.FlagData, 2);
-            _map = DataToArray(_cart.MapData, 2);
-            _cart.Init();
-            _cart.LoadLevel(3);
+            game = cart;
+            _sprites = DataToArray(game.SpriteData, 1);
+            _flags = DataToArray(game.FlagData, 2);
+            _map = DataToArray(game.MapData, 2);
+            game.Init();
         }
 
         public void Step()
