@@ -10,6 +10,7 @@ namespace Searchlo8
 
         private readonly int Base_frameadvback;
         private readonly int Base_frameadvfront;
+        private readonly int Baselen;
         private readonly int Base_speedback;
         private readonly int Base_speedfront;
         private readonly int Base_speedlerp;
@@ -167,6 +168,7 @@ namespace Searchlo8
 
             Items = new(new ItemStruct[30]);
             Link1 = new();
+            Baselen = 524288;
 
             // array to link sprite to colision
             Sdflink = new(new int[59])
@@ -262,7 +264,6 @@ namespace Searchlo8
         // a physic link between wheels
         public struct LinkStruct()
         {
-            public int Baselen = 524288;
             public int Length = 524288;
             public int Dirx = 0;
             public int Diry = 0;
@@ -503,10 +504,6 @@ namespace Searchlo8
 
             // get the sprite at the offset
             int col = p8.Mget(sx, sy);
-            if (col != 0)
-            {
-
-            }
             int flags = p8.Fget(col);
             int isc = ((flags >> 16) & 1) << 16;
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"col {F32.FromRaw(col)} | lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)} | ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
@@ -573,7 +570,7 @@ namespace Searchlo8
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v2 {F32.FromRaw(v2)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
             int v3 = GetSdf(lx, ly, -196608, 262144);
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"v3 {F32.FromRaw(v3)} | lx {F32.FromRaw(lx)} | ly {F32.FromRaw(ly)}" + Environment.NewLine);
-                
+
             return F.Max(F.Max(v0, v1), F.Max(v2, v3));
         }
 
@@ -690,7 +687,7 @@ namespace Searchlo8
             //if (Link1 is not null)
             //{
             // force according to base length
-            int flink = F.Mul(Link1.Length - Link1.Baselen, Str_link);
+            int flink = F.Mul(Link1.Length - Baselen, Str_link);
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"flink {F32.FromRaw(flink)} | Link1.Length {F32.FromRaw(Link1.Length)} | Link1.Baselen {F32.FromRaw(Link1.Baselen)} | Str_link {F32.FromRaw(Str_link)}" + Environment.NewLine);
 
             // add the force
@@ -788,7 +785,7 @@ namespace Searchlo8
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpx {F32.FromRaw(perpx)} | nory {F32.FromRaw(nory)}" + Environment.NewLine);
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"perpy {F32.FromRaw(perpy)} | -norx {F32.FromRaw(-norx)}" + Environment.NewLine);
 
-                int angfac = F.Mul(F.Mul(205881, 524288), Str_wheel_size); // F32.FromDouble(3.1415) * 8 * Str_wheel_size;
+                int angfac = F.Mul(F.Mul(205881, 524288), Str_wheel_size);
                 // transform wheel speed to force
                 int angrot = F.Mul(ent.Vrot, angfac);
                 int wantx = F.Mul(angrot, perpx);
@@ -806,8 +803,8 @@ namespace Searchlo8
                 // and entity motion
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vx {F32.FromRaw(ent.Vx)} | wantx {F32.FromRaw(wantx)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ent.Vy {F32.FromRaw(ent.Vy)} | wanty {F32.FromRaw(wanty)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
-                int lerpx = Lerp(ent.Vx, wantx, Str_wheel); // * distfactor);
-                int lerpy = Lerp(ent.Vy, wanty, Str_wheel); // * distfactor);
+                int lerpx = Lerp(ent.Vx, wantx, Str_wheel);
+                int lerpy = Lerp(ent.Vy, wanty, Str_wheel);
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpx {F32.FromRaw(lerpx)} | ent.Vx {F32.FromRaw(ent.Vx)} | wantx {F32.FromRaw(wantx)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lerpy {F32.FromRaw(lerpy)} | ent.Vy {F32.FromRaw(ent.Vy)} | wanty {F32.FromRaw(wanty)} | Str_wheel {F32.FromRaw(Str_wheel)}" + Environment.NewLine);
 
@@ -966,52 +963,52 @@ namespace Searchlo8
         public void Update()
         {
             // start menu
-            if (!Isstarted)
-            {
-                // start the game
-                if (p8.Btnp(4))
-                {
-                    LoadLevel(Currentlevel);
-                }
-                // change current level
-                if (p8.Btnp(0) || p8.Btnp(3))
-                {
-                    Currentlevel -= 1;
-                    if (Currentlevel <= 0)
-                    {
-                        Currentlevel = Levelnb;
-                    }
-                    p8.Sfx(0, 3);
-                }
-                if (p8.Btnp(1) || p8.Btnp(2))
-                {
-                    Currentlevel += 1;
-                    if (Currentlevel > Levelnb)
-                    {
-                        Currentlevel = 1;
-                    }
-                    p8.Sfx(0, 3);
-                }
-                // debug
-                // Isstarted = true;
-                return;
-            }
+            //if (!Isstarted)
+            //{
+            //    // start the game
+            //    if (p8.Btnp(4))
+            //    {
+            //        LoadLevel(Currentlevel);
+            //    }
+            //    // change current level
+            //    if (p8.Btnp(0) || p8.Btnp(3))
+            //    {
+            //        Currentlevel -= 1;
+            //        if (Currentlevel <= 0)
+            //        {
+            //            Currentlevel = Levelnb;
+            //        }
+            //        p8.Sfx(0, 3);
+            //    }
+            //    if (p8.Btnp(1) || p8.Btnp(2))
+            //    {
+            //        Currentlevel += 1;
+            //        if (Currentlevel > Levelnb)
+            //        {
+            //            Currentlevel = 1;
+            //        }
+            //        p8.Sfx(0, 3);
+            //    }
+            //    // debug
+            //    // Isstarted = true;
+            //    return;
+            //}
 
             // handle going to the next level
-            if (Isfinish)
-            {
-                if (Timernextlevel > Timernextlevel_dur)
-                {
-                    if (Currentlevel != Levelnb)
-                    {
-                        Isfinish = false;
-                        StartLevel(Currentlevel + 1);
-                        Timernextlevel = 0;
-                    }
-                }
-                Timernextlevel += 65536;
-            }
-            Bodyrot = 0;
+            //if (Isfinish)
+            //{
+            //    if (Timernextlevel > Timernextlevel_dur)
+            //    {
+            //        if (Currentlevel != Levelnb)
+            //        {
+            //            Isfinish = false;
+            //            StartLevel(Currentlevel + 1);
+            //            Timernextlevel = 0;
+            //        }
+            //    }
+            //    Timernextlevel += 65536;
+            //}
+            //Bodyrot = 0;
 
             // player control
             if ((!Isdead) && (!Isfinish))
@@ -1025,7 +1022,7 @@ namespace Searchlo8
                 EntityStruct controlwheel = Wheel0;
                 EntityStruct otherwheel = Wheel1;
                 int wheelside = 65536;
-                                       // invert all values if bike face left
+                // invert all values if bike face left
                 if (!Bikefaceright)
                 {
                     (controlwheel, otherwheel) = (otherwheel, controlwheel);
@@ -1095,7 +1092,7 @@ namespace Searchlo8
             // according to the 2 wheels
             // this is the upper body
             (Charx, Chary, Chardown) = GetBikeRot(ref Wheel0, ref Wheel1, 262144);
-                                                                           // this is the lower body
+            // this is the lower body
             (Charx2, Chary2, isdown) = GetBikeRot(ref Wheel0, ref Wheel1, 65536);
 
             // make upper body a bit closer
@@ -1666,7 +1663,7 @@ namespace Searchlo8
             int lampy = wheel.Y + F.Mul(lampperpy, 262144) + F.Mul(F.Mul(lampdiry, sidefac), 131072);
 
             Lamp(lampx, lampy, lampdirx, lampdiry, lampperpx, lampperpy, sidefac, 1310720, 655360);
-            
+
             p8.Circ(F.Floor(lampx), F.Floor(lampy), 65536, 65536);
             p8.Pset(F.FloorToInt(lampx), F.Floor(lampy), 458752);
 
