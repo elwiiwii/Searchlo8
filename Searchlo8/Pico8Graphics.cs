@@ -82,7 +82,7 @@ namespace Searchlo8
         public void Update()
         {
             var state = Keyboard.GetState();
-            if (state.IsKeyDown(Keys.LeftControl) && state.IsKeyDown(Keys.R))
+            if (state.IsKeyDown(Keys.LeftControl) && state.IsKeyDown(Keys.R) && prevState.IsKeyUp(Keys.R))
             {
                 _cart = new(this);
                 LoadGame(_cart);
