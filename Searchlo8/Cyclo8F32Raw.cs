@@ -495,11 +495,13 @@ namespace Searchlo8
         // chosen at an offset ox,oy
         private int GetSdf(int lx, int ly, int ox, int oy)
         {
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"GetSdf()" + Environment.NewLine);
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)}" + Environment.NewLine);
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
             int sx = F.DivPrecise(F.Floor(lx + ox), 524288);
             int sy = F.DivPrecise(F.Floor(ly + oy), 524288);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | lx {F32.FromRaw(lx)} | ox {F32.FromRaw(ox)}" + Environment.NewLine);
-            //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | ly {F32.FromRaw(ly)} | oy {F32.FromRaw(oy)}" + Environment.NewLine);
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sx {F32.FromRaw(sx)} | F.Floor(lx + ox) {F.Floor(lx + ox)}" + Environment.NewLine);
+            File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"sy {F32.FromRaw(sy)} | F.Floor(ly + oy) {F.Floor(ly + oy)}" + Environment.NewLine);
 
             // get the sprite at the offset
             int col = p8.Mget(sx, sy);
