@@ -963,52 +963,52 @@ namespace Searchlo8
         public void Update()
         {
             // start menu
-            //if (!Isstarted)
-            //{
-            //    // start the game
-            //    if (p8.Btnp(4))
-            //    {
-            //        LoadLevel(Currentlevel);
-            //    }
-            //    // change current level
-            //    if (p8.Btnp(0) || p8.Btnp(3))
-            //    {
-            //        Currentlevel -= 1;
-            //        if (Currentlevel <= 0)
-            //        {
-            //            Currentlevel = Levelnb;
-            //        }
-            //        p8.Sfx(0, 3);
-            //    }
-            //    if (p8.Btnp(1) || p8.Btnp(2))
-            //    {
-            //        Currentlevel += 1;
-            //        if (Currentlevel > Levelnb)
-            //        {
-            //            Currentlevel = 1;
-            //        }
-            //        p8.Sfx(0, 3);
-            //    }
-            //    // debug
-            //    // Isstarted = true;
-            //    return;
-            //}
+            if (!Isstarted)
+            {
+                // start the game
+                if (p8.Btnp(4))
+                {
+                    LoadLevel(Currentlevel);
+                }
+                // change current level
+                if (p8.Btnp(0) || p8.Btnp(3))
+                {
+                    Currentlevel -= 1;
+                    if (Currentlevel <= 0)
+                    {
+                        Currentlevel = Levelnb;
+                    }
+                    p8.Sfx(0, 3);
+                }
+                if (p8.Btnp(1) || p8.Btnp(2))
+                {
+                    Currentlevel += 1;
+                    if (Currentlevel > Levelnb)
+                    {
+                        Currentlevel = 1;
+                    }
+                    p8.Sfx(0, 3);
+                }
+                // debug
+                // Isstarted = true;
+                return;
+            }
 
             // handle going to the next level
-            //if (Isfinish)
-            //{
-            //    if (Timernextlevel > Timernextlevel_dur)
-            //    {
-            //        if (Currentlevel != Levelnb)
-            //        {
-            //            Isfinish = false;
-            //            StartLevel(Currentlevel + 1);
-            //            Timernextlevel = 0;
-            //        }
-            //    }
-            //    Timernextlevel += 65536;
-            //}
-            //Bodyrot = 0;
+            if (Isfinish)
+            {
+                if (Timernextlevel > Timernextlevel_dur)
+                {
+                    if (Currentlevel != Levelnb)
+                    {
+                        Isfinish = false;
+                        StartLevel(Currentlevel + 1);
+                        Timernextlevel = 0;
+                    }
+                }
+                Timernextlevel += 65536;
+            }
+            Bodyrot = 0;
 
             // player control
             if ((!Isdead) && (!Isfinish))

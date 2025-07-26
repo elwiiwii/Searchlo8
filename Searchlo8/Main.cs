@@ -64,7 +64,7 @@ namespace Searchlo8
             base.Initialize();
 
             //optionsFile = OptionsFile.Initialize();
-            p8.LoadGame(p8._cart, 4);
+            //p8.LoadGame(p8._cart, 4);
 
             UpdateViewport();
         }

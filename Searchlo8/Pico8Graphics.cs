@@ -22,6 +22,7 @@ namespace Searchlo8
         private GraphicsDevice GraphicsDevice;
         private (int, int) CameraOffset;
         private Dictionary<int, Texture2D> spriteTextures = [];
+        private KeyboardState prevState;
         #endregion
 
         //public Pico8(Dictionary<string, SoundEffect> soundEffectDictionary, Dictionary<string, SoundEffect> musicDictionary, Texture2D pixel, SpriteBatch batch, GraphicsDevice graphicsDevice)
@@ -29,6 +30,7 @@ namespace Searchlo8
         {
             _btnState = 0;
             _memory = [];
+            prevState = Keyboard.GetState();
             //SoundEffectDictionary = soundEffectDictionary;
             //MusicDictionary = musicDictionary;
             Pixel = pixel;
@@ -36,7 +38,7 @@ namespace Searchlo8
             GraphicsDevice = graphicsDevice;
             CameraOffset = (0, 0);
             _cart = new(this);
-            //LoadGame(_cart);
+            LoadGame(_cart);
         }
 
         private int[] DataToArray(string s, int n)
@@ -50,7 +52,7 @@ namespace Searchlo8
             return val;
         }
 
-        public void LoadGame(Cyclo8F32Raw cart, int lvl)
+        public void LoadGame(Cyclo8F32Raw cart) //, int lvl)
         {
             _cart = cart;
             _memory = new() {
@@ -62,7 +64,7 @@ namespace Searchlo8
             Array.Copy(colors, sprColors, colors.Length);
             Array.Copy(colors, resetSprColors, colors.Length);
             _cart.Init();
-            _cart.LoadLevel(lvl);
+            //_cart.LoadLevel(lvl);
             //while (!_cart.Isdead)
             //{
             //    Step();
@@ -79,7 +81,14 @@ namespace Searchlo8
 
         public void Update()
         {
+            var state = Keyboard.GetState();
+            if (state.IsKeyDown(Keys.LeftControl) && state.IsKeyDown(Keys.R))
+            {
+                _cart = new(this);
+                LoadGame(_cart);
+            }
             _cart.Update();
+            prevState = state;
         }
 
         public void Draw()
@@ -189,12 +198,24 @@ namespace Searchlo8
         public bool Btn(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btn
         {
             KeyboardState state = Keyboard.GetState();
-            return i == 2 && state.IsKeyDown(Keys.W);
+            if (i == 0 && state.IsKeyDown(Keys.A)) return true;
+            else if (i == 1 && state.IsKeyDown(Keys.D)) return true;
+            else if (i == 2 && state.IsKeyDown(Keys.W)) return true;
+            else if (i == 3 && state.IsKeyDown(Keys.S)) return true;
+            else if (i == 4 && state.IsKeyDown(Keys.X)) return true;
+            else if (i == 5 && state.IsKeyDown(Keys.Z)) return true;
+            return false;
         }
 
 
         public bool Btnp(int i, int p = 0) // https://pico-8.fandom.com/wiki/Btnp
         {
+            if (i == 0 && Btn(i) && prevState.IsKeyUp(Keys.A)) return true;
+            else if (i == 1 && Btn(i) && prevState.IsKeyUp(Keys.D)) return true;
+            else if (i == 2 && Btn(i) && prevState.IsKeyUp(Keys.W)) return true;
+            else if (i == 3 && Btn(i) && prevState.IsKeyUp(Keys.S)) return true;
+            else if (i == 4 && Btn(i) && prevState.IsKeyUp(Keys.X)) return true;
+            else if (i == 5 && Btn(i) && prevState.IsKeyUp(Keys.Z)) return true;
             return false;
         }
 
