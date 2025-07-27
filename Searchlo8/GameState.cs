@@ -1,8 +1,6 @@
-﻿using static Searchlo8.Cyclo8;
+﻿namespace Searchlo8;
 
-namespace Searchlo8;
-
-public class GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, Cyclo8.LinkStruct link, Cyclo8.ItemStruct[] items, bool isDead, bool isFinish)
+public struct GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, Cyclo8.LinkStruct link, Cyclo8.ItemStruct[] items, bool isDead, bool isFinish)
 {
     public Cyclo8.EntityStruct Wheel0 { get; set; } = wheel0;
     public Cyclo8.EntityStruct Wheel1 { get; set; } = wheel1;
@@ -14,7 +12,7 @@ public class GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, C
     public string StateToString()
     {
         string str = " | ";
-        EntityStruct[] entities = [Wheel0, Wheel1];
+        Cyclo8.EntityStruct[] entities = [Wheel0, Wheel1];
         foreach (var entity in entities)
         {
             str += $"{

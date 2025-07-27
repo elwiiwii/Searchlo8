@@ -30,7 +30,7 @@ namespace Searchlo8
             set => _cart = value;
         }
 
-        private static int[] DataToArray(string s, int n)
+        private int[] DataToArray(string s, int n)
         {
             if (string.IsNullOrEmpty(s))
             {

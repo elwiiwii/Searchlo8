@@ -43,8 +43,8 @@ class Search3 : Searchlo8
     {
         Search3 s = new();
         //s.CreateLevelImage(3, 2);
-        List<List<int>> solutions = s.Search(200, true);
+        List<ActionsStruct> solutions = s.Search(200, true);
 
-        Console.WriteLine($"inputs: {s.InputsToEnglish(solutions[0])}");
+        Console.WriteLine($"inputs: {s.InputsToEnglish(solutions[0].Path)}");
     }
 }

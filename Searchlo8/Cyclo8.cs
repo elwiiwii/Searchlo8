@@ -5,7 +5,7 @@ namespace Searchlo8
     public class Cyclo8
     {
         #region globals
-        private static Pico8 p8;
+        private Pico8 p8;
 
         private readonly int Base_frameadvback;
         private readonly int Base_frameadvfront;
@@ -192,7 +192,7 @@ namespace Searchlo8
 
         // map zone structure.
         // level is made of several zones
-        public class ZoneClass(int inStartx, int inStarty, int inSizex, int inSizey)
+        public struct ZoneClass(int inStartx, int inStarty, int inSizex, int inSizey)
         {
             public int Startx = inStartx;
             public int Starty = inStarty;
@@ -201,7 +201,7 @@ namespace Searchlo8
         }
 
         // level structure
-        public class LevelClass(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
+        public struct LevelClass(string inName, int inZkill, int inBacky, int inCamminx, int inCammaxx, int inCamminy, int inCammaxy)
         {
             public string Name = inName;
             public ZoneClass[] Zones = new ZoneClass[2];
@@ -217,7 +217,7 @@ namespace Searchlo8
 
         // entity = the 2 wheels
 
-        public class EntityStruct(int inx, int iny)
+        public struct EntityStruct(int inx, int iny)
         {
             public int X = inx;
             public int Y = iny;
@@ -229,7 +229,7 @@ namespace Searchlo8
             public int Linkside = 65536;
         }
 
-        public class ItemStruct(int inx, int iny, int inType)
+        public struct ItemStruct(int inx, int iny, int inType)
         {
             public int X = inx;
             public int Y = iny;
@@ -239,20 +239,20 @@ namespace Searchlo8
         }
 
         // a physic link between wheels
-        public class LinkStruct()
+        public struct LinkStruct()
         {
             public int Length = 524288;
             public int Dirx = 0;
             public int Diry = 0;
         }
 
-        private static int Lerp(int a, int b, int alpha)
+        private int Lerp(int a, int b, int alpha)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Lerp()" + Environment.NewLine);
             return F.Mul(a, 65536 - alpha) + F.Mul(b, alpha);
         }
 
-        private static int Saturate(int a)
+        private int Saturate(int a)
         {
             return F.Max(0, F.Min(65536, a));
         }
@@ -634,7 +634,7 @@ namespace Searchlo8
 
         // this update the state of a link
         // between 2 wheels
-        private void UpLink(LinkStruct link)
+        private void UpLink(ref LinkStruct link)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpLink()" + Environment.NewLine);
             int dirx = Wheel1.X - Wheel0.X;
@@ -649,7 +649,7 @@ namespace Searchlo8
         }
 
         // pre physic update of a wheel
-        private void UpStartEntity(EntityStruct ent)
+        private void UpStartEntity(ref EntityStruct ent)
         {
             // apply gravity
             ent.Vy += Str_gravity;
@@ -657,7 +657,7 @@ namespace Searchlo8
         }
 
         // do one step of physic on a wheel
-        private void UpStepEntity(EntityStruct ent)
+        private void UpStepEntity(ref EntityStruct ent)
         {
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"UpStepEntity()" + Environment.NewLine);
             // apply link force
@@ -806,7 +806,7 @@ namespace Searchlo8
         }
 
         // post physic update of a wheel
-        private void UpEndEntity(EntityStruct ent)
+        private void UpEndEntity(ref EntityStruct ent)
         {
             // apply air friction
             if (!ent.Isflying)
@@ -823,7 +823,7 @@ namespace Searchlo8
 
         // check if an item
         // is near the player
-        private void CheckItem(ItemStruct it)
+        private void CheckItem(ref ItemStruct it)
         {
             // need to be carefull
             // with squaring because of overflow
@@ -898,7 +898,7 @@ namespace Searchlo8
             for (int i = 0; i < Items.Length; i++)
             {
                 var item = Items[i];
-                LoopNextCheckpoint(item);
+                LoopNextCheckpoint(ref item);
                 Items[i] = item;
             }
             if (Dbg_checkfound)
@@ -913,7 +913,7 @@ namespace Searchlo8
             }
         }
 
-        private void LoopNextCheckpoint(ItemStruct it)
+        private void LoopNextCheckpoint(ref ItemStruct it)
         {
             if (it.Type == Item_checkpoint)
             {
@@ -1039,8 +1039,8 @@ namespace Searchlo8
             // to improve colision
             //foreach (EntityStruct i in Entities)
             //{
-            UpStartEntity(Wheel0);
-            UpStartEntity(Wheel1);
+            UpStartEntity(ref Wheel0);
+            UpStartEntity(ref Wheel1);
             //}
             //Console.WriteLine($"Timer {Timer}");
             //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"Timer {F32.FromRaw(Timer)}" + Environment.NewLine);
@@ -1049,18 +1049,18 @@ namespace Searchlo8
                 //Console.WriteLine($"physics loop {i}");
                 //File.AppendAllText(@"c:\Users\me\Desktop\output.txt", $"physics loop {F32.FromRaw(i)}" + Environment.NewLine);
                 // update links
-                UpLink(Link1);
+                UpLink(ref Link1);
                 // update wheels
                 //foreach (EntityStruct j in Entities)
                 //{
-                UpStepEntity(Wheel0);
-                UpStepEntity(Wheel1);
+                UpStepEntity(ref Wheel0);
+                UpStepEntity(ref Wheel1);
                 //}
             }
             //foreach (EntityStruct i in Entities)
             //{
-            UpEndEntity(Wheel0);
-            UpEndEntity(Wheel1);
+            UpEndEntity(ref Wheel0);
+            UpEndEntity(ref Wheel1);
             //}
 
             bool isdown = false;
@@ -1068,9 +1068,9 @@ namespace Searchlo8
             // compute the body location
             // according to the 2 wheels
             // this is the upper body
-            (Charx, Chary, Chardown) = GetBikeRot(Wheel0, Wheel1, 262144);
+            (Charx, Chary, Chardown) = GetBikeRot(ref Wheel0, ref Wheel1, 262144);
             // this is the lower body
-            (Charx2, Chary2, isdown) = GetBikeRot(Wheel0, Wheel1, 65536);
+            (Charx2, Chary2, isdown) = GetBikeRot(ref Wheel0, ref Wheel1, 65536);
 
             // make upper body a bit closer
             // to the lower body
@@ -1096,9 +1096,9 @@ namespace Searchlo8
             for (int i = 0; i < Items.Length; i++)
             {
                 var item = Items[i];
-                if (item is not null) // .Active) // replaced null check
+                if (item.Active) // replaced null check
                 {
-                    CheckItem(item);
+                    CheckItem(ref item);
                     Items[i] = item;
                 }
             }
@@ -1205,7 +1205,7 @@ namespace Searchlo8
         }
 
         // draw a wheel entity
-        private static void DrawEntity(EntityStruct ent)
+        private void DrawEntity(ref EntityStruct ent)
         {
             int @base = 5242880;
             // the wheel sprite
@@ -1253,7 +1253,7 @@ namespace Searchlo8
         // take 2 wheel and give
         // a point between
         // with an perpendicular offset
-        private static (int, int, bool) GetBikeRot(EntityStruct ent1, EntityStruct ent2, int offset)
+        private (int, int, bool) GetBikeRot(ref EntityStruct ent1, ref EntityStruct ent2, int offset)
         {
             int dirx = ent2.X - ent1.X;
             int diry = ent2.Y - ent1.Y;
@@ -1286,7 +1286,7 @@ namespace Searchlo8
             return (centx, centy, isdown);
         }
 
-        private static void CenterText(int posx, int posy, string text, int col)
+        private void CenterText(int posx, int posy, string text, int col)
         {
             int sposx = posx - F.Mul(text.Length << 16, 131072);
             int sposy = posy;
@@ -1298,7 +1298,7 @@ namespace Searchlo8
         }
 
         // draw an item icon (apple, checkpoint)
-        private void DrawItem(ItemStruct it)
+        private void DrawItem(ref ItemStruct it)
         {
             // only apples can be picked
             bool hide = false;
@@ -1363,7 +1363,7 @@ namespace Searchlo8
             p8.Sspr(F.Mul(sprite - 4194304, 524288), F.Mul(524288, 524288), 524288, 524288, finishx - 1048576 + 4194304, finishy - 524288, 2097152, 2097152, false);
         }
 
-        private static string GetTimeStr(int val)
+        private string GetTimeStr(int val)
         {
             // transform timer to min:sec:dec
             int t_cent = p8.Mod(F.Floor(F.DivPrecise(F.Mul(val, 655360), 1966080)), 655360);
@@ -1379,12 +1379,12 @@ namespace Searchlo8
             return $"{t_min >> 16}:{fill_sec}{t_sec >> 16}:{t_cent >> 16}";
         }
 
-        private static int Clampy(int v)
+        private int Clampy(int v)
         {
             return v; // return max(0,min(128,v))
         }
 
-        private static (int, int) Swap(int x1, int x2)
+        private (int, int) Swap(int x1, int x2)
         {
             return (x2, x1);
         }
@@ -1572,9 +1572,9 @@ namespace Searchlo8
             for (int j = 0; j < Items.Length; j++)
             {
                 var item = Items[j];
-                if (item is not null) //.X + item.Y != 0) // replaced null check
+                if (item.X + item.Y != 0) // replaced null check
                 {
-                    DrawItem(item);
+                    DrawItem(ref item);
                     Items[j] = item;
                 }
             }
@@ -1583,8 +1583,8 @@ namespace Searchlo8
             // draw_entity(entities[2])
             //foreach (EntityStruct j in Entities)
             //{
-            DrawEntity(Wheel0);
-            DrawEntity(Wheel1);
+            DrawEntity(ref Wheel0);
+            DrawEntity(ref Wheel1);
             //}
 
             // draw the player :
