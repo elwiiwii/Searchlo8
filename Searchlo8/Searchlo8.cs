@@ -10,7 +10,7 @@ namespace Searchlo8;
 
 public class Searchlo8
 {
-    private ConcurrentDictionary<ActionsStruct, GameState> _cache;
+    private ConcurrentOrderedStateMap _cache;
     private Cyclo8.ItemStruct endflag;
     private ThreadLocal<Pico8> p8;
     private List<ActionsStruct> Solutions;
@@ -28,8 +28,16 @@ public class Searchlo8
         workerThreads: Environment.ProcessorCount,
         completionPortThreads: Environment.ProcessorCount
         );
-        _cache = [];
-        p8 = new(() => new Pico8());
+        _cache = new(
+            minKey: 0,
+            maxKey: 10000000,
+            concurrencyLevel: 16);
+        p8 = new ThreadLocal<Pico8>(() =>
+        {
+            var instance = new Pico8();
+            instance._cart.StartLevel(3);
+            return instance;
+        }, trackAllValues: true);
         InitPathImage();
         Solutions = [];
     }
@@ -54,7 +62,6 @@ public class Searchlo8
 
     private GameState InitState()
     {
-        p8.Value._cart.LoadLevel(3);
         startflag = p8.Value._cart.Items.Where(item => item.Type == 196608).FirstOrDefault();
         endflag = p8.Value._cart.Items.Where(item => item.Type == 262144).FirstOrDefault();
         return new GameState(p8.Value._cart.Wheel0, p8.Value._cart.Wheel1, p8.Value._cart.Link1, p8.Value._cart.Items, p8.Value._cart.Isdead, p8.Value._cart.Isfinish);
@@ -108,8 +115,8 @@ public class Searchlo8
         }
         else
         {
+            var e = PathFromImage(state.Wheel0, state.Wheel1, 3, Color.FromArgb(0, 0, 255, 0), 2);
             return true;
-            //return PathFromImage(state.Entities, 3, Color.FromArgb(0, 0, 255, 0), 2);
         }
     }
 
@@ -132,7 +139,7 @@ public class Searchlo8
         return state.IsFinish;
     }
 
-    private int[] GetActions()
+    private int[] GetActions(GameState state)
     {
         return AllowableActions();
     }
@@ -152,100 +159,46 @@ public class Searchlo8
 
     private bool DepthCheck(int depth, int maxdepth)
     {
-        Parallel.ForEach(_cache, kvp =>
+        var snapshot = _cache.GetOrdered().ToList();
+
+        Parallel.ForEach(snapshot, item =>
         {
-            foreach (int action in GetActions())
+            if (item.actions.Path.Length == depth)
             {
-                if (kvp.Key.Path.Length == depth)
+                foreach (int action in GetActions(item.state))
                 {
-                    KeyValuePair<ActionsStruct, GameState> state = new(new ActionsStruct(kvp.Key.Path.Append(action)), Transition(kvp.Value, action));
-                    if (Hcost(state.Value, depth, maxdepth))
+                    ActionsStruct newActions = new(item.actions.Path.Append(action));
+                    GameState newState = Transition(item.state, action);
+                    
+                    if (Hcost(newState, depth, maxdepth))
                     {
-                        _cache.Append(state);
+                        int newDist = F.Abs(newState.Wheel0.X - endflag.X) + F.Abs(newState.Wheel0.Y - endflag.Y);
+                        _cache.Add(newDist, newActions, newState);
                     }
-                    if (IsGoal(state.Value))
+
+                    if (IsGoal(newState))
                     {
-                        Solutions.Add(state.Key);
-                        Console.WriteLine($"  inputs: {InputsToEnglish(state.Key.Path)}\n  frames: {state.Key.Path.Length - 1}");
+                        Solutions.Add(newActions);
+                        Console.WriteLine($"  inputs: {InputsToEnglish(newActions.Path)}\n  frames: {newActions.Path.Length - 1}");
                     }
                 }
-            }
-            _cache.TryRemove(kvp.Key, out _);
-        });
 
-        Console.WriteLine("new pairs start");
-        List<KeyValuePair<ActionsStruct, GameState>> kvpairs = [];
-        foreach (var kvp in _cache)
-        {
-            if (kvp.Key.Path.Length == depth)
-            {
-                kvpairs.Add(kvp);
-            }
-        }
-
-        Console.WriteLine("add to dict start");
-        var states = new ConcurrentDictionary<ActionsStruct, GameState>();
-        var partitioner = Partitioner.Create(kvpairs, EnumerablePartitionerOptions.NoBuffering);
-
-        Parallel.ForEach(partitioner, () => new Dictionary<ActionsStruct, GameState>(),
-        (kvp, loopState, localDict) =>
-        {
-            foreach (int action in GetActions())
-            {
-                // Create new key efficiently (avoids full list copy)
-                var newKey = new ActionsStruct(kvp.Key.Path.Append(action));
-
-                // Only add if not already present locally
-                if (!localDict.ContainsKey(newKey))
-                    localDict[newKey] = kvp.Value;
-            }
-            return localDict;
-        },
-        localDict =>
-        {
-            // Merge local results into global dictionary
-            foreach (var kvp in localDict)
-                states.TryAdd(kvp.Key, kvp.Value);
-        });
-
-        Console.WriteLine("transition start");
-        _cache = [];
-        Parallel.ForEach(states, state =>
-        {
-            var (newKey, newValue) = state;
-            GameState curstate = Transition(newValue, newKey.Path[^1]);
-            if (Hcost(curstate, depth, maxdepth))
-            {
-                _cache.TryAdd(newKey, curstate);
-            }
-            if (IsGoal(curstate))
-            {
-                Solutions.Add(newKey);
-                Console.WriteLine($"  inputs: {InputsToEnglish(newKey.Path)}\n  frames: {newKey.Path.Length - 1}");
+                _cache.Remove(item.dist, item.actions);
             }
         });
-        Console.WriteLine(_cache.Count);
 
-        var sorted = _cache
-            .OrderBy(kvp =>
-            {
-                var point = kvp.Value.Wheel0;
-                return F.Abs(point.X - endflag.X) + F.Abs(point.Y - endflag.Y);
-            })
-            .ToList();
-        Console.WriteLine(sorted[0].Value.Wheel0.X >> 16);
-        Console.WriteLine(sorted[0].Value.Wheel0.Y >> 16);
-        Console.WriteLine(sorted[0].Value.Wheel0.Isflying);
-        //var entries = _cache.Count;
-        var keep = 1000000; //(int)F.Ceiling(entries * 0.5);
+        snapshot = _cache.GetOrdered().ToList(); // can fail, need to fix
+
+        Console.WriteLine($"{snapshot.Count} states in cache");
+        Console.WriteLine(snapshot[0].state.Wheel0.X >> 16);
+        Console.WriteLine(snapshot[0].state.Wheel0.Y >> 16);
+        Console.WriteLine(snapshot[0].state.Wheel0.Isflying);
+
+        long keep = 5000000;
 
         if (_cache.Count > keep)
         {
-            _cache = [];
-            foreach (var entry in sorted.Take(keep))
-            {
-                _cache.TryAdd(entry.Key, entry.Value);
-            }
+            _cache.CullTo(keep);
         }
 
         return true;
@@ -257,7 +210,7 @@ public class Searchlo8
         DateTime timer = DateTime.Now;
         ActionsStruct key = new(ImmutableArray<int>.Empty);
         GameState state = InitState();
-        _cache.TryAdd(new ActionsStruct(key.Path.Append(0)), state); 
+        _cache.Add(-1, new ActionsStruct(key.Path.Append(0)), state); 
         Console.WriteLine("searching...");
         for (int i = 1; i <= max_depth; i++)
         {
@@ -355,8 +308,8 @@ public class Searchlo8
 
     private bool PathFromImage(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, int lvl, Color color, int extralayers = 0)
     {
-        int iX = F.FloorToInt(F.DivPrecise(F.Min(wheel0.X, wheel1.X) + (F.Max(wheel0.X, wheel1.X) - F.Min(wheel0.X, wheel1.X)), 2));
-        int iY = F.FloorToInt(F.DivPrecise(F.Min(wheel0.Y, wheel1.Y) + (F.Max(wheel0.Y, wheel1.Y) - F.Min(wheel0.Y, wheel1.Y)), 2));
+        int iX = F.FloorToInt(F.Min(wheel0.X, wheel1.X) + F.DivPrecise(F.Abs(wheel0.X - wheel1.X), 131072));
+        int iY = F.FloorToInt(F.Min(wheel0.Y, wheel1.Y) + F.DivPrecise(F.Abs(wheel0.Y - wheel1.Y), 131072));
         var iLevel = p8.Value._cart.Levels[lvl - 1];
         int startx = iLevel.Zones[0].Startx >> 16;
         int starty = iLevel.Zones[0].Starty >> 16;

@@ -330,9 +330,10 @@ namespace Searchlo8
             }
         }
 
-        private void StartLevel(int level)
+        public void StartLevel(int level)
         {
             Currentlevel = level;
+            Isstarted = true;
 
             Items = new ItemStruct[30];
             Itemnb = 0;
@@ -926,14 +927,6 @@ namespace Searchlo8
                 }
                 Dbg_curcheckcount += 65536;
             }
-        }
-
-        // [CHANGE]
-        public void LoadLevel(int level)
-        {
-            Currentlevel = level;
-            Isstarted = true;
-            StartLevel(Currentlevel);
         }
 
         // main update function
