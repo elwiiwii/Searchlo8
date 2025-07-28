@@ -35,7 +35,7 @@ class Search3 : Searchlo8
             0b101001 - 41 - l + d + x
             0b101010 - 42 - r + d + x
         */
-        int[] actions = [0b000101, 0b000110];
+        int[] actions = [0b000101, 0b000110, 0b010100];
         return actions;
     }
 

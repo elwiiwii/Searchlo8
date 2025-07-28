@@ -31,7 +31,7 @@ public class Searchlo8
         _cache = new(
             minKey: 0,
             maxKey: 10000000,
-            concurrencyLevel: 16);
+            concurrencyLevel: Environment.ProcessorCount);
         p8 = new ThreadLocal<Pico8>(() =>
         {
             var instance = new Pico8();
@@ -44,7 +44,7 @@ public class Searchlo8
 
     private void InitPathImage()
     {
-        using (var pathImage = new Bitmap("Paths/lvl3route4.bmp"))
+        using (var pathImage = new Bitmap("Paths/lvl3route5.bmp"))
         {
             _pathImageWidth = pathImage.Width;
             _pathImageHeight = pathImage.Height;
@@ -160,6 +160,7 @@ public class Searchlo8
     private bool DepthCheck(int depth, int maxdepth)
     {
         var snapshot = _cache.GetOrdered().ToList();
+        if (snapshot.Count <= 0) snapshot = _cache.GetOrdered().ToList();
 
         Parallel.ForEach(snapshot, item =>
         {
@@ -188,13 +189,14 @@ public class Searchlo8
         });
 
         snapshot = _cache.GetOrdered().ToList(); // can fail, need to fix
+        if (snapshot.Count <= 0) snapshot = _cache.GetOrdered().ToList();
 
         Console.WriteLine($"{snapshot.Count} states in cache");
         Console.WriteLine(snapshot[0].state.Wheel0.X >> 16);
         Console.WriteLine(snapshot[0].state.Wheel0.Y >> 16);
         Console.WriteLine(snapshot[0].state.Wheel0.Isflying);
 
-        long keep = 5000000;
+        long keep = 3000000;
 
         if (_cache.Count > keep)
         {
