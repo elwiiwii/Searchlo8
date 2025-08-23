@@ -1,4 +1,4 @@
-﻿namespace Searchlo8;
+﻿namespace SearchAlgorithm;
 
 public struct GameState(Cyclo8.EntityStruct wheel0, Cyclo8.EntityStruct wheel1, Cyclo8.LinkStruct link, Cyclo8.ItemStruct[] items, bool isDead, bool isFinish)
 {

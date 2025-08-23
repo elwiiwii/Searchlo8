@@ -1,8 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
+using SearchAlgorithm;
 
 namespace Searchlo8;
 
-class Search3 : Searchlo8
+class Search3(int level) : MainAlgorithm(level)
 {
     public override int[] AllowableActions()
     {
@@ -41,7 +42,7 @@ class Search3 : Searchlo8
 
     static void Main(String[] args)
     {
-        Search3 s = new();
+        Search3 s = new(3);
         //s.CreateLevelImage(3, 2);
         List<ActionsStruct> solutions = s.Search(200, true);
 

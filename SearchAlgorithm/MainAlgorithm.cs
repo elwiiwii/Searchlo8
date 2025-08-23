@@ -6,11 +6,11 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using F = FixPointCS.Fixed32;
 
-namespace Searchlo8;
+namespace SearchAlgorithm;
 
-public class Searchlo8
+public class MainAlgorithm
 {
-    private ConcurrentOrderedStateMap _cache;
+    private IStorageProvider _cache;
     private Cyclo8.ItemStruct endflag;
     private ThreadLocal<Pico8> p8;
     private List<ActionsStruct> Solutions;
@@ -22,7 +22,7 @@ public class Searchlo8
     private int _pathImageWidth;
     private int _pathImageHeight;
 
-    public Searchlo8()
+    public MainAlgorithm(int level)
     {
         ThreadPool.SetMinThreads(
         workerThreads: Environment.ProcessorCount,
@@ -35,7 +35,7 @@ public class Searchlo8
         p8 = new ThreadLocal<Pico8>(() =>
         {
             var instance = new Pico8();
-            instance._cart.StartLevel(3);
+            instance._cart.StartLevel(level);
             return instance;
         }, trackAllValues: true);
         InitPathImage();
@@ -44,20 +44,18 @@ public class Searchlo8
 
     private void InitPathImage()
     {
-        using (var pathImage = new Bitmap("Paths/lvl3route5.bmp"))
-        {
-            _pathImageWidth = pathImage.Width;
-            _pathImageHeight = pathImage.Height;
-            var rect = new Rectangle(0, 0, pathImage.Width, pathImage.Height);
-            var bitmapData = pathImage.LockBits(rect, ImageLockMode.ReadOnly, pathImage.PixelFormat);
+        using var pathImage = new Bitmap("Paths/lvl3route5.bmp");
+        _pathImageWidth = pathImage.Width;
+        _pathImageHeight = pathImage.Height;
+        var rect = new Rectangle(0, 0, pathImage.Width, pathImage.Height);
+        var bitmapData = pathImage.LockBits(rect, ImageLockMode.ReadOnly, pathImage.PixelFormat);
 
-            _pathImageStride = bitmapData.Stride;
-            _pathImagePixelFormat = pathImage.PixelFormat;
-            _pathImageData = new byte[bitmapData.Stride * pathImage.Height];
+        _pathImageStride = bitmapData.Stride;
+        _pathImagePixelFormat = pathImage.PixelFormat;
+        _pathImageData = new byte[bitmapData.Stride * pathImage.Height];
 
-            Marshal.Copy(bitmapData.Scan0, _pathImageData, 0, _pathImageData.Length);
-            pathImage.UnlockBits(bitmapData);
-        }
+        Marshal.Copy(bitmapData.Scan0, _pathImageData, 0, _pathImageData.Length);
+        pathImage.UnlockBits(bitmapData);
     }
 
     private GameState InitState()
@@ -159,8 +157,7 @@ public class Searchlo8
 
     private bool DepthCheck(int depth, int maxdepth)
     {
-        var snapshot = _cache.GetOrdered().ToList();
-        if (snapshot.Count <= 0) snapshot = _cache.GetOrdered().ToList();
+        var snapshot = _cache.GetOrderedSnapshotAsList();
 
         Parallel.ForEach(snapshot, item =>
         {
@@ -188,8 +185,7 @@ public class Searchlo8
             }
         });
 
-        snapshot = _cache.GetOrdered().ToList(); // can fail, need to fix
-        if (snapshot.Count <= 0) snapshot = _cache.GetOrdered().ToList();
+        snapshot = _cache.GetOrderedSnapshotAsList(); // can fail, need to fix
 
         Console.WriteLine($"{snapshot.Count} states in cache");
         Console.WriteLine(snapshot[0].state.Wheel0.X >> 16);
@@ -198,7 +194,7 @@ public class Searchlo8
 
         long keep = 3000000;
 
-        if (_cache.Count > keep)
+        if (_cache.Count() > keep)
         {
             _cache.CullTo(keep);
         }

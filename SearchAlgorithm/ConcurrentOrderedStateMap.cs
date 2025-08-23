@@ -1,6 +1,6 @@
-﻿namespace Searchlo8;
+﻿namespace SearchAlgorithm;
 
-public sealed class ConcurrentOrderedStateMap
+public sealed class ConcurrentOrderedStateMap : IStorageProvider
 {
     private readonly Partition[] _partitions;
     private readonly int _partitionCount;

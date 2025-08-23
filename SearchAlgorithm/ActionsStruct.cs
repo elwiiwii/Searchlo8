@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Searchlo8;
+namespace SearchAlgorithm;
 
 public readonly struct ActionsStruct : IEquatable<ActionsStruct>
 {
